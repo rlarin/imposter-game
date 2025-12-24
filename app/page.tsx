@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Input, Card } from '@/components/ui';
 import { validatePlayerName, validateRoomCode } from '@/lib/utils';
+import {Image} from "next/dist/client/image-component";
 
 export default function Home() {
   const router = useRouter();
@@ -97,7 +98,9 @@ export default function Home() {
       <Card variant="elevated" padding="lg" className="w-full max-w-md">
         {/* Logo y título */}
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🕵️</div>
+          <div className="text-6xl mb-4 flex justify-center">
+            <Image alt="Imposter" src="/imposter192x192.png" width={100} height={100} />
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             El Impostor
           </h1>
