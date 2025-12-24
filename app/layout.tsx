@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Imposter Game!",
   description: "Create or join a game room to play Imposter with friends!",
+  icons: {
+      icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
