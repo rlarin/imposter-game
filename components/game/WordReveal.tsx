@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui';
+import {Image} from "next/dist/client/image-component";
 
 interface WordRevealProps {
   secretWord: string | null;
@@ -25,7 +26,9 @@ export default function WordReveal({ secretWord, isImposter, category }: WordRev
       <Card variant="elevated" padding="lg" className="text-center max-w-md w-full">
         {isImposter ? (
           <>
-            <div className="text-6xl mb-6">🕵️</div>
+            <div className="text-6xl mb-6 flex justify-center">
+              <Image alt="Imposter" src="/imposter192x192.png" width={100} height={100} />
+            </div>
             <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
               ¡ERES EL IMPOSTOR!
             </h2>
