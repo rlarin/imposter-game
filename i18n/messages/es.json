@@ -40,7 +40,11 @@
     "imposterHintSettings": "Pista para el impostor",
     "imposterHintEnabled": "Pista habilitada",
     "imposterHintDisabled": "Sin pista",
-    "imposterHintDescription": "El impostor recibe una pista abstracta relacionada con la palabra"
+    "imposterHintDescription": "El impostor recibe una pista abstracta relacionada con la palabra",
+    "trollModeSettings": "Modo Troll",
+    "trollModeEnabled": "Modo troll activado",
+    "trollModeDisabled": "Modo troll desactivado",
+    "trollModeDescription": "20% de probabilidad de que TODOS sean impostores en una ronda"
   },
   "game": {
     "connecting": "Conectando...",
@@ -109,7 +113,9 @@
     "caughtNoGuess": "El impostor fue descubierto y no adivinó la palabra.",
     "caughtTimeout": "El impostor fue descubierto y no intentó adivinar a tiempo.",
     "wrongElimination": "El grupo eliminó a un jugador inocente.",
-    "correctGuess": "El impostor adivinó la palabra correctamente."
+    "correctGuess": "El impostor adivinó la palabra correctamente.",
+    "everyoneWasImposter": "¡TODOS eran impostores!",
+    "trollModeActivated": "¡El modo troll se activó! Nadie conocía la palabra."
   },
   "player": {
     "you": "Tú",
@@ -147,6 +153,7 @@
     "hostLeft": "El host ha abandonado la partida. La sala se cerrará..."
   },
   "categories": {
+    "all": "Todas",
     "animals": "Animales",
     "food": "Comida",
     "places": "Lugares",
@@ -155,5 +162,25 @@
     "sports": "Deportes",
     "objects": "Objetos",
     "nature": "Naturaleza"
+  },
+  "wordChange": {
+    "title": "Votación: Cambiar Palabra",
+    "initiateButton": "Cambiar la palabra secreta",
+    "initiateHint": "Si sospechas que el impostor ya la sabe",
+    "initiatedBy": "{name} ha iniciado una votación para cambiar la palabra",
+    "description": "Si la mayoría vota SÍ, se cambiará la palabra secreta y el impostor recibirá 2 pistas adicionales.",
+    "imposterWarning": "¡Advertencia! El impostor también vota pero recibirá pistas extras si pasa.",
+    "votesProgress": "{voted} de {total} han votado",
+    "voteYes": "SÍ, cambiar",
+    "voteNo": "NO, mantener",
+    "voteSubmitted": "Voto registrado",
+    "waitingOthers": "Esperando a los demás...",
+    "resultPassed": "¡La palabra ha cambiado!",
+    "resultFailed": "La votación no pasó",
+    "newWordSelected": "Se ha seleccionado una nueva palabra secreta.",
+    "imposterGotHints": "El impostor ha recibido {count} pistas adicionales.",
+    "continueWithWord": "Se mantiene la palabra actual.",
+    "autoClose": "Cerrando automáticamente...",
+    "alreadyUsed": "El cambio de palabra ya fue usado esta ronda"
   }
 }

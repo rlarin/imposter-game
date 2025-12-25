@@ -40,7 +40,11 @@
     "imposterHintSettings": "Imposter hint",
     "imposterHintEnabled": "Hint enabled",
     "imposterHintDisabled": "No hint",
-    "imposterHintDescription": "The imposter receives an abstract hint related to the word"
+    "imposterHintDescription": "The imposter receives an abstract hint related to the word",
+    "trollModeSettings": "Troll Mode",
+    "trollModeEnabled": "Troll mode enabled",
+    "trollModeDisabled": "Troll mode disabled",
+    "trollModeDescription": "20% chance that EVERYONE is the imposter in a round"
   },
   "game": {
     "connecting": "Connecting...",
@@ -109,7 +113,9 @@
     "caughtNoGuess": "The imposter was caught and didn't guess the word.",
     "caughtTimeout": "The imposter was caught and didn't try to guess in time.",
     "wrongElimination": "The group eliminated an innocent player.",
-    "correctGuess": "The imposter guessed the word correctly."
+    "correctGuess": "The imposter guessed the word correctly.",
+    "everyoneWasImposter": "EVERYONE was the imposter!",
+    "trollModeActivated": "Troll mode activated! Nobody knew the word."
   },
   "player": {
     "you": "You",
@@ -147,6 +153,7 @@
     "hostLeft": "The host has left the game. The room will close..."
   },
   "categories": {
+    "all": "All",
     "animals": "Animals",
     "food": "Food",
     "places": "Places",
@@ -155,5 +162,25 @@
     "sports": "Sports",
     "objects": "Objects",
     "nature": "Nature"
+  },
+  "wordChange": {
+    "title": "Vote: Change Word",
+    "initiateButton": "Change the secret word",
+    "initiateHint": "If you suspect the imposter already knows it",
+    "initiatedBy": "{name} has initiated a vote to change the word",
+    "description": "If the majority votes YES, the secret word will change and the imposter will receive 2 additional hints.",
+    "imposterWarning": "Warning! The imposter also votes but will receive extra hints if it passes.",
+    "votesProgress": "{voted} of {total} have voted",
+    "voteYes": "YES, change",
+    "voteNo": "NO, keep",
+    "voteSubmitted": "Vote registered",
+    "waitingOthers": "Waiting for others...",
+    "resultPassed": "The word has changed!",
+    "resultFailed": "The vote did not pass",
+    "newWordSelected": "A new secret word has been selected.",
+    "imposterGotHints": "The imposter has received {count} additional hints.",
+    "continueWithWord": "Keeping the current word.",
+    "autoClose": "Closing automatically...",
+    "alreadyUsed": "Word change was already used this round"
   }
 }

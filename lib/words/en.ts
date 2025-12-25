@@ -11,7 +11,11 @@ export const enWordCategories: WordCategory[] = [
       'koala', 'leopard', 'panda', 'raccoon', 'zebra',
       'gorilla', 'cheetah', 'peacock', 'hippopotamus', 'armadillo',
       'eagle', 'shark', 'turtle', 'chameleon', 'wolf',
-      'bear', 'lion', 'tiger', 'snake', 'owl'
+      'bear', 'lion', 'tiger', 'snake', 'owl',
+      'whale', 'rhinoceros', 'ostrich', 'beaver', 'bat',
+      'bee', 'spider', 'crab', 'jellyfish', 'horse',
+      'rabbit', 'mouse', 'cat', 'dog', 'parrot',
+      'toucan', 'pelican', 'swan', 'otter', 'seal'
     ]
   },
   {
@@ -24,7 +28,11 @@ export const enWordCategories: WordCategory[] = [
       'croissant', 'burrito', 'lasagna', 'cake', 'pretzel',
       'popcorn', 'empanada', 'waffle', 'sandwich', 'nachos',
       'paella', 'ceviche', 'doughnut', 'churros', 'ice cream',
-      'pudding', 'salad', 'soup', 'rice', 'chicken'
+      'pudding', 'salad', 'soup', 'rice', 'chicken',
+      'mango', 'strawberry', 'banana', 'grape', 'cherry',
+      'cheese', 'ham', 'bacon', 'egg', 'bread',
+      'cookie', 'donut', 'brownie', 'jelly', 'candy',
+      'coffee', 'lemonade', 'smoothie', 'omelette', 'croquette'
     ]
   },
   {
@@ -37,7 +45,11 @@ export const enWordCategories: WordCategory[] = [
       'park', 'cinema', 'theater', 'church', 'supermarket',
       'school', 'university', 'gym', 'pool', 'garden',
       'plaza', 'market', 'station', 'harbor', 'lighthouse',
-      'castle', 'palace', 'pyramid', 'cave', 'volcano'
+      'castle', 'palace', 'pyramid', 'cave', 'volcano',
+      'aquarium', 'circus', 'nightclub', 'cafeteria', 'bakery',
+      'pharmacy', 'bank', 'office', 'factory', 'farm',
+      'cemetery', 'prison', 'embassy', 'cathedral', 'mosque',
+      'temple', 'monastery', 'observatory', 'planetarium', 'cliff'
     ]
   },
   {
@@ -50,7 +62,11 @@ export const enWordCategories: WordCategory[] = [
       'lawyer', 'police officer', 'veterinarian', 'journalist', 'engineer',
       'dentist', 'nurse', 'photographer', 'painter', 'actor',
       'singer', 'dancer', 'writer', 'scientist', 'programmer',
-      'mechanic', 'electrician', 'carpenter', 'baker', 'gardener'
+      'mechanic', 'electrician', 'carpenter', 'baker', 'gardener',
+      'librarian', 'archaeologist', 'biologist', 'chemist', 'physicist',
+      'psychologist', 'sociologist', 'economist', 'accountant', 'banker',
+      'hairdresser', 'tailor', 'shoemaker', 'jeweler', 'watchmaker',
+      'sailor', 'fisherman', 'farmer', 'rancher', 'miner'
     ]
   },
   {
@@ -63,7 +79,11 @@ export const enWordCategories: WordCategory[] = [
       'up', 'ratatouille', 'toy story', 'finding nemo', 'cars',
       'moana', 'encanto', 'spider-man', 'iron man', 'thor',
       'jurassic park', 'harry potter', 'star wars', 'the godfather', 'forrest gump',
-      'rocky', 'rambo', 'terminator', 'alien', 'indiana jones'
+      'rocky', 'rambo', 'terminator', 'alien', 'indiana jones',
+      'the lion king', 'aladdin', 'mulan', 'tarzan', 'pocahontas',
+      'hercules', 'dumbo', 'bambi', 'pinocchio', 'cinderella',
+      'the little mermaid', 'interstellar', 'dunkirk', 'joker', 'aquaman',
+      'wonder woman', 'superman', 'hulk', 'deadpool', 'venom'
     ]
   },
   {
@@ -76,7 +96,11 @@ export const enWordCategories: WordCategory[] = [
       'surfing', 'skiing', 'skating', 'karate', 'judo',
       'hockey', 'rugby', 'cricket', 'badminton', 'ping pong',
       'climbing', 'skydiving', 'diving', 'sailing', 'rowing',
-      'gymnastics', 'wrestling', 'fencing', 'polo', 'horseback riding'
+      'gymnastics', 'wrestling', 'fencing', 'polo', 'horseback riding',
+      'snowboarding', 'wakeboarding', 'skateboarding', 'parkour', 'crossfit',
+      'triathlon', 'marathon', 'decathlon', 'pentathlon', 'biathlon',
+      'taekwondo', 'aikido', 'sumo', 'kickboxing', 'capoeira',
+      'darts', 'billiards', 'bowling', 'chess', 'poker'
     ]
   },
   {
@@ -89,7 +113,11 @@ export const enWordCategories: WordCategory[] = [
       'door', 'stairs', 'elevator', 'bicycle', 'car',
       'airplane', 'boat', 'train', 'motorcycle', 'skateboard',
       'guitar', 'piano', 'drums', 'violin', 'flute',
-      'camera', 'book', 'pencil', 'scissors', 'umbrella'
+      'camera', 'book', 'pencil', 'scissors', 'umbrella',
+      'suitcase', 'backpack', 'purse', 'wallet', 'key',
+      'padlock', 'flashlight', 'compass', 'binoculars', 'telescope',
+      'microscope', 'thermometer', 'stethoscope', 'syringe', 'scalpel',
+      'hammer', 'screwdriver', 'drill', 'saw', 'pliers'
     ]
   },
   {
@@ -102,7 +130,11 @@ export const enWordCategories: WordCategory[] = [
       'rainbow', 'cloud', 'sun', 'moon', 'star',
       'rain', 'snow', 'thunder', 'lightning', 'tornado',
       'earthquake', 'tsunami', 'glacier', 'aurora', 'sunrise',
-      'sunset', 'coral', 'seaweed', 'mushroom', 'cactus'
+      'sunset', 'coral', 'seaweed', 'mushroom', 'cactus',
+      'palm tree', 'bamboo', 'oak', 'pine', 'willow',
+      'orchid', 'rose', 'tulip', 'sunflower', 'daisy',
+      'mountain', 'valley', 'canyon', 'meadow', 'swamp',
+      'mangrove', 'tundra', 'savanna', 'steppe', 'oasis'
     ]
   }
 ];

@@ -1,5 +1,5 @@
-import { GameRoom, Player, GameSettings, Clue, Vote } from './types';
-import { generateRoomCode, generatePlayerId, getRandomAvatarColor, pickRandom, tallyVotes } from './utils';
+import { GameRoom, Player, GameSettings, Clue, Vote, WordChangeVote } from './types';
+import { generateRoomCode, generatePlayerId, getRandomAvatarColor, pickRandom, shuffle, tallyVotes } from './utils';
 import { getRandomWord, getHintWord } from './words/index';
 import { Locale } from '@/i18n/config';
 
@@ -10,8 +10,12 @@ export const defaultSettings: GameSettings = {
   voteTimeLimit: 180,      // 3 minutos por defecto
   category: 'animals',
   timerEnabled: false,     // Timer deshabilitado por defecto
-  imposterHintEnabled: false // Pista para el impostor deshabilitada por defecto
+  imposterHintEnabled: true, // Pista para el impostor habilitada por defecto
+  trollModeEnabled: true   // Modo troll habilitado por defecto
 };
+
+// Probabilidad de que todos sean impostores en modo troll (20%)
+const TROLL_MODE_CHANCE = 0.20;
 
 // Crear una nueva sala
 export function createRoom(hostName: string): { room: GameRoom; playerId: string } {
@@ -27,7 +31,8 @@ export function createRoom(hostName: string): { room: GameRoom; playerId: string
     isEliminated: false,
     isConnected: true,
     hasSubmittedClue: false,
-    hasVoted: false
+    hasVoted: false,
+    hasVotedWordChange: false
   };
 
   const room: GameRoom = {
@@ -39,9 +44,15 @@ export function createRoom(hostName: string): { room: GameRoom; playerId: string
     currentRound: 0,
     secretWord: null,
     imposterHint: null,
+    imposterHints: [],
     imposterId: null,
+    everyoneIsImposter: false,
     clues: [],
     votes: [],
+    wordChangeUsed: false,
+    wordChangeVotingActive: false,
+    wordChangeVotes: [],
+    wordChangeInitiatorId: null,
     createdAt: Date.now(),
     phaseStartedAt: Date.now(),
     phaseEndsAt: null,
@@ -69,7 +80,8 @@ export function addPlayer(room: GameRoom, playerName: string): { room: GameRoom;
     isEliminated: false,
     isConnected: true,
     hasSubmittedClue: false,
-    hasVoted: false
+    hasVoted: false,
+    hasVotedWordChange: false
   };
 
   return {
@@ -129,23 +141,47 @@ export function startGame(room: GameRoom, category: string, locale: Locale = 'en
   const secretWord = getRandomWord(locale, category);
   if (!secretWord) return null;
 
-  // Generar pista para el impostor si está habilitado
+  // Modo troll: posibilidad de que todos sean impostores
+  const everyoneIsImposter = room.settings.trollModeEnabled && Math.random() < TROLL_MODE_CHANCE;
+
+  // Generar pista para el impostor si está habilitado (no aplica si todos son impostores)
   let imposterHint: string | null = null;
-  if (room.settings.imposterHintEnabled) {
+  if (room.settings.imposterHintEnabled && !everyoneIsImposter) {
     imposterHint = getHintWord(locale, category, secretWord);
   }
 
-  // Seleccionar impostor aleatorio
-  const imposter = pickRandom(connectedPlayers);
+  // Seleccionar impostor aleatorio (o todos si es modo troll activado)
+  let imposterId: string | null = null;
+  let updatedPlayers: Player[];
 
-  // Resetear estado de jugadores
-  const updatedPlayers = room.players.map(p => ({
-    ...p,
-    isImposter: p.id === imposter.id,
-    isEliminated: false,
-    hasSubmittedClue: false,
-    hasVoted: false
-  }));
+  if (everyoneIsImposter) {
+    // Todos son impostores - nadie conoce la palabra
+    updatedPlayers = room.players.map(p => ({
+      ...p,
+      isImposter: true,
+      isEliminated: false,
+      hasSubmittedClue: false,
+      hasVoted: false,
+      hasVotedWordChange: false
+    }));
+  } else {
+    // Juego normal - un impostor
+    const shuffledPlayers = shuffle(connectedPlayers);
+    const imposter = pickRandom(shuffledPlayers);
+    imposterId = imposter.id;
+
+    updatedPlayers = room.players.map(p => ({
+      ...p,
+      isImposter: p.id === imposter.id,
+      isEliminated: false,
+      hasSubmittedClue: false,
+      hasVoted: false,
+      hasVotedWordChange: false
+    }));
+  }
+
+  // Crear array de pistas para el impostor (inicialmente con 1 pista si está habilitado)
+  const imposterHints: string[] = imposterHint ? [imposterHint] : [];
 
   return {
     ...room,
@@ -155,9 +191,15 @@ export function startGame(room: GameRoom, category: string, locale: Locale = 'en
     currentRound: 1,
     secretWord,
     imposterHint,
-    imposterId: imposter.id,
+    imposterHints,
+    imposterId,
+    everyoneIsImposter,
     clues: [],
     votes: [],
+    wordChangeUsed: false,
+    wordChangeVotingActive: false,
+    wordChangeVotes: [],
+    wordChangeInitiatorId: null,
     phaseStartedAt: Date.now(),
     phaseEndsAt: Date.now() + 5000, // 5 segundos para ver la palabra
     winner: null,
@@ -198,6 +240,17 @@ export function advancePhase(room: GameRoom): GameRoom {
       return processVotes(room);
 
     case 'vote-results':
+      // En modo troll (todos son impostores), ir directo a game-over
+      if (room.everyoneIsImposter) {
+        return {
+          ...room,
+          phase: 'game-over',
+          winner: null, // No hay ganador en troll mode
+          phaseStartedAt: now,
+          phaseEndsAt: null
+        };
+      }
+
       // Si el impostor fue eliminado, pasa a imposter-guess
       // Si no, continúa con más rondas o termina
       if (room.eliminatedPlayerId === room.imposterId) {
@@ -218,10 +271,15 @@ export function advancePhase(room: GameRoom): GameRoom {
           phaseStartedAt: now,
           phaseEndsAt: getPhaseEndTime(room, room.settings.clueTimeLimit),
           votes: [],
+          wordChangeUsed: false,
+          wordChangeVotingActive: false,
+          wordChangeVotes: [],
+          wordChangeInitiatorId: null,
           players: room.players.map(p => ({
             ...p,
             hasSubmittedClue: false,
-            hasVoted: false
+            hasVoted: false,
+            hasVotedWordChange: false
           }))
         };
       }
@@ -357,9 +415,15 @@ export function playAgain(room: GameRoom): GameRoom {
     currentRound: 0,
     secretWord: null,
     imposterHint: null,
+    imposterHints: [],
     imposterId: null,
+    everyoneIsImposter: false,
     clues: [],
     votes: [],
+    wordChangeUsed: false,
+    wordChangeVotingActive: false,
+    wordChangeVotes: [],
+    wordChangeInitiatorId: null,
     phaseStartedAt: Date.now(),
     phaseEndsAt: null,
     winner: null,
@@ -370,7 +434,8 @@ export function playAgain(room: GameRoom): GameRoom {
       isImposter: false,
       isEliminated: false,
       hasSubmittedClue: false,
-      hasVoted: false
+      hasVoted: false,
+      hasVotedWordChange: false
     }))
   };
 }
@@ -401,6 +466,139 @@ export function getVoteCounts(room: GameRoom): Record<string, number> {
   return counts;
 }
 
+// ========== WORD CHANGE VOTING ==========
+
+// Iniciar votación de cambio de palabra
+export function initiateWordChangeVote(room: GameRoom, playerId: string): GameRoom | null {
+  // Solo permitido durante clue-round
+  if (room.phase !== 'clue-round') return null;
+
+  // No permitir si ya se usó este round
+  if (room.wordChangeUsed) return null;
+
+  // No permitir si ya hay una votación activa
+  if (room.wordChangeVotingActive) return null;
+
+  // El jugador debe existir y no estar eliminado
+  const player = room.players.find(p => p.id === playerId);
+  if (!player || player.isEliminated) return null;
+
+  return {
+    ...room,
+    wordChangeVotingActive: true,
+    wordChangeVotes: [],
+    wordChangeInitiatorId: playerId,
+    players: room.players.map(p => ({
+      ...p,
+      hasVotedWordChange: false
+    }))
+  };
+}
+
+// Emitir voto para cambio de palabra
+export function castWordChangeVote(room: GameRoom, voterId: string, vote: boolean): GameRoom | null {
+  // Debe haber una votación activa
+  if (!room.wordChangeVotingActive) return null;
+
+  const voter = room.players.find(p => p.id === voterId);
+  if (!voter || voter.hasVotedWordChange || voter.isEliminated) return null;
+
+  const wordChangeVote: WordChangeVote = {
+    voterId,
+    vote
+  };
+
+  return {
+    ...room,
+    wordChangeVotes: [...room.wordChangeVotes, wordChangeVote],
+    players: room.players.map(p =>
+      p.id === voterId ? { ...p, hasVotedWordChange: true } : p
+    )
+  };
+}
+
+// Verificar si todos han votado cambio de palabra
+export function allWordChangeVotesSubmitted(room: GameRoom): boolean {
+  const activePlayers = room.players.filter(p => p.isConnected && !p.isEliminated);
+  return activePlayers.every(p => p.hasVotedWordChange);
+}
+
+// Procesar resultado de votación de cambio de palabra
+export function processWordChangeVotes(room: GameRoom, locale: Locale = 'en'): { room: GameRoom; passed: boolean; newHintsCount: number } {
+  const activePlayers = room.players.filter(p => p.isConnected && !p.isEliminated);
+  const requiredVotes = Math.floor(activePlayers.length / 2) + 1; // Mayoría simple
+
+  const yesVotes = room.wordChangeVotes.filter(v => v.vote).length;
+  const passed = yesVotes >= requiredVotes;
+
+  if (!passed) {
+    // La votación falló - solo marcar como usada y cerrar votación
+    return {
+      room: {
+        ...room,
+        wordChangeUsed: true,
+        wordChangeVotingActive: false
+      },
+      passed: false,
+      newHintsCount: 0
+    };
+  }
+
+  // La votación pasó - cambiar palabra y dar pistas extras al impostor
+  const category = room.settings.category;
+  const currentWord = room.secretWord;
+
+  // Obtener nueva palabra (diferente a la actual)
+  let newWord = getRandomWord(locale, category);
+  let attempts = 0;
+  while (newWord === currentWord && attempts < 10) {
+    newWord = getRandomWord(locale, category);
+    attempts++;
+  }
+
+  if (!newWord) {
+    // No se pudo obtener nueva palabra - fallback
+    return {
+      room: {
+        ...room,
+        wordChangeUsed: true,
+        wordChangeVotingActive: false
+      },
+      passed: false,
+      newHintsCount: 0
+    };
+  }
+
+  // Generar 2 pistas extras para el impostor
+  const newHints: string[] = [];
+  if (room.settings.imposterHintEnabled && !room.everyoneIsImposter) {
+    for (let i = 0; i < 2; i++) {
+      const hint = getHintWord(locale, category, newWord);
+      if (hint && !newHints.includes(hint)) {
+        newHints.push(hint);
+      }
+    }
+  }
+
+  // Nueva pista principal para el impostor
+  const newImposterHint = room.settings.imposterHintEnabled && !room.everyoneIsImposter
+    ? getHintWord(locale, category, newWord)
+    : null;
+
+  return {
+    room: {
+      ...room,
+      secretWord: newWord,
+      imposterHint: newImposterHint,
+      imposterHints: [...room.imposterHints, ...newHints],
+      wordChangeUsed: true,
+      wordChangeVotingActive: false
+    },
+    passed: true,
+    newHintsCount: newHints.length
+  };
+}
+
 // Obtener información segura para enviar al cliente
 // (no enviar secretWord ni imposterId excepto cuando corresponda)
 export function getSafeRoomState(room: GameRoom, playerId: string): GameRoom {
@@ -408,6 +606,7 @@ export function getSafeRoomState(room: GameRoom, playerId: string): GameRoom {
   const isImposter = player?.isImposter ?? false;
   const isGameOver = room.phase === 'game-over';
   const isVoteResults = room.phase === 'vote-results';
+  const isImposterGuess = room.phase === 'imposter-guess';
 
   return {
     ...room,
@@ -415,12 +614,16 @@ export function getSafeRoomState(room: GameRoom, playerId: string): GameRoom {
     secretWord: (isImposter && !isGameOver) ? null : room.secretWord,
     // Solo mostrar pista al impostor (y solo si está habilitada)
     imposterHint: isImposter ? room.imposterHint : null,
-    // Solo mostrar quién es el impostor en game-over o vote-results
-    imposterId: (isGameOver || isVoteResults) ? room.imposterId : null,
+    // Solo mostrar array de pistas al impostor
+    imposterHints: isImposter ? room.imposterHints : [],
+    // Mostrar quién es el impostor en game-over, vote-results, o imposter-guess
+    imposterId: (isGameOver || isVoteResults || isImposterGuess) ? room.imposterId : null,
     // Ocultar quién es impostor en la lista de jugadores (excepto game-over)
     players: room.players.map(p => ({
       ...p,
       isImposter: isGameOver ? p.isImposter : (p.id === playerId ? p.isImposter : false)
-    }))
+    })),
+    // Ocultar votos de cambio de palabra (votación secreta) - solo mostrar si votó
+    wordChangeVotes: room.wordChangeVotes.filter(v => v.voterId === playerId)
   };
 }

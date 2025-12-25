@@ -8,14 +8,17 @@ import { validateClue } from '@/lib/utils';
 import { useLocale } from '@/lib/i18n-context';
 import { getCategoryById } from '@/lib/words/index';
 import PlayerList from './PlayerList';
+import WordChangeVoteModal from './WordChangeVoteModal';
 
 interface ClueRoundProps {
   room: GameRoom;
   playerId: string;
   onSubmitClue: (word: string) => void;
+  onInitiateWordChange: () => void;
+  onVoteWordChange: (vote: boolean) => void;
 }
 
-export default function ClueRound({ room, playerId, onSubmitClue }: ClueRoundProps) {
+export default function ClueRound({ room, playerId, onSubmitClue, onInitiateWordChange, onVoteWordChange }: ClueRoundProps) {
   const t = useTranslations();
   const { locale } = useLocale();
   const [clue, setClue] = useState('');
@@ -25,6 +28,10 @@ export default function ClueRound({ room, playerId, onSubmitClue }: ClueRoundPro
   const hasSubmitted = currentPlayer?.hasSubmittedClue ?? false;
   const isImposter = currentPlayer?.isImposter ?? false;
   const category = getCategoryById(locale, room.settings.category);
+
+  // Word change voting state
+  const canInitiateWordChange = !room.wordChangeUsed && !room.wordChangeVotingActive && !currentPlayer?.isEliminated;
+  const showVotingModal = room.wordChangeVotingActive;
 
   // Pistas de rondas anteriores
   const previousClues = room.clues.filter(c => c.round < room.currentRound);
@@ -81,21 +88,25 @@ export default function ClueRound({ room, playerId, onSubmitClue }: ClueRoundPro
         </Card>
       )}
 
-      {/* Indicador de impostor con hint */}
+      {/* Indicador de impostor con hints */}
       {isImposter && (
         <Card className="text-center bg-red-50 dark:bg-red-900/20">
           <p className="text-xs sm:text-sm text-red-500">{t('game.youAreImposter')}</p>
           <p className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400 mb-2">
             {t('clue.imposterHint')}
           </p>
-          {room.imposterHint && (
+          {room.imposterHints && room.imposterHints.length > 0 && (
             <div className="mt-2 p-2 sm:p-3 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
               <p className="text-xs text-amber-700 dark:text-amber-400 mb-1">
-                {t('game.imposterHintLabel')}
+                {t('game.imposterHintLabel')} ({room.imposterHints.length})
               </p>
-              <p className="text-lg font-bold text-amber-800 dark:text-amber-300 uppercase">
-                {room.imposterHint}
-              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {room.imposterHints.map((hint, i) => (
+                  <span key={i} className="text-lg font-bold text-amber-800 dark:text-amber-300 uppercase px-2 py-1 bg-amber-200/50 dark:bg-amber-800/30 rounded">
+                    {hint}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </Card>
@@ -166,6 +177,42 @@ export default function ClueRound({ room, playerId, onSubmitClue }: ClueRoundPro
           hostId={room.hostId}
         />
       </Card>
+
+      {/* Botón para cambiar palabra */}
+      {canInitiateWordChange && (
+        <Card className="text-center">
+          <button
+            onClick={onInitiateWordChange}
+            className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 border border-purple-300 dark:border-purple-700 rounded-lg transition-colors"
+          >
+            <span className="text-xl">🔄</span>
+            <div className="text-left">
+              <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                {t('wordChange.initiateButton')}
+              </p>
+              <p className="text-xs text-purple-600/70 dark:text-purple-400/70">
+                {t('wordChange.initiateHint')}
+              </p>
+            </div>
+          </button>
+        </Card>
+      )}
+
+      {/* Indicador de que ya se usó el cambio de palabra */}
+      {room.wordChangeUsed && !room.wordChangeVotingActive && (
+        <div className="text-center text-xs text-gray-400 dark:text-gray-500">
+          {t('wordChange.alreadyUsed')}
+        </div>
+      )}
+
+      {/* Modal de votación de cambio de palabra */}
+      {showVotingModal && (
+        <WordChangeVoteModal
+          room={room}
+          playerId={playerId}
+          onVote={onVoteWordChange}
+        />
+      )}
     </div>
   );
 }

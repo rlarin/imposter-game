@@ -169,7 +169,8 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
 // Selecciona un elemento aleatorio de un array
 export function pickRandom<T>(array: T[]): T {
-    return array[Math.floor(Math.random() * array.length)];
+    const random = crypto.getRandomValues(new Uint32Array(1))[0]
+    return array[random % array.length]
 }
 
 // Mezcla un array (Fisher-Yates)

@@ -8,6 +8,8 @@ import {usePartySocket} from '@/hooks/usePartySocket';
 import {Card} from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import {ClueRound, GameOver, ImposterGuess, LobbyView, VoteResults, VotingView, WordReveal} from '@/components/game';
+import WordChangeVoteModal from '@/components/game/WordChangeVoteModal';
+import WordChangeResult from '@/components/game/WordChangeResult';
 
 export default function GamePage() {
     const params = useParams();
@@ -18,6 +20,7 @@ export default function GamePage() {
     const [room, setRoom] = useState<GameRoom | null>(null);
     const [playerId, setPlayerId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [wordChangeResult, setWordChangeResult] = useState<{ passed: boolean; newHintsCount: number } | null>(null);
     const hasJoinedRef = useRef(false);
 
     // Callbacks para el socket
@@ -61,6 +64,10 @@ export default function GamePage() {
         }
     }, [router, t]);
 
+    const handleWordChangeVoteResult = useCallback((passed: boolean, newHintsCount: number) => {
+        setWordChangeResult({ passed, newHintsCount });
+    }, []);
+
     const {
         isConnected,
         isConnecting,
@@ -72,7 +79,9 @@ export default function GamePage() {
         playAgain,
         resetGame,
         kickPlayer,
-        updateSettings
+        updateSettings,
+        initiateWordChange,
+        voteWordChange
     } = usePartySocket({
         roomCode,
         onGameSettings: handleGameSettings,
@@ -80,7 +89,8 @@ export default function GamePage() {
         onPlayerLeft: handleKickPlayer,
         onPlayerJoined: handlePlayerJoined,
         onError: handleError,
-        onRoomClosed: handleRoomClosed
+        onRoomClosed: handleRoomClosed,
+        onWordChangeVoteResult: handleWordChangeVoteResult
     });
 
     useEffect(() => {
@@ -186,6 +196,8 @@ export default function GamePage() {
                         room={room}
                         playerId={playerId}
                         onSubmitClue={submitClue}
+                        onInitiateWordChange={initiateWordChange}
+                        onVoteWordChange={voteWordChange}
                     />
                 );
 
@@ -291,6 +303,15 @@ export default function GamePage() {
                     {renderPhase()}
                 </main>
             </div>
+
+            {/* Word Change Result Modal */}
+            {wordChangeResult && (
+                <WordChangeResult
+                    passed={wordChangeResult.passed}
+                    newHintsCount={wordChangeResult.newHintsCount}
+                    onClose={() => setWordChangeResult(null)}
+                />
+            )}
         </div>
     );
 }

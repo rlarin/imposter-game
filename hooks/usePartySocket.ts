@@ -15,6 +15,9 @@ interface UsePartySocketOptions {
   onPlayerLeft?: (playerId: string) => void;
   onPhaseChanged?: (phase: GameRoom['phase']) => void;
   onRoomClosed?: (reason: 'host-left') => void;
+  onWordChangeVoteStarted?: (initiatorId: string, initiatorName: string) => void;
+  onWordChangeVoteCast?: (voterId: string) => void;
+  onWordChangeVoteResult?: (passed: boolean, newHintsCount: number) => void;
 }
 
 type ConnectionState = 'connecting' | 'connected' | 'disconnected';
@@ -27,7 +30,10 @@ export function usePartySocket({
   onPlayerJoined,
   onPlayerLeft,
   onPhaseChanged,
-  onRoomClosed
+  onRoomClosed,
+  onWordChangeVoteStarted,
+  onWordChangeVoteCast,
+  onWordChangeVoteResult
 }: UsePartySocketOptions) {
   const socketRef = useRef<PartySocket | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
@@ -40,7 +46,10 @@ export function usePartySocket({
     onPlayerJoined,
     onPlayerLeft,
     onPhaseChanged,
-    onRoomClosed
+    onRoomClosed,
+    onWordChangeVoteStarted,
+    onWordChangeVoteCast,
+    onWordChangeVoteResult
   });
 
   // Actualizar refs cuando cambian los callbacks
@@ -52,9 +61,12 @@ export function usePartySocket({
       onPlayerJoined,
       onPlayerLeft,
       onPhaseChanged,
-      onRoomClosed
+      onRoomClosed,
+      onWordChangeVoteStarted,
+      onWordChangeVoteCast,
+      onWordChangeVoteResult
     };
-  }, [onRoomState, onGameSettings, onError, onPlayerJoined, onPlayerLeft, onPhaseChanged, onRoomClosed]);
+  }, [onRoomState, onGameSettings, onError, onPlayerJoined, onPlayerLeft, onPhaseChanged, onRoomClosed, onWordChangeVoteStarted, onWordChangeVoteCast, onWordChangeVoteResult]);
 
   // Conectar al servidor
   useEffect(() => {
@@ -112,6 +124,18 @@ export function usePartySocket({
 
           case 'error':
             callbacksRef.current.onError?.(message.message);
+            break;
+
+          case 'word-change-vote-started':
+            callbacksRef.current.onWordChangeVoteStarted?.(message.initiatorId, message.initiatorName);
+            break;
+
+          case 'word-change-vote-cast':
+            callbacksRef.current.onWordChangeVoteCast?.(message.voterId);
+            break;
+
+          case 'word-change-vote-result':
+            callbacksRef.current.onWordChangeVoteResult?.(message.passed, message.newHintsCount || 0);
             break;
         }
       } catch (error) {
@@ -182,6 +206,14 @@ export function usePartySocket({
     send({ type: 'update-settings', settings });
   }, [send]);
 
+  const initiateWordChange = useCallback(() => {
+    send({ type: 'initiate-word-change' });
+  }, [send]);
+
+  const voteWordChange = useCallback((vote: boolean) => {
+    send({ type: 'vote-word-change', vote });
+  }, [send]);
+
   const result = useMemo(() => ({
     isConnected: connectionState === 'connected',
     isConnecting: connectionState === 'connecting',
@@ -195,8 +227,10 @@ export function usePartySocket({
     resetGame,
     kickPlayer,
     updateSettings,
+    initiateWordChange,
+    voteWordChange,
     send
-  }), [connectionState, join, leave, startGame, submitClue, castVote, guessWord, playAgain, resetGame, kickPlayer, updateSettings, send]);
+  }), [connectionState, join, leave, startGame, submitClue, castVote, guessWord, playAgain, resetGame, kickPlayer, updateSettings, initiateWordChange, voteWordChange, send]);
 
   return result;
 }

@@ -11,7 +11,11 @@ export const esWordCategories: WordCategory[] = [
       'koala', 'leopardo', 'panda', 'mapache', 'cebra',
       'gorila', 'guepardo', 'pavo real', 'hipopótamo', 'armadillo',
       'águila', 'tiburón', 'tortuga', 'camaleón', 'lobo',
-      'oso', 'león', 'tigre', 'serpiente', 'búho'
+      'oso', 'león', 'tigre', 'serpiente', 'búho',
+      'ballena', 'rinoceronte', 'avestruz', 'castor', 'murciélago',
+      'abeja', 'araña', 'cangrejo', 'medusa', 'caballo',
+      'conejo', 'ratón', 'gato', 'perro', 'loro',
+      'tucán', 'pelícano', 'cisne', 'nutria', 'foca'
     ]
   },
   {
@@ -24,7 +28,11 @@ export const esWordCategories: WordCategory[] = [
       'croissant', 'burrito', 'lasaña', 'pastel', 'pretzel',
       'palomitas', 'empanada', 'waffle', 'sándwich', 'nachos',
       'paella', 'ceviche', 'arepa', 'churros', 'helado',
-      'flan', 'ensalada', 'sopa', 'arroz', 'pollo'
+      'flan', 'ensalada', 'sopa', 'arroz', 'pollo',
+      'mango', 'fresa', 'banana', 'uva', 'cereza',
+      'queso', 'jamón', 'tocino', 'huevo', 'pan',
+      'galleta', 'donut', 'brownie', 'gelatina', 'caramelo',
+      'café', 'limonada', 'batido', 'tortilla', 'croqueta'
     ]
   },
   {
@@ -37,7 +45,11 @@ export const esWordCategories: WordCategory[] = [
       'parque', 'cine', 'teatro', 'iglesia', 'supermercado',
       'escuela', 'universidad', 'gimnasio', 'piscina', 'jardín',
       'plaza', 'mercado', 'estación', 'puerto', 'faro',
-      'castillo', 'palacio', 'pirámide', 'cueva', 'volcán'
+      'castillo', 'palacio', 'pirámide', 'cueva', 'volcán',
+      'acuario', 'circo', 'discoteca', 'cafetería', 'panadería',
+      'farmacia', 'banco', 'oficina', 'fábrica', 'granja',
+      'cementerio', 'prisión', 'embajada', 'catedral', 'mezquita',
+      'templo', 'monasterio', 'observatorio', 'planetario', 'acantilado'
     ]
   },
   {
@@ -50,7 +62,11 @@ export const esWordCategories: WordCategory[] = [
       'abogado', 'policía', 'veterinario', 'periodista', 'ingeniero',
       'dentista', 'enfermero', 'fotógrafo', 'pintor', 'actor',
       'cantante', 'bailarín', 'escritor', 'científico', 'programador',
-      'mecánico', 'electricista', 'carpintero', 'panadero', 'jardinero'
+      'mecánico', 'electricista', 'carpintero', 'panadero', 'jardinero',
+      'bibliotecario', 'arqueólogo', 'biólogo', 'químico', 'físico',
+      'psicólogo', 'sociólogo', 'economista', 'contador', 'banquero',
+      'peluquero', 'sastre', 'zapatero', 'joyero', 'relojero',
+      'marinero', 'pescador', 'agricultor', 'ganadero', 'minero'
     ]
   },
   {
@@ -58,12 +74,16 @@ export const esWordCategories: WordCategory[] = [
     name: 'Películas',
     emoji: '🎬',
     words: [
-      'titanic', 'avatar', 'frozen', 'tiburón', 'batman',
-      'shrek', 'origen', 'gladiador', 'matrix', 'coco',
-      'up', 'ratatouille', 'toy story', 'buscando a nemo', 'cars',
-      'moana', 'encanto', 'spider-man', 'iron man', 'thor',
-      'jurassic park', 'harry potter', 'star wars', 'el padrino', 'forrest gump',
-      'rocky', 'rambo', 'terminator', 'alien', 'indiana jones'
+      'titanic', 'avatar', 'frozen', 'batman', 'shrek',
+      'origen', 'gladiador', 'matrix', 'coco', 'up',
+      'ratatouille', 'toy story', 'buscando a nemo', 'cars', 'moana',
+      'encanto', 'spider-man', 'iron man', 'thor', 'jurassic park',
+      'harry potter', 'star wars', 'el padrino', 'forrest gump', 'rocky',
+      'rambo', 'terminator', 'alien', 'indiana jones', 'el rey león',
+      'aladdin', 'mulan', 'tarzán', 'pocahontas', 'hércules',
+      'dumbo', 'bambi', 'pinocho', 'cenicienta', 'la sirenita',
+      'inception', 'interstellar', 'dunkirk', 'joker', 'aquaman',
+      'wonder woman', 'superman', 'hulk', 'deadpool', 'venom'
     ]
   },
   {
@@ -76,7 +96,11 @@ export const esWordCategories: WordCategory[] = [
       'surf', 'esquí', 'patinaje', 'karate', 'judo',
       'hockey', 'rugby', 'cricket', 'bádminton', 'ping pong',
       'escalada', 'paracaidismo', 'buceo', 'vela', 'remo',
-      'gimnasia', 'lucha', 'esgrima', 'polo', 'equitación'
+      'gimnasia', 'lucha', 'esgrima', 'polo', 'equitación',
+      'snowboard', 'wakeboard', 'skateboard', 'parkour', 'crossfit',
+      'triatlón', 'maratón', 'decatlón', 'pentatlón', 'biatlón',
+      'taekwondo', 'aikido', 'sumo', 'kickboxing', 'capoeira',
+      'dardos', 'billar', 'boliche', 'ajedrez', 'poker'
     ]
   },
   {
@@ -89,7 +113,11 @@ export const esWordCategories: WordCategory[] = [
       'puerta', 'escalera', 'ascensor', 'bicicleta', 'carro',
       'avión', 'barco', 'tren', 'moto', 'patineta',
       'guitarra', 'piano', 'tambor', 'violín', 'flauta',
-      'cámara', 'libro', 'lápiz', 'tijeras', 'paraguas'
+      'cámara', 'libro', 'lápiz', 'tijeras', 'paraguas',
+      'maleta', 'mochila', 'cartera', 'billetera', 'llave',
+      'candado', 'linterna', 'brújula', 'binoculares', 'telescopio',
+      'microscopio', 'termómetro', 'estetoscopio', 'jeringa', 'bisturí',
+      'martillo', 'destornillador', 'taladro', 'sierra', 'pinza'
     ]
   },
   {
@@ -102,7 +130,11 @@ export const esWordCategories: WordCategory[] = [
       'arcoíris', 'nube', 'sol', 'luna', 'estrella',
       'lluvia', 'nieve', 'trueno', 'relámpago', 'tornado',
       'terremoto', 'maremoto', 'glaciar', 'aurora', 'amanecer',
-      'atardecer', 'coral', 'alga', 'hongo', 'cactus'
+      'atardecer', 'coral', 'alga', 'hongo', 'cactus',
+      'palmera', 'bambú', 'roble', 'pino', 'sauce',
+      'orquídea', 'rosa', 'tulipán', 'girasol', 'margarita',
+      'montaña', 'valle', 'cañón', 'pradera', 'pantano',
+      'manglar', 'tundra', 'sabana', 'estepa', 'oasis'
     ]
   }
 ];

@@ -40,7 +40,11 @@
     "imposterHintSettings": "Hint voor de bedrieger",
     "imposterHintEnabled": "Hint ingeschakeld",
     "imposterHintDisabled": "Geen hint",
-    "imposterHintDescription": "De bedrieger ontvangt een abstracte hint gerelateerd aan het woord"
+    "imposterHintDescription": "De bedrieger ontvangt een abstracte hint gerelateerd aan het woord",
+    "trollModeSettings": "Troll Modus",
+    "trollModeEnabled": "Troll modus ingeschakeld",
+    "trollModeDisabled": "Troll modus uitgeschakeld",
+    "trollModeDescription": "20% kans dat IEDEREEN de bedrieger is in een ronde"
   },
   "game": {
     "connecting": "Verbinden...",
@@ -109,7 +113,9 @@
     "caughtNoGuess": "De bedrieger werd betrapt en raadde het woord niet.",
     "caughtTimeout": "De bedrieger werd betrapt en probeerde niet op tijd te raden.",
     "wrongElimination": "De groep elimineerde een onschuldige speler.",
-    "correctGuess": "De bedrieger raadde het woord correct."
+    "correctGuess": "De bedrieger raadde het woord correct.",
+    "everyoneWasImposter": "IEDEREEN was de bedrieger!",
+    "trollModeActivated": "Troll modus geactiveerd! Niemand kende het woord."
   },
   "player": {
     "you": "Jij",
@@ -147,6 +153,7 @@
     "hostLeft": "De host heeft het spel verlaten. De kamer wordt gesloten..."
   },
   "categories": {
+    "all": "Alle",
     "animals": "Dieren",
     "food": "Eten",
     "places": "Plaatsen",
@@ -155,5 +162,25 @@
     "sports": "Sport",
     "objects": "Voorwerpen",
     "nature": "Natuur"
+  },
+  "wordChange": {
+    "title": "Stemming: Woord Wijzigen",
+    "initiateButton": "Het geheime woord wijzigen",
+    "initiateHint": "Als je vermoedt dat de bedrieger het al weet",
+    "initiatedBy": "{name} heeft een stemming gestart om het woord te wijzigen",
+    "description": "Als de meerderheid JA stemt, wordt het geheime woord gewijzigd en krijgt de bedrieger 2 extra hints.",
+    "imposterWarning": "Waarschuwing! De bedrieger stemt ook maar krijgt extra hints als het doorgaat.",
+    "votesProgress": "{voted} van {total} hebben gestemd",
+    "voteYes": "JA, wijzigen",
+    "voteNo": "NEE, behouden",
+    "voteSubmitted": "Stem geregistreerd",
+    "waitingOthers": "Wachten op anderen...",
+    "resultPassed": "Het woord is gewijzigd!",
+    "resultFailed": "De stemming is niet geslaagd",
+    "newWordSelected": "Er is een nieuw geheim woord geselecteerd.",
+    "imposterGotHints": "De bedrieger heeft {count} extra hints ontvangen.",
+    "continueWithWord": "Het huidige woord blijft behouden.",
+    "autoClose": "Automatisch sluiten...",
+    "alreadyUsed": "Woordwijziging is al gebruikt deze ronde"
   }
 }
