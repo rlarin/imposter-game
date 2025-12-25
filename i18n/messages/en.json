@@ -28,10 +28,19 @@
     "players": "Players",
     "minPlayers": "Minimum 3 players",
     "categoryTitle": "Word category",
-    "hostOnly": "Only the host can change the category",
+    "hostOnly": "Only the host can change settings",
     "startGame": "Start Game",
     "waitingPlayers": "Waiting for players ({current}/3)",
-    "waitingHost": "Waiting for the host to start the game..."
+    "waitingHost": "Waiting for the host to start the game...",
+    "timerSettings": "Timer",
+    "timerEnabled": "Enable timer",
+    "timerDisabled": "No time limit",
+    "timeLimit": "Time per phase",
+    "minutes": "min",
+    "imposterHintSettings": "Imposter hint",
+    "imposterHintEnabled": "Hint enabled",
+    "imposterHintDisabled": "No hint",
+    "imposterHintDescription": "The imposter receives an abstract hint related to the word"
   },
   "game": {
     "connecting": "Connecting...",
@@ -45,7 +54,9 @@
     "category": "Category",
     "wordIs": "The secret word is:",
     "dontSayIt": "Don't say it out loud! Give subtle clues.",
-    "startsIn": "Round starts in"
+    "startsIn": "Round starts in",
+    "imposterHintLabel": "Your hint:",
+    "resetGame": "Reset"
   },
   "clue": {
     "previousClues": "Previous clues",
@@ -131,7 +142,9 @@
     "couldNotConnect": "Could not connect to the server",
     "backToHome": "Back to home",
     "createRoomError": "Error creating room",
-    "joinRoomError": "Error joining room"
+    "joinRoomError": "Error joining room",
+    "kickedFromRoom": "You have been kicked from the room",
+    "hostLeft": "The host has left the game. The room will close..."
   },
   "categories": {
     "animals": "Animals",

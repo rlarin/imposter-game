@@ -81,13 +81,23 @@ export default function ClueRound({ room, playerId, onSubmitClue }: ClueRoundPro
         </Card>
       )}
 
-      {/* Indicador de impostor */}
+      {/* Indicador de impostor con hint */}
       {isImposter && (
         <Card className="text-center bg-red-50 dark:bg-red-900/20">
           <p className="text-xs sm:text-sm text-red-500">{t('game.youAreImposter')}</p>
-          <p className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400">
+          <p className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400 mb-2">
             {t('clue.imposterHint')}
           </p>
+          {room.imposterHint && (
+            <div className="mt-2 p-2 sm:p-3 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
+              <p className="text-xs text-amber-700 dark:text-amber-400 mb-1">
+                {t('game.imposterHintLabel')}
+              </p>
+              <p className="text-lg font-bold text-amber-800 dark:text-amber-300 uppercase">
+                {room.imposterHint}
+              </p>
+            </div>
+          )}
         </Card>
       )}
 

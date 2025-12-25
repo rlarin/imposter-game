@@ -1,13 +1,16 @@
 import { GameRoom, Player, GameSettings, Clue, Vote } from './types';
 import { generateRoomCode, generatePlayerId, getRandomAvatarColor, pickRandom, tallyVotes } from './utils';
-import { getRandomWord } from './words';
+import { getRandomWord, getHintWord } from './words/index';
+import { Locale } from '@/i18n/config';
 
 // Configuración por defecto
 export const defaultSettings: GameSettings = {
   clueRounds: 2,
-  clueTimeLimit: 60,
-  voteTimeLimit: 45,
-  category: 'animals'
+  clueTimeLimit: 180,      // 3 minutos por defecto
+  voteTimeLimit: 180,      // 3 minutos por defecto
+  category: 'animals',
+  timerEnabled: false,     // Timer deshabilitado por defecto
+  imposterHintEnabled: false // Pista para el impostor deshabilitada por defecto
 };
 
 // Crear una nueva sala
@@ -35,6 +38,7 @@ export function createRoom(hostName: string): { room: GameRoom; playerId: string
     settings: { ...defaultSettings },
     currentRound: 0,
     secretWord: null,
+    imposterHint: null,
     imposterId: null,
     clues: [],
     votes: [],
@@ -116,14 +120,20 @@ export function reconnectPlayer(room: GameRoom, playerId: string): GameRoom {
 }
 
 // Iniciar el juego
-export function startGame(room: GameRoom, category: string): GameRoom | null {
+export function startGame(room: GameRoom, category: string, locale: Locale = 'en'): GameRoom | null {
   const connectedPlayers = room.players.filter(p => p.isConnected);
   if (connectedPlayers.length < 3) return null;
   if (room.phase !== 'lobby') return null;
 
   // Seleccionar palabra secreta
-  const secretWord = getRandomWord(category);
+  const secretWord = getRandomWord(locale, category);
   if (!secretWord) return null;
+
+  // Generar pista para el impostor si está habilitado
+  let imposterHint: string | null = null;
+  if (room.settings.imposterHintEnabled) {
+    imposterHint = getHintWord(locale, category, secretWord);
+  }
 
   // Seleccionar impostor aleatorio
   const imposter = pickRandom(connectedPlayers);
@@ -144,6 +154,7 @@ export function startGame(room: GameRoom, category: string): GameRoom | null {
     settings: { ...room.settings, category },
     currentRound: 1,
     secretWord,
+    imposterHint,
     imposterId: imposter.id,
     clues: [],
     votes: [],
@@ -153,6 +164,12 @@ export function startGame(room: GameRoom, category: string): GameRoom | null {
     imposterGuess: null,
     eliminatedPlayerId: null
   };
+}
+
+// Helper para calcular phaseEndsAt respetando timerEnabled
+function getPhaseEndTime(room: GameRoom, durationSeconds: number): number | null {
+  if (!room.settings.timerEnabled) return null;
+  return Date.now() + durationSeconds * 1000;
 }
 
 // Avanzar a la siguiente fase
@@ -165,7 +182,7 @@ export function advancePhase(room: GameRoom): GameRoom {
         ...room,
         phase: 'clue-round',
         phaseStartedAt: now,
-        phaseEndsAt: now + room.settings.clueTimeLimit * 1000
+        phaseEndsAt: getPhaseEndTime(room, room.settings.clueTimeLimit)
       };
 
     case 'clue-round':
@@ -173,7 +190,7 @@ export function advancePhase(room: GameRoom): GameRoom {
         ...room,
         phase: 'voting',
         phaseStartedAt: now,
-        phaseEndsAt: now + room.settings.voteTimeLimit * 1000,
+        phaseEndsAt: getPhaseEndTime(room, room.settings.voteTimeLimit),
         players: room.players.map(p => ({ ...p, hasVoted: false }))
       };
 
@@ -188,7 +205,7 @@ export function advancePhase(room: GameRoom): GameRoom {
           ...room,
           phase: 'imposter-guess',
           phaseStartedAt: now,
-          phaseEndsAt: now + 30000 // 30 segundos para adivinar
+          phaseEndsAt: getPhaseEndTime(room, 30) // 30 segundos para adivinar
         };
       }
 
@@ -199,7 +216,7 @@ export function advancePhase(room: GameRoom): GameRoom {
           phase: 'clue-round',
           currentRound: room.currentRound + 1,
           phaseStartedAt: now,
-          phaseEndsAt: now + room.settings.clueTimeLimit * 1000,
+          phaseEndsAt: getPhaseEndTime(room, room.settings.clueTimeLimit),
           votes: [],
           players: room.players.map(p => ({
             ...p,
@@ -339,6 +356,7 @@ export function playAgain(room: GameRoom): GameRoom {
     phase: 'lobby',
     currentRound: 0,
     secretWord: null,
+    imposterHint: null,
     imposterId: null,
     clues: [],
     votes: [],
@@ -395,6 +413,8 @@ export function getSafeRoomState(room: GameRoom, playerId: string): GameRoom {
     ...room,
     // Solo mostrar palabra si NO es el impostor o si el juego terminó
     secretWord: (isImposter && !isGameOver) ? null : room.secretWord,
+    // Solo mostrar pista al impostor (y solo si está habilitada)
+    imposterHint: isImposter ? room.imposterHint : null,
     // Solo mostrar quién es el impostor en game-over o vote-results
     imposterId: (isGameOver || isVoteResults) ? room.imposterId : null,
     // Ocultar quién es impostor en la lista de jugadores (excepto game-over)

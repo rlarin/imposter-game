@@ -55,6 +55,18 @@ export default class GameServer implements Party.Server {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
+    // If the host disconnects, close the room for everyone
+    if (playerId === this.room.hostId) {
+      this.broadcast({
+        type: 'room-closed',
+        reason: 'host-left'
+      });
+      this.room = null;
+      this.connectionPlayers.clear();
+      this.clearPhaseTimer();
+      return;
+    }
+
     // Marcar jugador como desconectado
     this.room = {
       ...this.room,
@@ -63,12 +75,6 @@ export default class GameServer implements Party.Server {
       )
     };
 
-    // Notificar a todos
-    this.broadcast({
-      type: 'player-left',
-      playerId
-    });
-
     this.connectionPlayers.delete(conn.id);
 
     // Si no quedan jugadores conectados, limpiar la sala
@@ -76,6 +82,9 @@ export default class GameServer implements Party.Server {
     if (connectedPlayers.length === 0) {
       this.room = null;
       this.clearPhaseTimer();
+    } else {
+      // Broadcast updated state to all remaining players
+      this.broadcastState();
     }
   }
 
@@ -94,7 +103,7 @@ export default class GameServer implements Party.Server {
           break;
 
         case 'start-game':
-          await this.handleStartGame(sender, event.category);
+          await this.handleStartGame(sender, event.category, event.locale);
           break;
 
         case 'submit-clue':
@@ -111,6 +120,10 @@ export default class GameServer implements Party.Server {
 
         case 'play-again':
           await this.handlePlayAgain(sender);
+          break;
+
+        case 'reset-game':
+          await this.handleResetGame(sender);
           break;
 
         case 'update-settings':
@@ -157,6 +170,7 @@ export default class GameServer implements Party.Server {
         settings: { ...defaultSettings },
         currentRound: 0,
         secretWord: null,
+        imposterHint: null,
         imposterId: null,
         clues: [],
         votes: [],
@@ -179,6 +193,9 @@ export default class GameServer implements Party.Server {
             p.id === existingPlayer.id ? { ...p, isConnected: true } : p
           )
         };
+        // Broadcast to all so everyone sees the reconnection
+        this.broadcastState();
+        return;
       } else {
         // Nuevo jugador
         if (this.room.phase !== 'lobby') {
@@ -213,22 +230,11 @@ export default class GameServer implements Party.Server {
           ...this.room,
           players: [...this.room.players, player]
         };
-
-        // Notificar a todos del nuevo jugador
-        this.broadcast({
-          type: 'player-joined',
-          player
-        });
       }
     }
 
-    // Enviar estado completo al jugador que se une
-    const currentPlayerId = this.connectionPlayers.get(conn.id) || playerId;
-    this.sendToConnection(conn, {
-      type: 'room-state',
-      room: getSafeRoomState(this.room, currentPlayerId),
-      playerId: currentPlayerId
-    });
+    // Broadcast state to ALL players (including the new one)
+    this.broadcastState();
   }
 
   // Manejar jugador saliendo
@@ -236,27 +242,33 @@ export default class GameServer implements Party.Server {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
+    // If the host leaves, close the room for everyone
+    if (playerId === this.room.hostId) {
+      this.broadcast({
+        type: 'room-closed',
+        reason: 'host-left'
+      });
+      this.room = null;
+      this.connectionPlayers.clear();
+      this.clearPhaseTimer();
+      return;
+    }
+
     this.room = {
       ...this.room,
       players: this.room.players.filter(p => p.id !== playerId)
     };
 
-    // Si el host se va, asignar nuevo host
-    if (playerId === this.room.hostId && this.room.players.length > 0) {
-      this.room.hostId = this.room.players[0].id;
-      this.room.players[0] = { ...this.room.players[0], isHost: true };
-    }
-
-    this.broadcast({
-      type: 'player-left',
-      playerId
-    });
-
     this.connectionPlayers.delete(conn.id);
+
+    // Broadcast updated state to remaining players
+    if (this.room.players.length > 0) {
+      this.broadcastState();
+    }
   }
 
   // Iniciar juego
-  private async handleStartGame(conn: Party.Connection, category: string) {
+  private async handleStartGame(conn: Party.Connection, category: string, locale?: string) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -269,7 +281,9 @@ export default class GameServer implements Party.Server {
       return;
     }
 
-    const newRoom = startGame(this.room, category);
+    // Use provided locale or default to 'en'
+    const gameLocale = (locale as 'es' | 'en' | 'nl') || 'en';
+    const newRoom = startGame(this.room, category, gameLocale);
     if (!newRoom) {
       this.sendToConnection(conn, {
         type: 'error',
@@ -301,17 +315,17 @@ export default class GameServer implements Party.Server {
 
     this.room = newRoom;
 
-    // Notificar que alguien envió pista (sin revelar cuál)
-    this.broadcast({
-      type: 'clue-submitted',
-      playerId
-    });
-
     // Si todos enviaron, avanzar fase
     if (allCluesSubmitted(this.room)) {
       this.clearPhaseTimer();
       this.room = advancePhase(this.room);
-      this.broadcastState();
+    }
+
+    // Broadcast state to update hasSubmittedClue status for all players
+    this.broadcastState();
+
+    // Schedule next phase if needed
+    if (this.room.phaseEndsAt) {
       this.schedulePhaseAdvance();
     }
   }
@@ -332,17 +346,17 @@ export default class GameServer implements Party.Server {
 
     this.room = newRoom;
 
-    // Notificar que alguien votó
-    this.broadcast({
-      type: 'vote-cast',
-      voterId: playerId
-    });
-
     // Si todos votaron, avanzar fase
     if (allVotesSubmitted(this.room)) {
       this.clearPhaseTimer();
       this.room = advancePhase(this.room);
-      this.broadcastState();
+    }
+
+    // Broadcast state to update hasVoted status for all players
+    this.broadcastState();
+
+    // Schedule next phase if needed
+    if (this.room.phaseEndsAt) {
       this.schedulePhaseAdvance();
     }
   }
@@ -385,6 +399,30 @@ export default class GameServer implements Party.Server {
     this.broadcastState();
   }
 
+  // Reiniciar juego (desde cualquier fase)
+  private async handleResetGame(conn: Party.Connection) {
+    const playerId = this.connectionPlayers.get(conn.id);
+    if (!playerId || !this.room) return;
+
+    // Solo el host puede reiniciar
+    if (playerId !== this.room.hostId) {
+      this.sendToConnection(conn, {
+        type: 'error',
+        message: 'Solo el host puede reiniciar'
+      });
+      return;
+    }
+
+    // No permitir reiniciar si ya estamos en lobby
+    if (this.room.phase === 'lobby') {
+      return;
+    }
+
+    this.clearPhaseTimer();
+    this.room = playAgain(this.room);
+    this.broadcastState();
+  }
+
   // Actualizar configuración
   private async handleUpdateSettings(conn: Party.Connection, settings: Partial<GameSettings>) {
     const playerId = this.connectionPlayers.get(conn.id);
@@ -409,10 +447,8 @@ export default class GameServer implements Party.Server {
       settings: { ...this.room.settings, ...settings }
     };
 
-    this.broadcast({
-      type: 'settings-updated',
-      settings: this.room.settings
-    });
+    // Broadcast full state so all clients update
+    this.broadcastState();
   }
 
   // Expulsar jugador
@@ -435,23 +471,34 @@ export default class GameServer implements Party.Server {
       return;
     }
 
+    // Find and close the kicked player's connection
+    let kickedConnId: string | null = null;
+    for (const [connId, pId] of this.connectionPlayers.entries()) {
+      if (pId === targetPlayerId) {
+        kickedConnId = connId;
+        break;
+      }
+    }
+
+    // Send kick notification to the kicked player before removing them
+    if (kickedConnId) {
+      const kickedConn = this.party.getConnection(kickedConnId);
+      if (kickedConn) {
+        this.sendToConnection(kickedConn, {
+          type: 'player-kicked',
+          playerId: targetPlayerId
+        });
+      }
+      this.connectionPlayers.delete(kickedConnId);
+    }
+
     this.room = {
       ...this.room,
       players: this.room.players.filter(p => p.id !== targetPlayerId)
     };
 
-    this.broadcast({
-      type: 'player-kicked',
-      playerId: targetPlayerId
-    });
-
-    // Desconectar al jugador expulsado
-    for (const [connId, pId] of this.connectionPlayers.entries()) {
-      if (pId === targetPlayerId) {
-        this.connectionPlayers.delete(connId);
-        break;
-      }
-    }
+    // Broadcast updated state to remaining players
+    this.broadcastState();
   }
 
   // Programar avance automático de fase

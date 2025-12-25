@@ -28,10 +28,19 @@
     "players": "Spelers",
     "minPlayers": "Minimaal 3 spelers",
     "categoryTitle": "Woordcategorie",
-    "hostOnly": "Alleen de host kan de categorie wijzigen",
+    "hostOnly": "Alleen de host kan instellingen wijzigen",
     "startGame": "Spel Starten",
     "waitingPlayers": "Wachten op spelers ({current}/3)",
-    "waitingHost": "Wachten tot de host het spel start..."
+    "waitingHost": "Wachten tot de host het spel start...",
+    "timerSettings": "Timer",
+    "timerEnabled": "Timer inschakelen",
+    "timerDisabled": "Geen tijdslimiet",
+    "timeLimit": "Tijd per fase",
+    "minutes": "min",
+    "imposterHintSettings": "Hint voor de bedrieger",
+    "imposterHintEnabled": "Hint ingeschakeld",
+    "imposterHintDisabled": "Geen hint",
+    "imposterHintDescription": "De bedrieger ontvangt een abstracte hint gerelateerd aan het woord"
   },
   "game": {
     "connecting": "Verbinden...",
@@ -45,7 +54,9 @@
     "category": "Categorie",
     "wordIs": "Het geheime woord is:",
     "dontSayIt": "Zeg het niet hardop! Geef subtiele hints.",
-    "startsIn": "Ronde begint over"
+    "startsIn": "Ronde begint over",
+    "imposterHintLabel": "Jouw hint:",
+    "resetGame": "Herstarten"
   },
   "clue": {
     "previousClues": "Vorige hints",
@@ -131,7 +142,9 @@
     "couldNotConnect": "Kon geen verbinding maken met de server",
     "backToHome": "Terug naar home",
     "createRoomError": "Fout bij maken van kamer",
-    "joinRoomError": "Fout bij deelnemen aan kamer"
+    "joinRoomError": "Fout bij deelnemen aan kamer",
+    "kickedFromRoom": "Je bent uit de kamer verwijderd",
+    "hostLeft": "De host heeft het spel verlaten. De kamer wordt gesloten..."
   },
   "categories": {
     "animals": "Dieren",
