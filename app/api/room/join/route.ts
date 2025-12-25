@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const nameValidation = validatePlayerName(playerName || '');
     if (!nameValidation.valid) {
       return NextResponse.json(
-        { error: nameValidation.error },
+        { error: 'Invalid name', errorKey: nameValidation.errorKey },
         { status: 400 }
       );
     }
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const codeValidation = validateRoomCode(roomCode || '');
     if (!codeValidation.valid) {
       return NextResponse.json(
-        { error: codeValidation.error },
+        { error: 'Invalid code', errorKey: codeValidation.errorKey },
         { status: 400 }
       );
     }

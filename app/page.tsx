@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button, Input, Card } from '@/components/ui';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 import { validatePlayerName, validateRoomCode } from '@/lib/utils';
 import {Image} from "next/dist/client/image-component";
 
 export default function Home() {
   const router = useRouter();
+  const t = useTranslations();
   const [playerName, setPlayerName] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -17,7 +20,7 @@ export default function Home() {
   const handleCreateGame = async () => {
     const validation = validatePlayerName(playerName);
     if (!validation.valid) {
-      setError(validation.error || 'Nombre inválido');
+      setError(validation.errorKey ? t(validation.errorKey) : t('validation.invalidName'));
       return;
     }
 
@@ -34,7 +37,7 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Error al crear la sala');
+        throw new Error(data.error || t('errors.createRoomError'));
       }
 
       // Guardar ID del jugador en localStorage
@@ -44,7 +47,7 @@ export default function Home() {
       // Navegar a la sala
       router.push(`/game/${data.roomCode}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear la sala');
+      setError(err instanceof Error ? err.message : t('errors.createRoomError'));
       setIsCreating(false);
     }
   };
@@ -52,13 +55,13 @@ export default function Home() {
   const handleJoinGame = async () => {
     const nameValidation = validatePlayerName(playerName);
     if (!nameValidation.valid) {
-      setError(nameValidation.error || 'Nombre inválido');
+      setError(nameValidation.errorKey ? t(nameValidation.errorKey) : t('validation.invalidName'));
       return;
     }
 
     const codeValidation = validateRoomCode(roomCode);
     if (!codeValidation.valid) {
-      setError(codeValidation.error || 'Código inválido');
+      setError(codeValidation.errorKey ? t(codeValidation.errorKey) : t('validation.invalidCode'));
       return;
     }
 
@@ -78,7 +81,7 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Error al unirse a la sala');
+        throw new Error(data.error || t('errors.joinRoomError'));
       }
 
       // Guardar ID del jugador en localStorage
@@ -88,33 +91,38 @@ export default function Home() {
       // Navegar a la sala
       router.push(`/game/${roomCode.trim().toUpperCase()}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al unirse a la sala');
+      setError(err instanceof Error ? err.message : t('errors.joinRoomError'));
       setIsJoining(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
+      {/* Language selector */}
+      <div className="absolute top-4 right-4">
+        <LanguageSelector variant="compact" />
+      </div>
+
       <Card variant="elevated" padding="lg" className="w-full max-w-md">
         {/* Logo y título */}
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4 flex justify-center">
-            <Image alt="Imposter" src="/imposter192x192.png" width={100} height={100} />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="mb-3 sm:mb-4 flex justify-center">
+            <Image alt="Imposter" src="/imposter192x192.png" width={80} height={80} className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            El Impostor
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">
+            {t('home.title')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            ¿Quién es el que no conoce la palabra?
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+            {t('home.subtitle')}
           </p>
         </div>
 
         {/* Formulario */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Nombre del jugador */}
           <Input
-            label="Tu nombre"
-            placeholder="Escribe tu nombre..."
+            label={t('home.nameLabel')}
+            placeholder={t('home.namePlaceholder')}
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             maxLength={15}
@@ -135,7 +143,7 @@ export default function Home() {
             className="w-full"
             size="lg"
           >
-            Crear Partida
+            {t('home.createGame')}
           </Button>
 
           {/* Separador */}
@@ -145,7 +153,7 @@ export default function Home() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-white dark:bg-gray-800 text-gray-500">
-                o únete a una partida
+                {t('home.joinSeparator')}
               </span>
             </div>
           </div>
@@ -153,7 +161,7 @@ export default function Home() {
           {/* Unirse a partida */}
           <div className="space-y-3">
             <Input
-              placeholder="Código de sala (ej: ABC123)"
+              placeholder={t('home.roomCodePlaceholder')}
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
               maxLength={6}
@@ -167,15 +175,15 @@ export default function Home() {
               className="w-full"
               size="lg"
             >
-              Unirse
+              {t('home.joinGame')}
             </Button>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            3-15 jugadores • Juego de palabras y deducción
+        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            {t('home.footer')}
           </p>
         </div>
       </Card>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
 import { Button, Card, Avatar } from '@/components/ui';
 
@@ -10,6 +11,7 @@ interface GameOverProps {
 }
 
 export default function GameOver({ room, playerId, onPlayAgain }: GameOverProps) {
+  const t = useTranslations();
   const isHost = playerId === room.hostId;
   const imposterPlayer = room.players.find(p => p.id === room.imposterId);
   const currentPlayer = room.players.find(p => p.id === playerId);
@@ -19,44 +21,57 @@ export default function GameOver({ room, playerId, onPlayAgain }: GameOverProps)
   // Determinar si el jugador actual ganó
   const playerWon = (groupWon && !wasImposter) || (!groupWon && wasImposter);
 
+  // Determinar razón de victoria
+  const getWinReason = () => {
+    if (groupWon) {
+      return room.imposterGuess
+        ? t('gameOver.caughtNoGuess')
+        : t('gameOver.caughtTimeout');
+    } else {
+      return room.eliminatedPlayerId !== room.imposterId
+        ? t('gameOver.wrongElimination')
+        : t('gameOver.correctGuess');
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="flex items-center justify-center min-h-[60vh] px-4">
       <Card variant="elevated" padding="lg" className="text-center max-w-md w-full">
         {/* Resultado principal */}
         <div className={`
-          text-6xl mb-4
+          text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4
           ${playerWon ? 'animate-bounce' : 'animate-pulse'}
         `}>
           {playerWon ? '🎉' : '😢'}
         </div>
 
         <h2 className={`
-          text-3xl font-bold mb-2
+          text-2xl sm:text-3xl font-bold mb-1 sm:mb-2
           ${groupWon
             ? 'text-green-600 dark:text-green-400'
             : 'text-red-600 dark:text-red-400'
           }
         `}>
-          {groupWon ? '¡El grupo gana!' : '¡El impostor gana!'}
+          {groupWon ? t('gameOver.groupWins') : t('gameOver.imposterWins')}
         </h2>
 
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-          {playerWon ? '¡Felicidades!' : 'Mejor suerte la próxima vez'}
+        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
+          {playerWon ? t('gameOver.congrats') : t('gameOver.betterLuck')}
         </p>
 
         {/* Info del impostor */}
-        <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-6">
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            El impostor era:
+        <div className="p-3 sm:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-4 sm:mb-6">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
+            {t('gameOver.imposterWas')}
           </p>
           {imposterPlayer && (
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
               <Avatar
                 name={imposterPlayer.name}
                 color={imposterPlayer.avatarColor}
-                size="lg"
+                size="md"
               />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                 {imposterPlayer.name}
               </span>
             </div>
@@ -64,20 +79,20 @@ export default function GameOver({ room, playerId, onPlayAgain }: GameOverProps)
         </div>
 
         {/* Palabra secreta */}
-        <div className="p-4 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl mb-6">
-          <p className="text-sm text-gray-500 dark:text-gray-400">La palabra secreta era:</p>
-          <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
+        <div className="p-3 sm:p-4 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl mb-4 sm:mb-6">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('gameOver.secretWordWas')}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
             {room.secretWord}
           </p>
 
           {/* Si el impostor intentó adivinar */}
           {room.imposterGuess && (
-            <div className="mt-3 pt-3 border-t border-indigo-200 dark:border-indigo-800">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                El impostor adivinó:
+            <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-indigo-200 dark:border-indigo-800">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {t('gameOver.imposterGuessed')}
               </p>
               <p className={`
-                text-xl font-bold
+                text-lg sm:text-xl font-bold
                 ${room.imposterGuess.toLowerCase() === room.secretWord?.toLowerCase()
                   ? 'text-green-600 dark:text-green-400'
                   : 'text-red-600 dark:text-red-400'
@@ -94,25 +109,18 @@ export default function GameOver({ room, playerId, onPlayAgain }: GameOverProps)
         </div>
 
         {/* Explicación de cómo ganó */}
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-          {groupWon
-            ? room.imposterGuess
-              ? 'El impostor fue descubierto y no adivinó la palabra.'
-              : 'El impostor fue descubierto y no intentó adivinar a tiempo.'
-            : room.eliminatedPlayerId !== room.imposterId
-              ? 'El grupo eliminó a un jugador inocente.'
-              : 'El impostor adivinó la palabra correctamente.'
-          }
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-6">
+          {getWinReason()}
         </p>
 
         {/* Botón de jugar de nuevo */}
         {isHost ? (
           <Button onClick={onPlayAgain} size="lg" className="w-full">
-            Jugar de Nuevo
+            {t('gameOver.playAgain')}
           </Button>
         ) : (
-          <p className="text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-            Esperando a que el host inicie otra partida...
+          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+            {t('gameOver.waitingHost')}
           </p>
         )}
       </Card>

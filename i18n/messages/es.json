@@ -1,0 +1,146 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "back": "Volver",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "exit": "Salir",
+    "room": "Sala",
+    "players": "jugadores"
+  },
+  "home": {
+    "title": "El Impostor",
+    "subtitle": "¿Quién es el que no conoce la palabra?",
+    "nameLabel": "Tu nombre",
+    "namePlaceholder": "Escribe tu nombre...",
+    "createGame": "Crear Partida",
+    "joinGame": "Unirse",
+    "joinSeparator": "o únete a una partida",
+    "roomCodePlaceholder": "Código de sala (ej: ABC123)",
+    "footer": "3-15 jugadores • Juego de palabras y deducción"
+  },
+  "lobby": {
+    "roomCode": "Código de sala",
+    "copyCode": "Copiar código",
+    "copyLink": "Copiar enlace de invitación",
+    "scanToJoin": "Escanea para unirte",
+    "players": "Jugadores",
+    "minPlayers": "Mínimo 3 jugadores",
+    "categoryTitle": "Categoría de palabras",
+    "hostOnly": "Solo el host puede cambiar la categoría",
+    "startGame": "Iniciar Partida",
+    "waitingPlayers": "Esperando jugadores ({current}/3)",
+    "waitingHost": "Esperando a que el host inicie la partida..."
+  },
+  "game": {
+    "connecting": "Conectando...",
+    "loadingRoom": "Cargando sala...",
+    "loadingGame": "Cargando partida...",
+    "round": "Ronda {current} de {total}",
+    "secretWord": "Palabra secreta",
+    "youAreImposter": "¡ERES EL IMPOSTOR!",
+    "imposterHint": "No conoces la palabra secreta.",
+    "imposterTip": "Intenta descubrirla con las pistas de los demás sin que te descubran.",
+    "category": "Categoría",
+    "wordIs": "La palabra secreta es:",
+    "dontSayIt": "¡No la digas en voz alta! Da pistas sutiles.",
+    "startsIn": "La ronda comienza en"
+  },
+  "clue": {
+    "previousClues": "Pistas anteriores",
+    "yourClue": "Tu pista (una sola palabra)",
+    "placeholder": "Escribe tu pista...",
+    "submit": "Enviar Pista",
+    "submitted": "Pista enviada",
+    "waiting": "Esperando a los demás jugadores...",
+    "imposterHint": "Inventa una pista convincente"
+  },
+  "voting": {
+    "title": "¿Quién es el impostor?",
+    "subtitle": "Vota por quien creas que es el impostor",
+    "cluesThisRound": "Pistas de esta ronda",
+    "selectSuspect": "Selecciona al sospechoso",
+    "confirmVote": "Confirmar Voto",
+    "voteRegistered": "Voto registrado",
+    "votingStatus": "Estado de votación"
+  },
+  "results": {
+    "title": "Resultados de la Votación",
+    "eliminated": "{name} ha sido eliminado",
+    "wasImposter": "¡Era el IMPOSTOR!",
+    "canGuess": "Pero aún puede intentar adivinar la palabra...",
+    "wasInnocent": "Era inocente...",
+    "tie": "¡Empate! Nadie es eliminado",
+    "continuing": "Continuando...",
+    "votes": "votos"
+  },
+  "imposterGuess": {
+    "lastChance": "¡Última oportunidad!",
+    "discovered": "Te descubrieron, pero si adivinas la palabra secreta, ¡ganas!",
+    "whatWasWord": "¿Cuál era la palabra?",
+    "guess": "Adivinar",
+    "waiting": "El impostor intenta adivinar",
+    "lastChanceDesc": "{name} tiene una última oportunidad de adivinar la palabra secreta.",
+    "wordWas": "La palabra era:",
+    "ifGuesses": "Si la adivina, el impostor gana..."
+  },
+  "gameOver": {
+    "groupWins": "¡El grupo gana!",
+    "imposterWins": "¡El impostor gana!",
+    "congrats": "¡Felicidades!",
+    "betterLuck": "Mejor suerte la próxima vez",
+    "imposterWas": "El impostor era:",
+    "secretWordWas": "La palabra secreta era:",
+    "imposterGuessed": "El impostor adivinó:",
+    "playAgain": "Jugar de Nuevo",
+    "waitingHost": "Esperando a que el host inicie otra partida...",
+    "caughtNoGuess": "El impostor fue descubierto y no adivinó la palabra.",
+    "caughtTimeout": "El impostor fue descubierto y no intentó adivinar a tiempo.",
+    "wrongElimination": "El grupo eliminó a un jugador inocente.",
+    "correctGuess": "El impostor adivinó la palabra correctamente."
+  },
+  "player": {
+    "you": "Tú",
+    "host": "Host",
+    "eliminated": "Eliminado",
+    "disconnected": "Desconectado",
+    "kick": "Expulsar jugador",
+    "clueSubmitted": "Pista enviada",
+    "hasVoted": "Ha votado"
+  },
+  "validation": {
+    "invalidName": "Nombre inválido",
+    "invalidCode": "Código inválido",
+    "invalidClue": "Pista inválida",
+    "nameEmpty": "El nombre no puede estar vacío",
+    "nameMinLength": "El nombre debe tener al menos 2 caracteres",
+    "nameMaxLength": "El nombre no puede tener más de 15 caracteres",
+    "nameInvalidChars": "El nombre contiene caracteres no válidos",
+    "codeLength": "El código debe tener 6 caracteres",
+    "codeInvalidChars": "El código solo puede contener letras y números",
+    "clueEmpty": "La pista no puede estar vacía",
+    "writeClue": "Escribe una pista",
+    "clueSingleWord": "La pista debe ser una sola palabra",
+    "clueTooLong": "La pista es demasiado larga",
+    "clueIsSecret": "No puedes decir la palabra secreta",
+    "clueTooObvious": "La pista es demasiado obvia"
+  },
+  "errors": {
+    "connectionError": "Error de conexión",
+    "couldNotConnect": "No se pudo conectar al servidor",
+    "backToHome": "Volver al inicio",
+    "createRoomError": "Error al crear la sala",
+    "joinRoomError": "Error al unirse a la sala"
+  },
+  "categories": {
+    "animals": "Animales",
+    "food": "Comida",
+    "places": "Lugares",
+    "professions": "Profesiones",
+    "movies": "Películas",
+    "sports": "Deportes",
+    "objects": "Objetos",
+    "nature": "Naturaleza"
+  }
+}
