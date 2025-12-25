@@ -17,12 +17,16 @@ export default function GameOver({ room, playerId, onPlayAgain }: GameOverProps)
   const currentPlayer = room.players.find(p => p.id === playerId);
   const wasImposter = currentPlayer?.isImposter ?? false;
   const groupWon = room.winner === 'group';
+  const everyoneWasImposter = room.everyoneIsImposter;
 
-  // Determinar si el jugador actual ganó
-  const playerWon = (groupWon && !wasImposter) || (!groupWon && wasImposter);
+  // Determinar si el jugador actual ganó (en troll mode todos "ganan" o "pierden" juntos)
+  const playerWon = everyoneWasImposter ? true : (groupWon && !wasImposter) || (!groupWon && wasImposter);
 
   // Determinar razón de victoria
   const getWinReason = () => {
+    if (everyoneWasImposter) {
+      return t('gameOver.trollModeActivated');
+    }
     if (groupWon) {
       return room.imposterGuess
         ? t('gameOver.caughtNoGuess')
@@ -40,43 +44,50 @@ export default function GameOver({ room, playerId, onPlayAgain }: GameOverProps)
         {/* Resultado principal */}
         <div className={`
           text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4
-          ${playerWon ? 'animate-bounce' : 'animate-pulse'}
+          ${everyoneWasImposter ? 'animate-spin' : (playerWon ? 'animate-bounce' : 'animate-pulse')}
         `}>
-          {playerWon ? '🎉' : '😢'}
+          {everyoneWasImposter ? '🎭' : (playerWon ? '🎉' : '😢')}
         </div>
 
         <h2 className={`
           text-2xl sm:text-3xl font-bold mb-1 sm:mb-2
-          ${groupWon
-            ? 'text-green-600 dark:text-green-400'
-            : 'text-red-600 dark:text-red-400'
+          ${everyoneWasImposter
+            ? 'text-purple-600 dark:text-purple-400'
+            : groupWon
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-red-600 dark:text-red-400'
           }
         `}>
-          {groupWon ? t('gameOver.groupWins') : t('gameOver.imposterWins')}
+          {everyoneWasImposter
+            ? t('gameOver.everyoneWasImposter')
+            : (groupWon ? t('gameOver.groupWins') : t('gameOver.imposterWins'))
+          }
         </h2>
 
         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
-          {playerWon ? t('gameOver.congrats') : t('gameOver.betterLuck')}
+          {everyoneWasImposter ? t('gameOver.trollModeActivated') : (playerWon ? t('gameOver.congrats') : t('gameOver.betterLuck'))}
         </p>
 
-        {/* Info del impostor */}
-        <div className="p-3 sm:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-4 sm:mb-6">
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
-            {t('gameOver.imposterWas')}
-          </p>
-          {imposterPlayer && (
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
-              <Avatar
-                name={imposterPlayer.name}
-                color={imposterPlayer.avatarColor}
-                size="md"
-              />
-              <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-                {imposterPlayer.name}
-              </span>
-            </div>
-          )}
-        </div>
+        {/* Info del impostor (solo si NO es troll mode) */}
+        {!everyoneWasImposter && (
+          <div className="p-3 sm:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-4 sm:mb-6">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
+              {t('gameOver.imposterWas')}
+            </p>
+            {imposterPlayer && (
+              <div className="flex items-center justify-center gap-2 sm:gap-3">
+                <Avatar
+                  name={imposterPlayer.name}
+                  color={imposterPlayer.avatarColor}
+                  size="md"
+                />
+                <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+                  {imposterPlayer.name}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Palabra secreta */}
         <div className="p-3 sm:p-4 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl mb-4 sm:mb-6">

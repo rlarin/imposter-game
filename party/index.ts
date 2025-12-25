@@ -16,8 +16,13 @@ import {
   advancePhase,
   allCluesSubmitted,
   allVotesSubmitted,
-  getSafeRoomState
+  getSafeRoomState,
+  initiateWordChangeVote,
+  castWordChangeVote,
+  allWordChangeVotesSubmitted,
+  processWordChangeVotes
 } from '../lib/game-logic';
+import { Locale } from '@/i18n/config';
 import { generatePlayerId, getRandomAvatarColor } from '../lib/utils';
 
 // Mapa de conexiones a IDs de jugador
@@ -27,6 +32,7 @@ export default class GameServer implements Party.Server {
   room: GameRoom | null = null;
   connectionPlayers: ConnectionPlayerMap = new Map();
   phaseTimer: ReturnType<typeof setTimeout> | null = null;
+  gameLocale: Locale = 'en';
 
   constructor(readonly party: Party.Party) {}
 
@@ -133,6 +139,14 @@ export default class GameServer implements Party.Server {
         case 'kick-player':
           await this.handleKickPlayer(sender, event.playerId);
           break;
+
+        case 'initiate-word-change':
+          await this.handleInitiateWordChange(sender);
+          break;
+
+        case 'vote-word-change':
+          await this.handleVoteWordChange(sender, event.vote);
+          break;
       }
     } catch (error) {
       console.error('Error processing message:', error);
@@ -159,7 +173,8 @@ export default class GameServer implements Party.Server {
         isEliminated: false,
         isConnected: true,
         hasSubmittedClue: false,
-        hasVoted: false
+        hasVoted: false,
+        hasVotedWordChange: false
       };
 
       this.room = {
@@ -171,9 +186,15 @@ export default class GameServer implements Party.Server {
         currentRound: 0,
         secretWord: null,
         imposterHint: null,
+        imposterHints: [],
         imposterId: null,
+        everyoneIsImposter: false,
         clues: [],
         votes: [],
+        wordChangeUsed: false,
+        wordChangeVotingActive: false,
+        wordChangeVotes: [],
+        wordChangeInitiatorId: null,
         createdAt: Date.now(),
         phaseStartedAt: Date.now(),
         phaseEndsAt: null,
@@ -223,7 +244,8 @@ export default class GameServer implements Party.Server {
           isEliminated: false,
           isConnected: true,
           hasSubmittedClue: false,
-          hasVoted: false
+          hasVoted: false,
+          hasVotedWordChange: false
         };
 
         this.room = {
@@ -282,8 +304,8 @@ export default class GameServer implements Party.Server {
     }
 
     // Use provided locale or default to 'en'
-    const gameLocale = (locale as 'es' | 'en' | 'nl') || 'en';
-    const newRoom = startGame(this.room, category, gameLocale);
+    this.gameLocale = (locale as Locale) || 'en';
+    const newRoom = startGame(this.room, category, this.gameLocale);
     if (!newRoom) {
       this.sendToConnection(conn, {
         type: 'error',
@@ -498,6 +520,73 @@ export default class GameServer implements Party.Server {
     };
 
     // Broadcast updated state to remaining players
+    this.broadcastState();
+  }
+
+  // Iniciar votación de cambio de palabra
+  private async handleInitiateWordChange(conn: Party.Connection) {
+    const playerId = this.connectionPlayers.get(conn.id);
+    if (!playerId || !this.room) return;
+
+    const newRoom = initiateWordChangeVote(this.room, playerId);
+    if (!newRoom) {
+      this.sendToConnection(conn, {
+        type: 'error',
+        message: 'No se puede iniciar votación de cambio de palabra'
+      });
+      return;
+    }
+
+    this.room = newRoom;
+
+    // Obtener nombre del iniciador
+    const initiator = this.room.players.find(p => p.id === playerId);
+
+    // Broadcast que se inició la votación
+    this.broadcast({
+      type: 'word-change-vote-started',
+      initiatorId: playerId,
+      initiatorName: initiator?.name || 'Jugador'
+    });
+
+    this.broadcastState();
+  }
+
+  // Votar en cambio de palabra
+  private async handleVoteWordChange(conn: Party.Connection, vote: boolean) {
+    const playerId = this.connectionPlayers.get(conn.id);
+    if (!playerId || !this.room) return;
+
+    const newRoom = castWordChangeVote(this.room, playerId, vote);
+    if (!newRoom) {
+      this.sendToConnection(conn, {
+        type: 'error',
+        message: 'No se pudo registrar el voto'
+      });
+      return;
+    }
+
+    this.room = newRoom;
+
+    // Broadcast que alguien votó
+    this.broadcast({
+      type: 'word-change-vote-cast',
+      voterId: playerId
+    });
+
+    // Si todos votaron, procesar resultado
+    if (allWordChangeVotesSubmitted(this.room)) {
+      const result = processWordChangeVotes(this.room, this.gameLocale);
+      this.room = result.room;
+
+      // Broadcast resultado
+      this.broadcast({
+        type: 'word-change-vote-result',
+        passed: result.passed,
+        newHintsCount: result.newHintsCount
+      });
+    }
+
     this.broadcastState();
   }
 

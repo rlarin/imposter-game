@@ -19,6 +19,7 @@ export interface Player {
   isConnected: boolean;    // Actualmente conectado
   hasSubmittedClue: boolean; // Ya envió pista esta ronda
   hasVoted: boolean;       // Ya votó esta ronda
+  hasVotedWordChange: boolean; // Ya votó en cambio de palabra
 }
 
 // Pista enviada por un jugador
@@ -36,6 +37,12 @@ export interface Vote {
   targetId: string;
 }
 
+// Voto para cambiar la palabra secreta
+export interface WordChangeVote {
+  voterId: string;
+  vote: boolean; // true = yes, false = no
+}
+
 // Configuración del juego
 export interface GameSettings {
   clueRounds: number;        // Número de rondas de pistas (1-3)
@@ -44,6 +51,7 @@ export interface GameSettings {
   category: string;          // Categoría de palabras
   timerEnabled: boolean;     // Si el timer está habilitado
   imposterHintEnabled: boolean; // Si el impostor recibe una pista
+  trollModeEnabled: boolean; // Modo troll: posibilidad de que todos sean impostores
 }
 
 // Estado completo de la sala
@@ -58,9 +66,17 @@ export interface GameRoom {
   currentRound: number;       // Ronda actual de pistas
   secretWord: string | null;  // Palabra secreta
   imposterHint: string | null; // Curated abstract hint for the imposter (Three-Filter Rule)
-  imposterId: string | null;  // Quién es el impostor
+  imposterHints: string[];    // Array de pistas para el impostor (puede recibir extras)
+  imposterId: string | null;  // Quién es el impostor (null si todos son impostores)
+  everyoneIsImposter: boolean; // Modo troll: todos son impostores
   clues: Clue[];              // Pistas enviadas
   votes: Vote[];              // Votos de la ronda actual
+
+  // Estado de votación de cambio de palabra
+  wordChangeUsed: boolean;           // Si ya se usó el cambio de palabra esta ronda
+  wordChangeVotingActive: boolean;   // Si hay una votación activa
+  wordChangeVotes: WordChangeVote[]; // Votos del cambio de palabra
+  wordChangeInitiatorId: string | null; // Quién inició la votación
 
   // Tiempos
   createdAt: number;          // Timestamp de creación
@@ -84,7 +100,9 @@ export type ClientMessage =
   | { type: 'play-again' }
   | { type: 'reset-game' }
   | { type: 'kick-player'; playerId: string }
-  | { type: 'update-settings'; settings: Partial<GameSettings> };
+  | { type: 'update-settings'; settings: Partial<GameSettings> }
+  | { type: 'initiate-word-change' }
+  | { type: 'vote-word-change'; vote: boolean };
 
 // Mensajes del servidor al cliente
 export type ServerMessage =
@@ -99,7 +117,10 @@ export type ServerMessage =
   | { type: 'vote-cast'; voterId: string }
   | { type: 'timer-update'; remaining: number }
   | { type: 'error'; message: string }
-  | { type: 'settings-updated'; settings: GameSettings };
+  | { type: 'settings-updated'; settings: GameSettings }
+  | { type: 'word-change-vote-started'; initiatorId: string; initiatorName: string }
+  | { type: 'word-change-vote-cast'; voterId: string }
+  | { type: 'word-change-vote-result'; passed: boolean; newHintsCount?: number };
 
 // Categoría de palabras
 export interface WordCategory {

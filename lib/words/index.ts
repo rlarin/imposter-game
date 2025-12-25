@@ -19,12 +19,36 @@ const hintsByLocale: Record<Locale, WordHintsMap> = {
   nl: nlWordHints
 };
 
+// Category names for "all" category in each locale
+const allCategoryNames: Record<Locale, string> = {
+  es: 'Todas',
+  en: 'All',
+  nl: 'Alle'
+};
+
 export function getWordCategories(locale: Locale = 'en'): WordCategory[] {
-  return wordsByLocale[locale] || wordsByLocale.en;
+  const categories = wordsByLocale[locale] || wordsByLocale.en;
+
+  // Add the "all" category at the beginning
+  const allCategory: WordCategory = {
+    id: 'all',
+    name: allCategoryNames[locale] || allCategoryNames.en,
+    emoji: '🎲',
+    words: [] // Words are selected dynamically from all categories
+  };
+
+  return [allCategory, ...categories];
 }
 
 export function getRandomWord(locale: Locale, categoryId: string): string | null {
   const categories = wordsByLocale[locale] || wordsByLocale.en;
+
+  // Handle "all" category - pick a random word from any category
+  if (categoryId === 'all') {
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    return randomCategory.words[Math.floor(Math.random() * randomCategory.words.length)];
+  }
+
   const category = categories.find(c => c.id === categoryId);
   if (!category) return null;
   return category.words[Math.floor(Math.random() * category.words.length)];

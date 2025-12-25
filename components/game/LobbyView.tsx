@@ -37,6 +37,7 @@ export default function LobbyView({
   const timerEnabled = room.settings.timerEnabled ?? true;
   const currentTimeMinutes = Math.round((room.settings.clueTimeLimit || 180) / 60);
   const imposterHintEnabled = room.settings.imposterHintEnabled ?? false;
+  const trollModeEnabled = room.settings.trollModeEnabled ?? false;
 
   const handleCopyLink = async () => {
     const success = await copyToClipboard(joinUrl);
@@ -76,6 +77,12 @@ export default function LobbyView({
   const handleImposterHintToggle = () => {
     if (isHost) {
       onUpdateSettings({ imposterHintEnabled: !imposterHintEnabled });
+    }
+  };
+
+  const handleTrollModeToggle = () => {
+    if (isHost) {
+      onUpdateSettings({ trollModeEnabled: !trollModeEnabled });
     }
   };
 
@@ -279,6 +286,47 @@ export default function LobbyView({
                 className={`
                   inline-block h-4 w-4 transform rounded-full bg-white transition-transform
                   ${imposterHintEnabled ? 'translate-x-6' : 'translate-x-1'}
+                `}
+              />
+            </button>
+          )}
+        </div>
+
+        {!isHost && (
+          <p className="text-xs text-gray-500 mt-3 text-center">
+            {t('lobby.hostOnly')}
+          </p>
+        )}
+      </Card>
+
+      {/* Modo Troll */}
+      <Card>
+        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
+          <span>🎭</span>
+          {t('lobby.trollModeSettings')}
+        </h3>
+
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <span className="text-sm text-gray-700 dark:text-gray-300">
+              {trollModeEnabled ? t('lobby.trollModeEnabled') : t('lobby.trollModeDisabled')}
+            </span>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {t('lobby.trollModeDescription')}
+            </p>
+          </div>
+          {isHost && (
+            <button
+              onClick={handleTrollModeToggle}
+              className={`
+                relative inline-flex h-6 w-11 items-center rounded-full transition-colors ml-4
+                ${trollModeEnabled ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}
+              `}
+            >
+              <span
+                className={`
+                  inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                  ${trollModeEnabled ? 'translate-x-6' : 'translate-x-1'}
                 `}
               />
             </button>
