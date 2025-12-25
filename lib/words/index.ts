@@ -1,13 +1,22 @@
 import { esWordCategories } from './es';
 import { enWordCategories } from './en';
 import { nlWordCategories } from './nl';
+import { esWordHints } from './es-hints';
+import { enWordHints } from './en-hints';
+import { nlWordHints } from './nl-hints';
 import { Locale } from '@/i18n/config';
-import { WordCategory } from '../types';
+import { WordCategory, WordHintsMap } from '../types';
 
 const wordsByLocale: Record<Locale, WordCategory[]> = {
   es: esWordCategories,
   en: enWordCategories,
   nl: nlWordCategories
+};
+
+const hintsByLocale: Record<Locale, WordHintsMap> = {
+  es: esWordHints,
+  en: enWordHints,
+  nl: nlWordHints
 };
 
 export function getWordCategories(locale: Locale = 'en'): WordCategory[] {
@@ -28,6 +37,38 @@ export function getCategoryById(locale: Locale, categoryId: string): WordCategor
 
 export function getAllCategoryIds(): string[] {
   return esWordCategories.map(c => c.id);
+}
+
+/**
+ * Get a curated hint for the imposter following Three-Filter Rule:
+ * 1. Related but not defining
+ * 2. Specific in intent but vague in interpretation
+ * 3. Never directly reveal the secret word
+ *
+ * Hints are experiences, emotions, or abstract concepts - NOT synonyms,
+ * translations, direct categories, or physical components.
+ *
+ * Example: For "airport" -> valid hints: "waiting", "stressful", "early morning"
+ *          Invalid: "plane", "terminal", "ticket"
+ */
+export function getHintWord(locale: Locale, categoryId: string, secretWord: string): string | null {
+  const hints = hintsByLocale[locale] || hintsByLocale.en;
+  const wordKey = secretWord.toLowerCase();
+
+  // Get curated hints for this word
+  const wordHints = hints[wordKey];
+
+  if (!wordHints || wordHints.length === 0) {
+    // Fallback: try to find hints in English if locale doesn't have them
+    const fallbackHints = hintsByLocale.en[wordKey];
+    if (fallbackHints && fallbackHints.length > 0) {
+      return fallbackHints[Math.floor(Math.random() * fallbackHints.length)];
+    }
+    return null;
+  }
+
+  // Return a random hint from the curated list
+  return wordHints[Math.floor(Math.random() * wordHints.length)];
 }
 
 // Re-export for backwards compatibility

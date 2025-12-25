@@ -8,22 +8,26 @@ const PARTYKIT_HOST = process.env.NEXT_PUBLIC_PARTYKIT_HOST || 'localhost:1999';
 
 interface UsePartySocketOptions {
   roomCode: string;
+  onGameSettings?: (settings: GameRoom['settings']) => void;
   onRoomState?: (room: GameRoom, playerId: string) => void;
   onError?: (message: string) => void;
   onPlayerJoined?: (player: GameRoom['players'][0]) => void;
   onPlayerLeft?: (playerId: string) => void;
   onPhaseChanged?: (phase: GameRoom['phase']) => void;
+  onRoomClosed?: (reason: 'host-left') => void;
 }
 
 type ConnectionState = 'connecting' | 'connected' | 'disconnected';
 
 export function usePartySocket({
   roomCode,
+  onGameSettings,
   onRoomState,
   onError,
   onPlayerJoined,
   onPlayerLeft,
-  onPhaseChanged
+  onPhaseChanged,
+  onRoomClosed
 }: UsePartySocketOptions) {
   const socketRef = useRef<PartySocket | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
@@ -31,22 +35,26 @@ export function usePartySocket({
   // Refs para callbacks para evitar re-renders
   const callbacksRef = useRef({
     onRoomState,
+    onGameSettings,
     onError,
     onPlayerJoined,
     onPlayerLeft,
-    onPhaseChanged
+    onPhaseChanged,
+    onRoomClosed
   });
 
   // Actualizar refs cuando cambian los callbacks
   useEffect(() => {
     callbacksRef.current = {
       onRoomState,
+      onGameSettings,
       onError,
       onPlayerJoined,
       onPlayerLeft,
-      onPhaseChanged
+      onPhaseChanged,
+      onRoomClosed
     };
-  }, [onRoomState, onError, onPlayerJoined, onPlayerLeft, onPhaseChanged]);
+  }, [onRoomState, onGameSettings, onError, onPlayerJoined, onPlayerLeft, onPhaseChanged, onRoomClosed]);
 
   // Conectar al servidor
   useEffect(() => {
@@ -77,6 +85,10 @@ export function usePartySocket({
         const message = JSON.parse(event.data) as ServerMessage;
 
         switch (message.type) {
+          case 'settings-updated':
+            callbacksRef.current.onGameSettings?.(message.settings);
+            break;
+
           case 'room-state':
             callbacksRef.current.onRoomState?.(message.room, message.playerId);
             break;
@@ -88,6 +100,10 @@ export function usePartySocket({
           case 'player-left':
           case 'player-kicked':
             callbacksRef.current.onPlayerLeft?.(message.playerId);
+            break;
+
+          case 'room-closed':
+            callbacksRef.current.onRoomClosed?.(message.reason);
             break;
 
           case 'phase-changed':
@@ -134,8 +150,8 @@ export function usePartySocket({
     send({ type: 'leave' });
   }, [send]);
 
-  const startGame = useCallback((category: string) => {
-    send({ type: 'start-game', category });
+  const startGame = useCallback((category: string, locale?: string) => {
+    send({ type: 'start-game', category, locale });
   }, [send]);
 
   const submitClue = useCallback((word: string) => {
@@ -152,6 +168,10 @@ export function usePartySocket({
 
   const playAgain = useCallback(() => {
     send({ type: 'play-again' });
+  }, [send]);
+
+  const resetGame = useCallback(() => {
+    send({ type: 'reset-game' });
   }, [send]);
 
   const kickPlayer = useCallback((playerId: string) => {
@@ -172,10 +192,11 @@ export function usePartySocket({
     castVote,
     guessWord,
     playAgain,
+    resetGame,
     kickPlayer,
     updateSettings,
     send
-  }), [connectionState, join, leave, startGame, submitClue, castVote, guessWord, playAgain, kickPlayer, updateSettings, send]);
+  }), [connectionState, join, leave, startGame, submitClue, castVote, guessWord, playAgain, resetGame, kickPlayer, updateSettings, send]);
 
   return result;
 }

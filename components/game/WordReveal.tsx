@@ -7,11 +7,12 @@ import {Image} from "next/dist/client/image-component";
 
 interface WordRevealProps {
   secretWord: string | null;
+  imposterHint: string | null;
   isImposter: boolean;
   category: string;
 }
 
-export default function WordReveal({ secretWord, isImposter, category }: WordRevealProps) {
+export default function WordReveal({ secretWord, imposterHint, isImposter, category }: WordRevealProps) {
   const t = useTranslations();
   const [countdown, setCountdown] = useState(5);
 
@@ -46,6 +47,16 @@ export default function WordReveal({ secretWord, isImposter, category }: WordRev
                 {t(`categories.${category}`)}
               </p>
             </div>
+            {imposterHint && (
+              <div className="p-3 sm:p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-xl">
+                <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-400 mb-1">
+                  {t('game.imposterHintLabel')}
+                </p>
+                <p className="text-lg sm:text-xl font-bold text-amber-800 dark:text-amber-300 uppercase">
+                  {imposterHint}
+                </p>
+              </div>
+            )}
           </>
         ) : (
           <>

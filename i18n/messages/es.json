@@ -28,10 +28,19 @@
     "players": "Jugadores",
     "minPlayers": "Mínimo 3 jugadores",
     "categoryTitle": "Categoría de palabras",
-    "hostOnly": "Solo el host puede cambiar la categoría",
+    "hostOnly": "Solo el host puede cambiar la configuración",
     "startGame": "Iniciar Partida",
     "waitingPlayers": "Esperando jugadores ({current}/3)",
-    "waitingHost": "Esperando a que el host inicie la partida..."
+    "waitingHost": "Esperando a que el host inicie la partida...",
+    "timerSettings": "Temporizador",
+    "timerEnabled": "Habilitar temporizador",
+    "timerDisabled": "Sin límite de tiempo",
+    "timeLimit": "Tiempo por fase",
+    "minutes": "min",
+    "imposterHintSettings": "Pista para el impostor",
+    "imposterHintEnabled": "Pista habilitada",
+    "imposterHintDisabled": "Sin pista",
+    "imposterHintDescription": "El impostor recibe una pista abstracta relacionada con la palabra"
   },
   "game": {
     "connecting": "Conectando...",
@@ -45,7 +54,9 @@
     "category": "Categoría",
     "wordIs": "La palabra secreta es:",
     "dontSayIt": "¡No la digas en voz alta! Da pistas sutiles.",
-    "startsIn": "La ronda comienza en"
+    "startsIn": "La ronda comienza en",
+    "imposterHintLabel": "Tu pista:",
+    "resetGame": "Reiniciar"
   },
   "clue": {
     "previousClues": "Pistas anteriores",
@@ -131,7 +142,9 @@
     "couldNotConnect": "No se pudo conectar al servidor",
     "backToHome": "Volver al inicio",
     "createRoomError": "Error al crear la sala",
-    "joinRoomError": "Error al unirse a la sala"
+    "joinRoomError": "Error al unirse a la sala",
+    "kickedFromRoom": "Has sido expulsado de la sala",
+    "hostLeft": "El host ha abandonado la partida. La sala se cerrará..."
   },
   "categories": {
     "animals": "Animales",

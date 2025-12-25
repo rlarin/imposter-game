@@ -38,10 +38,12 @@ export interface Vote {
 
 // Configuración del juego
 export interface GameSettings {
-  clueRounds: number;      // Número de rondas de pistas (1-3)
-  clueTimeLimit: number;   // Segundos por ronda de pistas
-  voteTimeLimit: number;   // Segundos para votar
-  category: string;        // Categoría de palabras
+  clueRounds: number;        // Número de rondas de pistas (1-3)
+  clueTimeLimit: number;     // Segundos por ronda de pistas
+  voteTimeLimit: number;     // Segundos para votar
+  category: string;          // Categoría de palabras
+  timerEnabled: boolean;     // Si el timer está habilitado
+  imposterHintEnabled: boolean; // Si el impostor recibe una pista
 }
 
 // Estado completo de la sala
@@ -55,6 +57,7 @@ export interface GameRoom {
   // Estado del juego activo
   currentRound: number;       // Ronda actual de pistas
   secretWord: string | null;  // Palabra secreta
+  imposterHint: string | null; // Curated abstract hint for the imposter (Three-Filter Rule)
   imposterId: string | null;  // Quién es el impostor
   clues: Clue[];              // Pistas enviadas
   votes: Vote[];              // Votos de la ronda actual
@@ -74,11 +77,12 @@ export interface GameRoom {
 export type ClientMessage =
   | { type: 'join'; playerName: string }
   | { type: 'leave' }
-  | { type: 'start-game'; category: string }
+  | { type: 'start-game'; category: string; locale?: string }
   | { type: 'submit-clue'; word: string }
   | { type: 'cast-vote'; targetId: string }
   | { type: 'imposter-guess'; word: string }
   | { type: 'play-again' }
+  | { type: 'reset-game' }
   | { type: 'kick-player'; playerId: string }
   | { type: 'update-settings'; settings: Partial<GameSettings> };
 
@@ -88,6 +92,7 @@ export type ServerMessage =
   | { type: 'player-joined'; player: Player }
   | { type: 'player-left'; playerId: string }
   | { type: 'player-kicked'; playerId: string }
+  | { type: 'room-closed'; reason: 'host-left' }
   | { type: 'game-started'; phase: GamePhase }
   | { type: 'phase-changed'; phase: GamePhase; data?: Record<string, unknown> }
   | { type: 'clue-submitted'; playerId: string }
@@ -103,6 +108,10 @@ export interface WordCategory {
   emoji: string;
   words: string[];
 }
+
+// Curated hints for imposter (follows Three-Filter Rule)
+// Hints are: related but not defining, vague in interpretation, never reveal the word
+export type WordHintsMap = Record<string, string[]>;
 
 // Para almacenamiento local del jugador
 export interface LocalPlayer {
