@@ -1,0 +1,146 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "back": "Back",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "exit": "Exit",
+    "room": "Room",
+    "players": "players"
+  },
+  "home": {
+    "title": "The Imposter",
+    "subtitle": "Who doesn't know the secret word?",
+    "nameLabel": "Your name",
+    "namePlaceholder": "Enter your name...",
+    "createGame": "Create Game",
+    "joinGame": "Join",
+    "joinSeparator": "or join a game",
+    "roomCodePlaceholder": "Room code (e.g. ABC123)",
+    "footer": "3-15 players • Word guessing and deduction game"
+  },
+  "lobby": {
+    "roomCode": "Room code",
+    "copyCode": "Copy code",
+    "copyLink": "Copy invitation link",
+    "scanToJoin": "Scan to join",
+    "players": "Players",
+    "minPlayers": "Minimum 3 players",
+    "categoryTitle": "Word category",
+    "hostOnly": "Only the host can change the category",
+    "startGame": "Start Game",
+    "waitingPlayers": "Waiting for players ({current}/3)",
+    "waitingHost": "Waiting for the host to start the game..."
+  },
+  "game": {
+    "connecting": "Connecting...",
+    "loadingRoom": "Loading room...",
+    "loadingGame": "Loading game...",
+    "round": "Round {current} of {total}",
+    "secretWord": "Secret word",
+    "youAreImposter": "YOU ARE THE IMPOSTER!",
+    "imposterHint": "You don't know the secret word.",
+    "imposterTip": "Try to figure it out from others' clues without getting caught.",
+    "category": "Category",
+    "wordIs": "The secret word is:",
+    "dontSayIt": "Don't say it out loud! Give subtle clues.",
+    "startsIn": "Round starts in"
+  },
+  "clue": {
+    "previousClues": "Previous clues",
+    "yourClue": "Your clue (one word only)",
+    "placeholder": "Write your clue...",
+    "submit": "Submit Clue",
+    "submitted": "Clue submitted",
+    "waiting": "Waiting for other players...",
+    "imposterHint": "Make up a convincing clue"
+  },
+  "voting": {
+    "title": "Who is the imposter?",
+    "subtitle": "Vote for who you think is the imposter",
+    "cluesThisRound": "Clues from this round",
+    "selectSuspect": "Select the suspect",
+    "confirmVote": "Confirm Vote",
+    "voteRegistered": "Vote registered",
+    "votingStatus": "Voting status"
+  },
+  "results": {
+    "title": "Voting Results",
+    "eliminated": "{name} has been eliminated",
+    "wasImposter": "They were the IMPOSTER!",
+    "canGuess": "But they can still try to guess the word...",
+    "wasInnocent": "They were innocent...",
+    "tie": "Tie! Nobody is eliminated",
+    "continuing": "Continuing...",
+    "votes": "votes"
+  },
+  "imposterGuess": {
+    "lastChance": "Last chance!",
+    "discovered": "You were caught, but if you guess the secret word, you win!",
+    "whatWasWord": "What was the word?",
+    "guess": "Guess",
+    "waiting": "The imposter is trying to guess",
+    "lastChanceDesc": "{name} has one last chance to guess the secret word.",
+    "wordWas": "The word was:",
+    "ifGuesses": "If they guess it, the imposter wins..."
+  },
+  "gameOver": {
+    "groupWins": "The group wins!",
+    "imposterWins": "The imposter wins!",
+    "congrats": "Congratulations!",
+    "betterLuck": "Better luck next time",
+    "imposterWas": "The imposter was:",
+    "secretWordWas": "The secret word was:",
+    "imposterGuessed": "The imposter guessed:",
+    "playAgain": "Play Again",
+    "waitingHost": "Waiting for the host to start another game...",
+    "caughtNoGuess": "The imposter was caught and didn't guess the word.",
+    "caughtTimeout": "The imposter was caught and didn't try to guess in time.",
+    "wrongElimination": "The group eliminated an innocent player.",
+    "correctGuess": "The imposter guessed the word correctly."
+  },
+  "player": {
+    "you": "You",
+    "host": "Host",
+    "eliminated": "Eliminated",
+    "disconnected": "Disconnected",
+    "kick": "Kick player",
+    "clueSubmitted": "Clue submitted",
+    "hasVoted": "Has voted"
+  },
+  "validation": {
+    "invalidName": "Invalid name",
+    "invalidCode": "Invalid code",
+    "invalidClue": "Invalid clue",
+    "nameEmpty": "Name cannot be empty",
+    "nameMinLength": "Name must be at least 2 characters",
+    "nameMaxLength": "Name cannot be longer than 15 characters",
+    "nameInvalidChars": "Name contains invalid characters",
+    "codeLength": "Code must be 6 characters",
+    "codeInvalidChars": "Code can only contain letters and numbers",
+    "clueEmpty": "Clue cannot be empty",
+    "writeClue": "Write a clue",
+    "clueSingleWord": "Clue must be a single word",
+    "clueTooLong": "Clue is too long",
+    "clueIsSecret": "You can't say the secret word",
+    "clueTooObvious": "Clue is too obvious"
+  },
+  "errors": {
+    "connectionError": "Connection error",
+    "couldNotConnect": "Could not connect to the server",
+    "backToHome": "Back to home",
+    "createRoomError": "Error creating room",
+    "joinRoomError": "Error joining room"
+  },
+  "categories": {
+    "animals": "Animals",
+    "food": "Food",
+    "places": "Places",
+    "professions": "Professions",
+    "movies": "Movies",
+    "sports": "Sports",
+    "objects": "Objects",
+    "nature": "Nature"
+  }
+}

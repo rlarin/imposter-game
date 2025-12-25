@@ -44,72 +44,72 @@ export function getAvatarColorByIndex(index: number): string {
 }
 
 // Valida el nombre del jugador
-export function validatePlayerName(name: string): { valid: boolean; error?: string } {
+export function validatePlayerName(name: string): { valid: boolean; errorKey?: string } {
   const trimmed = name.trim();
 
   if (trimmed.length === 0) {
-    return { valid: false, error: 'El nombre no puede estar vacío' };
+    return { valid: false, errorKey: 'validation.nameEmpty' };
   }
 
   if (trimmed.length < 2) {
-    return { valid: false, error: 'El nombre debe tener al menos 2 caracteres' };
+    return { valid: false, errorKey: 'validation.nameMinLength' };
   }
 
   if (trimmed.length > 15) {
-    return { valid: false, error: 'El nombre no puede tener más de 15 caracteres' };
+    return { valid: false, errorKey: 'validation.nameMaxLength' };
   }
 
   // Solo letras, números, espacios y algunos caracteres especiales
   const validChars = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s\-_]+$/;
   if (!validChars.test(trimmed)) {
-    return { valid: false, error: 'El nombre contiene caracteres no válidos' };
+    return { valid: false, errorKey: 'validation.nameInvalidChars' };
   }
 
   return { valid: true };
 }
 
 // Valida el código de sala
-export function validateRoomCode(code: string): { valid: boolean; error?: string } {
+export function validateRoomCode(code: string): { valid: boolean; errorKey?: string } {
   const trimmed = code.trim().toUpperCase();
 
   if (trimmed.length !== 6) {
-    return { valid: false, error: 'El código debe tener 6 caracteres' };
+    return { valid: false, errorKey: 'validation.codeLength' };
   }
 
   const validChars = /^[A-Z0-9]+$/;
   if (!validChars.test(trimmed)) {
-    return { valid: false, error: 'El código solo puede contener letras y números' };
+    return { valid: false, errorKey: 'validation.codeInvalidChars' };
   }
 
   return { valid: true };
 }
 
 // Valida una pista
-export function validateClue(clue: string, secretWord: string): { valid: boolean; error?: string } {
+export function validateClue(clue: string, secretWord: string): { valid: boolean; errorKey?: string } {
   const trimmed = clue.trim().toLowerCase();
   const secret = secretWord.toLowerCase();
 
   if (trimmed.length === 0) {
-    return { valid: false, error: 'La pista no puede estar vacía' };
+    return { valid: false, errorKey: 'validation.clueEmpty' };
   }
 
   // Solo una palabra (sin espacios)
   if (trimmed.includes(' ')) {
-    return { valid: false, error: 'La pista debe ser una sola palabra' };
+    return { valid: false, errorKey: 'validation.clueSingleWord' };
   }
 
   if (trimmed.length > 20) {
-    return { valid: false, error: 'La pista es demasiado larga' };
+    return { valid: false, errorKey: 'validation.clueTooLong' };
   }
 
   // No puede ser la palabra secreta
   if (trimmed === secret) {
-    return { valid: false, error: 'No puedes decir la palabra secreta' };
+    return { valid: false, errorKey: 'validation.clueIsSecret' };
   }
 
   // No puede contener la palabra secreta
   if (trimmed.includes(secret) || secret.includes(trimmed)) {
-    return { valid: false, error: 'La pista es demasiado obvia' };
+    return { valid: false, errorKey: 'validation.clueTooObvious' };
   }
 
   return { valid: true };

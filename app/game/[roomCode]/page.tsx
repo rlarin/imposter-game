@@ -2,9 +2,11 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
 import { usePartySocket } from '@/hooks/usePartySocket';
 import { Card } from '@/components/ui';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 import {
   LobbyView,
   WordReveal,
@@ -18,6 +20,7 @@ import {
 export default function GamePage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations();
   const roomCode = params.roomCode as string;
 
   const [room, setRoom] = useState<GameRoom | null>(null);
@@ -72,7 +75,7 @@ export default function GamePage() {
       <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
         <Card variant="elevated" padding="lg" className="text-center">
           <div className="animate-spin text-4xl mb-4">⏳</div>
-          <p className="text-gray-600 dark:text-gray-400">Conectando...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('game.connecting')}</p>
         </Card>
       </div>
     );
@@ -85,16 +88,16 @@ export default function GamePage() {
         <Card variant="elevated" padding="lg" className="text-center max-w-md">
           <div className="text-4xl mb-4">❌</div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Error de conexión
+            {t('errors.connectionError')}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {error || 'No se pudo conectar al servidor'}
+            {error || t('errors.couldNotConnect')}
           </p>
           <button
             onClick={() => router.push('/')}
             className="text-indigo-600 hover:underline"
           >
-            Volver al inicio
+            {t('errors.backToHome')}
           </button>
         </Card>
       </div>
@@ -107,7 +110,7 @@ export default function GamePage() {
       <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
         <Card variant="elevated" padding="lg" className="text-center">
           <div className="animate-pulse text-4xl mb-4">🎮</div>
-          <p className="text-gray-600 dark:text-gray-400">Cargando sala...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('game.loadingRoom')}</p>
         </Card>
       </div>
     );
@@ -189,30 +192,35 @@ export default function GamePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-2 sm:p-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <header className="flex items-center justify-between mb-6">
+        <header className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mb-4 sm:mb-6">
           <button
             onClick={() => router.push('/')}
-            className="text-white/80 hover:text-white transition-colors flex items-center gap-2"
+            className="text-white/80 hover:text-white transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Salir
+            <span className="hidden sm:inline">{t('common.exit')}</span>
           </button>
 
-          <div className="text-center">
-            <span className="text-white/60 text-sm">Sala</span>
-            <span className="text-white font-mono font-bold ml-2">{roomCode}</span>
+          <div className="text-center order-first sm:order-none w-full sm:w-auto">
+            <span className="text-white/60 text-xs sm:text-sm">{t('common.room')}</span>
+            <span className="text-white font-mono font-bold ml-1 sm:ml-2 text-sm sm:text-base">{roomCode}</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
-            <span className="text-white/60 text-sm">
-              {room.players.filter(p => p.isConnected).length} jugadores
-            </span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {room.phase === 'lobby' && (
+              <LanguageSelector variant="compact" />
+            )}
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
+              <span className="text-white/60 text-xs sm:text-sm">
+                {room.players.filter(p => p.isConnected).length} {t('common.players')}
+              </span>
+            </div>
           </div>
         </header>
 

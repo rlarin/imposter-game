@@ -1,0 +1,146 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fout",
+    "back": "Terug",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!",
+    "exit": "Verlaten",
+    "room": "Kamer",
+    "players": "spelers"
+  },
+  "home": {
+    "title": "De Bedrieger",
+    "subtitle": "Wie kent het geheime woord niet?",
+    "nameLabel": "Je naam",
+    "namePlaceholder": "Voer je naam in...",
+    "createGame": "Spel Maken",
+    "joinGame": "Deelnemen",
+    "joinSeparator": "of neem deel aan een spel",
+    "roomCodePlaceholder": "Kamercode (bijv. ABC123)",
+    "footer": "3-15 spelers • Woordraad- en deductiespel"
+  },
+  "lobby": {
+    "roomCode": "Kamercode",
+    "copyCode": "Code kopiëren",
+    "copyLink": "Uitnodigingslink kopiëren",
+    "scanToJoin": "Scan om deel te nemen",
+    "players": "Spelers",
+    "minPlayers": "Minimaal 3 spelers",
+    "categoryTitle": "Woordcategorie",
+    "hostOnly": "Alleen de host kan de categorie wijzigen",
+    "startGame": "Spel Starten",
+    "waitingPlayers": "Wachten op spelers ({current}/3)",
+    "waitingHost": "Wachten tot de host het spel start..."
+  },
+  "game": {
+    "connecting": "Verbinden...",
+    "loadingRoom": "Kamer laden...",
+    "loadingGame": "Spel laden...",
+    "round": "Ronde {current} van {total}",
+    "secretWord": "Geheim woord",
+    "youAreImposter": "JIJ BENT DE BEDRIEGER!",
+    "imposterHint": "Je kent het geheime woord niet.",
+    "imposterTip": "Probeer het te achterhalen via de hints van anderen zonder betrapt te worden.",
+    "category": "Categorie",
+    "wordIs": "Het geheime woord is:",
+    "dontSayIt": "Zeg het niet hardop! Geef subtiele hints.",
+    "startsIn": "Ronde begint over"
+  },
+  "clue": {
+    "previousClues": "Vorige hints",
+    "yourClue": "Je hint (slechts één woord)",
+    "placeholder": "Schrijf je hint...",
+    "submit": "Hint Verzenden",
+    "submitted": "Hint verzonden",
+    "waiting": "Wachten op andere spelers...",
+    "imposterHint": "Verzin een overtuigende hint"
+  },
+  "voting": {
+    "title": "Wie is de bedrieger?",
+    "subtitle": "Stem op wie je denkt dat de bedrieger is",
+    "cluesThisRound": "Hints van deze ronde",
+    "selectSuspect": "Selecteer de verdachte",
+    "confirmVote": "Stem Bevestigen",
+    "voteRegistered": "Stem geregistreerd",
+    "votingStatus": "Stemstatus"
+  },
+  "results": {
+    "title": "Stemresultaten",
+    "eliminated": "{name} is geëlimineerd",
+    "wasImposter": "Het was de BEDRIEGER!",
+    "canGuess": "Maar ze kunnen nog proberen het woord te raden...",
+    "wasInnocent": "Ze waren onschuldig...",
+    "tie": "Gelijkspel! Niemand wordt geëlimineerd",
+    "continuing": "Doorgaan...",
+    "votes": "stemmen"
+  },
+  "imposterGuess": {
+    "lastChance": "Laatste kans!",
+    "discovered": "Je bent betrapt, maar als je het geheime woord raadt, win je!",
+    "whatWasWord": "Wat was het woord?",
+    "guess": "Raden",
+    "waiting": "De bedrieger probeert te raden",
+    "lastChanceDesc": "{name} heeft nog één kans om het geheime woord te raden.",
+    "wordWas": "Het woord was:",
+    "ifGuesses": "Als ze het raden, wint de bedrieger..."
+  },
+  "gameOver": {
+    "groupWins": "De groep wint!",
+    "imposterWins": "De bedrieger wint!",
+    "congrats": "Gefeliciteerd!",
+    "betterLuck": "Meer geluk de volgende keer",
+    "imposterWas": "De bedrieger was:",
+    "secretWordWas": "Het geheime woord was:",
+    "imposterGuessed": "De bedrieger raadde:",
+    "playAgain": "Opnieuw Spelen",
+    "waitingHost": "Wachten tot de host een nieuw spel start...",
+    "caughtNoGuess": "De bedrieger werd betrapt en raadde het woord niet.",
+    "caughtTimeout": "De bedrieger werd betrapt en probeerde niet op tijd te raden.",
+    "wrongElimination": "De groep elimineerde een onschuldige speler.",
+    "correctGuess": "De bedrieger raadde het woord correct."
+  },
+  "player": {
+    "you": "Jij",
+    "host": "Host",
+    "eliminated": "Geëlimineerd",
+    "disconnected": "Niet verbonden",
+    "kick": "Speler verwijderen",
+    "clueSubmitted": "Hint verzonden",
+    "hasVoted": "Heeft gestemd"
+  },
+  "validation": {
+    "invalidName": "Ongeldige naam",
+    "invalidCode": "Ongeldige code",
+    "invalidClue": "Ongeldige hint",
+    "nameEmpty": "Naam mag niet leeg zijn",
+    "nameMinLength": "Naam moet minimaal 2 tekens bevatten",
+    "nameMaxLength": "Naam mag niet langer zijn dan 15 tekens",
+    "nameInvalidChars": "Naam bevat ongeldige tekens",
+    "codeLength": "Code moet 6 tekens bevatten",
+    "codeInvalidChars": "Code mag alleen letters en cijfers bevatten",
+    "clueEmpty": "Hint mag niet leeg zijn",
+    "writeClue": "Schrijf een hint",
+    "clueSingleWord": "Hint moet één woord zijn",
+    "clueTooLong": "Hint is te lang",
+    "clueIsSecret": "Je mag het geheime woord niet zeggen",
+    "clueTooObvious": "Hint is te voor de hand liggend"
+  },
+  "errors": {
+    "connectionError": "Verbindingsfout",
+    "couldNotConnect": "Kon geen verbinding maken met de server",
+    "backToHome": "Terug naar home",
+    "createRoomError": "Fout bij maken van kamer",
+    "joinRoomError": "Fout bij deelnemen aan kamer"
+  },
+  "categories": {
+    "animals": "Dieren",
+    "food": "Eten",
+    "places": "Plaatsen",
+    "professions": "Beroepen",
+    "movies": "Films",
+    "sports": "Sport",
+    "objects": "Voorwerpen",
+    "nature": "Natuur"
+  }
+}

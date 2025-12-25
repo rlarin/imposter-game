@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const validation = validatePlayerName(playerName || '');
     if (!validation.valid) {
       return NextResponse.json(
-        { error: validation.error },
+        { error: 'Invalid name', errorKey: validation.errorKey },
         { status: 400 }
       );
     }

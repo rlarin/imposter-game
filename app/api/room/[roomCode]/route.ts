@@ -12,7 +12,7 @@ export async function GET(
     const validation = validateRoomCode(roomCode || '');
     if (!validation.valid) {
       return NextResponse.json(
-        { exists: false, error: validation.error },
+        { exists: false, error: 'Invalid code', errorKey: validation.errorKey },
         { status: 400 }
       );
     }
