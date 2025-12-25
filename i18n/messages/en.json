@@ -163,6 +163,47 @@
     "objects": "Objects",
     "nature": "Nature"
   },
+  "instructions": {
+    "title": "How to Play",
+    "prev": "Previous",
+    "next": "Next",
+    "gotIt": "Got it!",
+    "howToPlay": "How to play?",
+    "steps": {
+      "objective": {
+        "title": "Game Objective",
+        "content": "The Imposter is a social deduction game.\n\nRegular players know the secret word and must find the imposter.\n\nThe imposter does NOT know the word and must figure it out without being caught."
+      },
+      "setup": {
+        "title": "Setup",
+        "content": "You need 3 to 15 players.\n\nOne player creates the room and shares the code with others.\n\nThe host selects a word category and configures game options."
+      },
+      "secretWord": {
+        "title": "The Secret Word",
+        "content": "When the game starts, everyone sees if they are the imposter or not.\n\nRegular players see the secret word.\n\nThe imposter sees a message indicating they are the imposter and may receive an abstract hint."
+      },
+      "imposter": {
+        "title": "The Imposter",
+        "content": "The imposter must pretend they know the word.\n\nThey may receive an abstract hint related to the word to help them blend in.\n\nThey must give convincing clues without being too obvious or too vague."
+      },
+      "clues": {
+        "title": "Clue Rounds",
+        "content": "Each round, everyone gives ONE word as a clue.\n\nClues should relate to the secret word without saying it directly.\n\nBe careful! If you're too obvious, the imposter will guess the word. If you're too vague, you'll look suspicious."
+      },
+      "voting": {
+        "title": "Voting",
+        "content": "After clues, everyone votes for who they think is the imposter.\n\nThe player with the most votes is eliminated.\n\nIf the imposter is eliminated, they get one last chance to guess the word."
+      },
+      "winning": {
+        "title": "Who Wins?",
+        "content": "🏆 The GROUP wins if:\n• They eliminate the imposter AND they don't guess the word\n\n🎭 The IMPOSTER wins if:\n• They are not discovered after all rounds\n• They are eliminated but guess the word correctly"
+      },
+      "tips": {
+        "title": "Tips",
+        "content": "💡 For regular players:\n• Give specific but not obvious clues\n• Pay attention to others' clues\n\n🕵️ For the imposter:\n• Pay attention to all clues\n• Give generic clues that could work for many words\n• Don't panic!"
+      }
+    }
+  },
   "wordChange": {
     "title": "Vote: Change Word",
     "initiateButton": "Change the secret word",
