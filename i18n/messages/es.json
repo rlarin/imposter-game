@@ -163,6 +163,47 @@
     "objects": "Objetos",
     "nature": "Naturaleza"
   },
+  "instructions": {
+    "title": "Cómo Jugar",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "gotIt": "¡Entendido!",
+    "howToPlay": "¿Cómo se juega?",
+    "steps": {
+      "objective": {
+        "title": "Objetivo del Juego",
+        "content": "El Impostor es un juego de deducción social.\n\nLos jugadores normales conocen la palabra secreta y deben encontrar al impostor.\n\nEl impostor NO conoce la palabra y debe descubrirla sin ser detectado."
+      },
+      "setup": {
+        "title": "Preparación",
+        "content": "Se necesitan de 3 a 15 jugadores.\n\nUn jugador crea la sala y comparte el código con los demás.\n\nEl anfitrión selecciona una categoría de palabras y configura las opciones del juego."
+      },
+      "secretWord": {
+        "title": "La Palabra Secreta",
+        "content": "Al iniciar, todos ven si son el impostor o no.\n\nLos jugadores normales ven la palabra secreta.\n\nEl impostor ve un mensaje indicando que es el impostor y puede recibir una pista abstracta."
+      },
+      "imposter": {
+        "title": "El Impostor",
+        "content": "El impostor debe fingir que conoce la palabra.\n\nPuede recibir una pista abstracta relacionada con la palabra para ayudarle a disimular.\n\nDebe dar pistas convincentes sin ser demasiado obvio ni demasiado vago."
+      },
+      "clues": {
+        "title": "Rondas de Pistas",
+        "content": "En cada ronda, todos dan UNA palabra como pista.\n\nLas pistas deben relacionarse con la palabra secreta sin decirla directamente.\n\n¡Cuidado! Si eres muy obvio, el impostor adivinará la palabra. Si eres muy vago, parecerás sospechoso."
+      },
+      "voting": {
+        "title": "Votación",
+        "content": "Después de las pistas, todos votan por quién creen que es el impostor.\n\nEl jugador con más votos es eliminado.\n\nSi eliminan al impostor, este tiene una última oportunidad de adivinar la palabra."
+      },
+      "winning": {
+        "title": "¿Quién Gana?",
+        "content": "🏆 El GRUPO gana si:\n• Eliminan al impostor Y este no adivina la palabra\n\n🎭 El IMPOSTOR gana si:\n• No es descubierto después de todas las rondas\n• Es eliminado pero adivina la palabra correctamente"
+      },
+      "tips": {
+        "title": "Consejos",
+        "content": "💡 Para jugadores normales:\n• Da pistas específicas pero no obvias\n• Observa las pistas de los demás\n\n🕵️ Para el impostor:\n• Presta atención a todas las pistas\n• Da pistas genéricas que podrían funcionar para muchas palabras\n• ¡No entres en pánico!"
+      }
+    }
+  },
   "wordChange": {
     "title": "Votación: Cambiar Palabra",
     "initiateButton": "Cambiar la palabra secreta",

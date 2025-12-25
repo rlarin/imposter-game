@@ -163,6 +163,47 @@
     "objects": "Voorwerpen",
     "nature": "Natuur"
   },
+  "instructions": {
+    "title": "Spelregels",
+    "prev": "Vorige",
+    "next": "Volgende",
+    "gotIt": "Begrepen!",
+    "howToPlay": "Hoe speel je?",
+    "steps": {
+      "objective": {
+        "title": "Doel van het Spel",
+        "content": "De Bedrieger is een sociaal deductiespel.\n\nGewone spelers kennen het geheime woord en moeten de bedrieger vinden.\n\nDe bedrieger kent het woord NIET en moet het ontdekken zonder betrapt te worden."
+      },
+      "setup": {
+        "title": "Voorbereiding",
+        "content": "Je hebt 3 tot 15 spelers nodig.\n\nEén speler maakt de kamer aan en deelt de code met anderen.\n\nDe host selecteert een woordcategorie en configureert de spelopties."
+      },
+      "secretWord": {
+        "title": "Het Geheime Woord",
+        "content": "Bij de start ziet iedereen of ze de bedrieger zijn of niet.\n\nGewone spelers zien het geheime woord.\n\nDe bedrieger ziet een bericht dat ze de bedrieger zijn en kan een abstracte hint ontvangen."
+      },
+      "imposter": {
+        "title": "De Bedrieger",
+        "content": "De bedrieger moet doen alsof ze het woord kennen.\n\nZe kunnen een abstracte hint ontvangen gerelateerd aan het woord om te helpen opgaan.\n\nZe moeten overtuigende hints geven zonder te voor de hand liggend of te vaag te zijn."
+      },
+      "clues": {
+        "title": "Hintronden",
+        "content": "Elke ronde geeft iedereen ÉÉN woord als hint.\n\nHints moeten gerelateerd zijn aan het geheime woord zonder het direct te zeggen.\n\nWees voorzichtig! Als je te voor de hand liggend bent, raadt de bedrieger het woord. Als je te vaag bent, lijk je verdacht."
+      },
+      "voting": {
+        "title": "Stemmen",
+        "content": "Na de hints stemt iedereen op wie ze denken dat de bedrieger is.\n\nDe speler met de meeste stemmen wordt geëlimineerd.\n\nAls de bedrieger wordt geëlimineerd, krijgen ze nog één kans om het woord te raden."
+      },
+      "winning": {
+        "title": "Wie Wint?",
+        "content": "🏆 De GROEP wint als:\n• Ze de bedrieger elimineren EN die het woord niet raadt\n\n🎭 De BEDRIEGER wint als:\n• Ze niet ontdekt worden na alle rondes\n• Ze worden geëlimineerd maar raden het woord correct"
+      },
+      "tips": {
+        "title": "Tips",
+        "content": "💡 Voor gewone spelers:\n• Geef specifieke maar niet voor de hand liggende hints\n• Let op de hints van anderen\n\n🕵️ Voor de bedrieger:\n• Let op alle hints\n• Geef generieke hints die voor veel woorden zouden kunnen werken\n• Raak niet in paniek!"
+      }
+    }
+  },
   "wordChange": {
     "title": "Stemming: Woord Wijzigen",
     "initiateButton": "Het geheime woord wijzigen",

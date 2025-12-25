@@ -5,6 +5,7 @@ import {useRouter} from 'next/navigation';
 import {useTranslations} from 'next-intl';
 import {Button, Card, Input} from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
+import Instructions from '@/components/ui/Instructions';
 import {validatePlayerName, validateRoomCode} from '@/lib/utils';
 import {Image} from "next/dist/client/image-component";
 
@@ -16,6 +17,7 @@ export default function Home() {
     const [isCreating, setIsCreating] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
     const [error, setError] = useState('');
+    const [showInstructions, setShowInstructions] = useState(false);
 
     const handleCreateGame = async () => {
         const validation = validatePlayerName(playerName);
@@ -184,12 +186,27 @@ export default function Home() {
                 </div>
 
                 {/* Footer */}
-                <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
+                <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 text-center space-y-3">
+                    {/* How to play button */}
+                    <button
+                        onClick={() => setShowInstructions(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                    >
+                        <span>📖</span>
+                        {t('instructions.howToPlay')}
+                    </button>
+
                     <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                         {t('home.footer')}
                     </p>
                 </div>
             </Card>
+
+            {/* Instructions Modal */}
+            <Instructions
+                isOpen={showInstructions}
+                onClose={() => setShowInstructions(false)}
+            />
         </div>
     );
 }
