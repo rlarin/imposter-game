@@ -217,6 +217,9 @@ export default function Home() {
           </button>
 
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('home.footer')}</p>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-2">
+            v{process.env.APP_VERSION}
+          </p>
         </div>
       </Card>
 
