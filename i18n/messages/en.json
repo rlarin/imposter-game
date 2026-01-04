@@ -49,6 +49,13 @@
     "clueRoundsDescription": "Number of clue rounds before voting",
     "rounds": "rounds"
   },
+  "roundEnd": {
+    "title": "Round {round} Complete",
+    "subtitle": "Round {current} of {total}",
+    "cluesTitle": "Clues from this round",
+    "nextRound": "Start Next Round",
+    "waitingForHost": "Waiting for host to start next round..."
+  },
   "game": {
     "connecting": "Connecting...",
     "loadingRoom": "Loading room...",
@@ -67,6 +74,7 @@
   },
   "clue": {
     "previousClues": "Previous clues",
+    "allClues": "All clues",
     "yourClue": "Your clue (one word only)",
     "placeholder": "Write your clue...",
     "submit": "Submit Clue",

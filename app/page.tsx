@@ -1,7 +1,7 @@
 'use client';
 
-import {useState} from 'react';
-import {useRouter} from 'next/navigation';
+import {useState, useEffect} from 'react';
+import {useRouter, useSearchParams} from 'next/navigation';
 import {useTranslations} from 'next-intl';
 import {Button, Card, Input} from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
@@ -11,6 +11,7 @@ import {Image} from "next/dist/client/image-component";
 
 export default function Home() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const t = useTranslations();
     const [playerName, setPlayerName] = useState('');
     const [roomCode, setRoomCode] = useState('');
@@ -18,6 +19,17 @@ export default function Home() {
     const [isJoining, setIsJoining] = useState(false);
     const [error, setError] = useState('');
     const [showInstructions, setShowInstructions] = useState(false);
+
+    // Check for room code in URL params
+    const urlRoomCode = searchParams.get('room') || searchParams.get('code') || '';
+    const hasUrlRoomCode = urlRoomCode.length > 0;
+
+    // Prefill room code from URL on mount
+    useEffect(() => {
+        if (urlRoomCode) {
+            setRoomCode(urlRoomCode.toUpperCase());
+        }
+    }, [urlRoomCode]);
 
     const handleCreateGame = async () => {
         const validation = validatePlayerName(playerName);
@@ -140,28 +152,32 @@ export default function Home() {
                         </div>
                     )}
 
-                    {/* Crear partida */}
-                    <Button
-                        onClick={handleCreateGame}
-                        isLoading={isCreating}
-                        disabled={!playerName.trim() || isJoining}
-                        className="w-full"
-                        size="lg"
-                    >
-                        {t('home.createGame')}
-                    </Button>
+                    {/* Crear partida - hide when joining via URL */}
+                    {!hasUrlRoomCode && (
+                        <>
+                            <Button
+                                onClick={handleCreateGame}
+                                isLoading={isCreating}
+                                disabled={!playerName.trim() || isJoining}
+                                className="w-full"
+                                size="lg"
+                            >
+                                {t('home.createGame')}
+                            </Button>
 
-                    {/* Separador */}
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-200 dark:border-gray-700"/>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-gray-800 text-gray-500">
-                {t('home.joinSeparator')}
-              </span>
-                        </div>
-                    </div>
+                            {/* Separador */}
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-200 dark:border-gray-700"/>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-4 bg-white dark:bg-gray-800 text-gray-500">
+                                        {t('home.joinSeparator')}
+                                    </span>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {/* Unirse a partida */}
                     <div className="space-y-3">

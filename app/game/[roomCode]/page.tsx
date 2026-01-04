@@ -8,6 +8,7 @@ import {usePartySocket} from '@/hooks/usePartySocket';
 import {Card} from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import {ClueRound, GameOver, ImposterGuess, LobbyView, VoteResults, VotingView, WordReveal} from '@/components/game';
+import RoundEnd from '@/components/game/RoundEnd';
 import WordChangeVoteModal from '@/components/game/WordChangeVoteModal';
 import WordChangeResult from '@/components/game/WordChangeResult';
 
@@ -81,7 +82,8 @@ export default function GamePage() {
         kickPlayer,
         updateSettings,
         initiateWordChange,
-        voteWordChange
+        voteWordChange,
+        nextRound
     } = usePartySocket({
         roomCode,
         onGameSettings: handleGameSettings,
@@ -198,6 +200,15 @@ export default function GamePage() {
                         onSubmitClue={submitClue}
                         onInitiateWordChange={initiateWordChange}
                         onVoteWordChange={voteWordChange}
+                    />
+                );
+
+            case 'round-end':
+                return (
+                    <RoundEnd
+                        room={room}
+                        isHost={isHost}
+                        onNextRound={nextRound}
                     />
                 );
 

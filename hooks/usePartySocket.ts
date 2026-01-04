@@ -214,6 +214,10 @@ export function usePartySocket({
     send({ type: 'vote-word-change', vote });
   }, [send]);
 
+  const nextRound = useCallback(() => {
+    send({ type: 'next-round' });
+  }, [send]);
+
   const result = useMemo(() => ({
     isConnected: connectionState === 'connected',
     isConnecting: connectionState === 'connecting',
@@ -229,8 +233,9 @@ export function usePartySocket({
     updateSettings,
     initiateWordChange,
     voteWordChange,
+    nextRound,
     send
-  }), [connectionState, join, leave, startGame, submitClue, castVote, guessWord, playAgain, resetGame, kickPlayer, updateSettings, initiateWordChange, voteWordChange, send]);
+  }), [connectionState, join, leave, startGame, submitClue, castVote, guessWord, playAgain, resetGame, kickPlayer, updateSettings, initiateWordChange, voteWordChange, nextRound, send]);
 
   return result;
 }

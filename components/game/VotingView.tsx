@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
 import { Button, Card, Timer, Avatar } from '@/components/ui';
+import CluesByPlayer from './CluesByPlayer';
 
 interface VotingViewProps {
   room: GameRoom;
@@ -22,9 +23,6 @@ export default function VotingView({ room, playerId, onVote }: VotingViewProps) 
   const votablePlayers = room.players.filter(
     p => p.isConnected && !p.isEliminated && p.id !== playerId
   );
-
-  // Pistas de la ronda actual
-  const currentClues = room.clues.filter(c => c.round === room.currentRound);
 
   const handleVote = () => {
     if (selectedId) {
@@ -47,39 +45,13 @@ export default function VotingView({ room, playerId, onVote }: VotingViewProps) 
         <Timer endTime={room.phaseEndsAt} />
       </div>
 
-      {/* Pistas de esta ronda */}
-      <Card>
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
-          {t('voting.cluesThisRound')}
-        </h3>
-        <div className="space-y-1.5 sm:space-y-2">
-          {currentClues.map((clue, i) => {
-            const player = room.players.find(p => p.id === clue.playerId);
-            return (
-              <div
-                key={i}
-                className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 dark:bg-gray-800 rounded-xl"
-              >
-                {player && (
-                  <Avatar
-                    name={player.name}
-                    color={player.avatarColor}
-                    size="sm"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm sm:text-base font-medium text-gray-900 dark:text-white truncate">
-                    {clue.playerName}
-                  </span>
-                </div>
-                <span className="text-base sm:text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                  &ldquo;{clue.word}&rdquo;
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
+      {/* All clues grouped by player */}
+      <CluesByPlayer
+        clues={room.clues}
+        players={room.players}
+        currentRound={room.currentRound}
+        title={t('clue.allClues')}
+      />
 
       {/* Votación */}
       {!hasVoted ? (

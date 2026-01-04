@@ -3,6 +3,7 @@ export type GamePhase =
   | 'lobby'           // Esperando jugadores
   | 'word-reveal'     // Mostrando palabra (o mensaje de impostor)
   | 'clue-round'      // Jugadores dan pistas
+  | 'round-end'       // Fin de ronda intermedia (esperando host para siguiente ronda)
   | 'voting'          // Votación para eliminar
   | 'vote-results'    // Mostrando resultados de votación
   | 'imposter-guess'  // El impostor intenta adivinar la palabra
@@ -102,7 +103,8 @@ export type ClientMessage =
   | { type: 'kick-player'; playerId: string }
   | { type: 'update-settings'; settings: Partial<GameSettings> }
   | { type: 'initiate-word-change' }
-  | { type: 'vote-word-change'; vote: boolean };
+  | { type: 'vote-word-change'; vote: boolean }
+  | { type: 'next-round' };
 
 // Mensajes del servidor al cliente
 export type ServerMessage =

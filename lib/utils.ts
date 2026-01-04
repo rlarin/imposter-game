@@ -126,7 +126,7 @@ export function formatTime(seconds: number): string {
 export function generateJoinUrl(roomCode: string): string {
     if (typeof window === 'undefined') return '';
     const baseUrl = window.location.origin;
-    return `${baseUrl}/game/${roomCode}`;
+    return `${baseUrl}/?room=${roomCode}`;
 }
 
 // Copia texto al portapapeles
