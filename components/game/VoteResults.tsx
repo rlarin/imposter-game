@@ -13,12 +13,12 @@ interface VoteResultsProps {
 export default function VoteResults({ room, playerId }: VoteResultsProps) {
   const t = useTranslations();
   const voteCounts = getVoteCounts(room);
-  const eliminatedPlayer = room.players.find(p => p.id === room.eliminatedPlayerId);
+  const eliminatedPlayer = room.players.find((p) => p.id === room.eliminatedPlayerId);
   const wasImposterCaught = room.eliminatedPlayerId === room.imposterId;
 
   // Ordenar jugadores por votos recibidos
   const sortedPlayers = [...room.players]
-    .filter(p => !p.isEliminated || p.id === room.eliminatedPlayerId)
+    .filter((p) => !p.isEliminated || p.id === room.eliminatedPlayerId)
     .sort((a, b) => (voteCounts[b.id] || 0) - (voteCounts[a.id] || 0));
 
   return (
@@ -35,9 +35,10 @@ export default function VoteResults({ room, playerId }: VoteResultsProps) {
               key={player.id}
               className={`
                 flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl transition-all
-                ${player.id === room.eliminatedPlayerId
-                  ? 'bg-red-100 dark:bg-red-900/30 ring-2 ring-red-500'
-                  : 'bg-gray-50 dark:bg-gray-800'
+                ${
+                  player.id === room.eliminatedPlayerId
+                    ? 'bg-red-100 dark:bg-red-900/30 ring-2 ring-red-500'
+                    : 'bg-gray-50 dark:bg-gray-800'
                 }
               `}
             >
@@ -52,16 +53,21 @@ export default function VoteResults({ room, playerId }: VoteResultsProps) {
                   {player.name}
                 </span>
                 {player.id === playerId && (
-                  <span className="text-[10px] sm:text-xs ml-1 sm:ml-2 text-gray-500">({t('player.you')})</span>
+                  <span className="text-[10px] sm:text-xs ml-1 sm:ml-2 text-gray-500">
+                    ({t('player.you')})
+                  </span>
                 )}
               </div>
-              <span className={`
+              <span
+                className={`
                 text-base sm:text-lg font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full
-                ${(voteCounts[player.id] || 0) > 0
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                ${
+                  (voteCounts[player.id] || 0) > 0
+                    ? 'bg-red-500 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
                 }
-              `}>
+              `}
+              >
                 {voteCounts[player.id] || 0}
               </span>
             </div>
@@ -70,13 +76,16 @@ export default function VoteResults({ room, playerId }: VoteResultsProps) {
 
         {/* Resultado */}
         {eliminatedPlayer ? (
-          <div className={`
+          <div
+            className={`
             p-3 sm:p-4 rounded-xl
-            ${wasImposterCaught
-              ? 'bg-green-100 dark:bg-green-900/30'
-              : 'bg-amber-100 dark:bg-amber-900/30'
+            ${
+              wasImposterCaught
+                ? 'bg-green-100 dark:bg-green-900/30'
+                : 'bg-amber-100 dark:bg-amber-900/30'
             }
-          `}>
+          `}
+          >
             <p className="text-base sm:text-lg font-bold mb-1 sm:mb-2">
               {t('results.eliminated', { name: eliminatedPlayer.name })}
             </p>

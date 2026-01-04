@@ -1,24 +1,25 @@
 // Game phase state machine
 export type GamePhase =
-  | 'lobby'           // Esperando jugadores
-  | 'word-reveal'     // Mostrando palabra (o mensaje de impostor)
-  | 'clue-round'      // Jugadores dan pistas
-  | 'voting'          // Votación para eliminar
-  | 'vote-results'    // Mostrando resultados de votación
-  | 'imposter-guess'  // El impostor intenta adivinar la palabra
-  | 'game-over';      // Fin del juego
+  | 'lobby' // Esperando jugadores
+  | 'word-reveal' // Mostrando palabra (o mensaje de impostor)
+  | 'clue-round' // Jugadores dan pistas
+  | 'round-end' // Fin de ronda intermedia (esperando host para siguiente ronda)
+  | 'voting' // Votación para eliminar
+  | 'vote-results' // Mostrando resultados de votación
+  | 'imposter-guess' // El impostor intenta adivinar la palabra
+  | 'game-over'; // Fin del juego
 
 // Jugador en la partida
 export interface Player {
-  id: string;              // ID único de conexión
-  name: string;            // Nombre visible
-  avatarColor: string;     // Color del avatar
-  isHost: boolean;         // Puede iniciar el juego
-  isImposter: boolean;     // Es el impostor (solo se revela al final)
-  isEliminated: boolean;   // Eliminado por votación
-  isConnected: boolean;    // Actualmente conectado
+  id: string; // ID único de conexión
+  name: string; // Nombre visible
+  avatarColor: string; // Color del avatar
+  isHost: boolean; // Puede iniciar el juego
+  isImposter: boolean; // Es el impostor (solo se revela al final)
+  isEliminated: boolean; // Eliminado por votación
+  isConnected: boolean; // Actualmente conectado
   hasSubmittedClue: boolean; // Ya envió pista esta ronda
-  hasVoted: boolean;       // Ya votó esta ronda
+  hasVoted: boolean; // Ya votó esta ronda
   hasVotedWordChange: boolean; // Ya votó en cambio de palabra
 }
 
@@ -45,42 +46,42 @@ export interface WordChangeVote {
 
 // Configuración del juego
 export interface GameSettings {
-  clueRounds: number;        // Número de rondas de pistas (1-3)
-  clueTimeLimit: number;     // Segundos por ronda de pistas
-  voteTimeLimit: number;     // Segundos para votar
-  category: string;          // Categoría de palabras
-  timerEnabled: boolean;     // Si el timer está habilitado
+  clueRounds: number; // Número de rondas de pistas (1-3)
+  clueTimeLimit: number; // Segundos por ronda de pistas
+  voteTimeLimit: number; // Segundos para votar
+  category: string; // Categoría de palabras
+  timerEnabled: boolean; // Si el timer está habilitado
   imposterHintEnabled: boolean; // Si el impostor recibe una pista
   trollModeEnabled: boolean; // Modo troll: posibilidad de que todos sean impostores
 }
 
 // Estado completo de la sala
 export interface GameRoom {
-  roomCode: string;           // Código de 6 caracteres
-  hostId: string;             // ID del host
-  players: Player[];          // Lista de jugadores
-  phase: GamePhase;           // Fase actual
-  settings: GameSettings;     // Configuración
+  roomCode: string; // Código de 6 caracteres
+  hostId: string; // ID del host
+  players: Player[]; // Lista de jugadores
+  phase: GamePhase; // Fase actual
+  settings: GameSettings; // Configuración
 
   // Estado del juego activo
-  currentRound: number;       // Ronda actual de pistas
-  secretWord: string | null;  // Palabra secreta
+  currentRound: number; // Ronda actual de pistas
+  secretWord: string | null; // Palabra secreta
   imposterHint: string | null; // Curated abstract hint for the imposter (Three-Filter Rule)
-  imposterHints: string[];    // Array de pistas para el impostor (puede recibir extras)
-  imposterId: string | null;  // Quién es el impostor (null si todos son impostores)
+  imposterHints: string[]; // Array de pistas para el impostor (puede recibir extras)
+  imposterId: string | null; // Quién es el impostor (null si todos son impostores)
   everyoneIsImposter: boolean; // Modo troll: todos son impostores
-  clues: Clue[];              // Pistas enviadas
-  votes: Vote[];              // Votos de la ronda actual
+  clues: Clue[]; // Pistas enviadas
+  votes: Vote[]; // Votos de la ronda actual
 
   // Estado de votación de cambio de palabra
-  wordChangeUsed: boolean;           // Si ya se usó el cambio de palabra esta ronda
-  wordChangeVotingActive: boolean;   // Si hay una votación activa
+  wordChangeUsed: boolean; // Si ya se usó el cambio de palabra esta ronda
+  wordChangeVotingActive: boolean; // Si hay una votación activa
   wordChangeVotes: WordChangeVote[]; // Votos del cambio de palabra
   wordChangeInitiatorId: string | null; // Quién inició la votación
 
   // Tiempos
-  createdAt: number;          // Timestamp de creación
-  phaseStartedAt: number;     // Cuándo empezó la fase actual
+  createdAt: number; // Timestamp de creación
+  phaseStartedAt: number; // Cuándo empezó la fase actual
   phaseEndsAt: number | null; // Cuándo termina la fase (para timer)
 
   // Resultado
@@ -102,7 +103,8 @@ export type ClientMessage =
   | { type: 'kick-player'; playerId: string }
   | { type: 'update-settings'; settings: Partial<GameSettings> }
   | { type: 'initiate-word-change' }
-  | { type: 'vote-word-change'; vote: boolean };
+  | { type: 'vote-word-change'; vote: boolean }
+  | { type: 'next-round' };
 
 // Mensajes del servidor al cliente
 export type ServerMessage =

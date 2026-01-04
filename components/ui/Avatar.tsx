@@ -15,12 +15,12 @@ export default function Avatar({
   size = 'md',
   isConnected = true,
   isEliminated = false,
-  className = ''
+  className = '',
 }: AvatarProps) {
   const sizes = {
     sm: 'w-8 h-8 text-sm',
     md: 'w-12 h-12 text-lg',
-    lg: 'w-16 h-16 text-2xl'
+    lg: 'w-16 h-16 text-2xl',
   };
 
   const initial = name.charAt(0).toUpperCase();

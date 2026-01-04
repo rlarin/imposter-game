@@ -90,8 +90,18 @@ export default function Instructions({ isOpen, onClose }: InstructionsProps) {
             onClick={handleClose}
             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
-            <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -106,8 +116,8 @@ export default function Instructions({ isOpen, onClose }: InstructionsProps) {
                 index === currentStep
                   ? 'bg-indigo-500'
                   : index < currentStep
-                  ? 'bg-indigo-300 dark:bg-indigo-700'
-                  : 'bg-gray-200 dark:bg-gray-600'
+                    ? 'bg-indigo-300 dark:bg-indigo-700'
+                    : 'bg-gray-200 dark:bg-gray-600'
               }`}
             />
           ))}
@@ -141,11 +151,7 @@ export default function Instructions({ isOpen, onClose }: InstructionsProps) {
           >
             {t('prev')}
           </Button>
-          <Button
-            variant="primary"
-            onClick={handleNext}
-            className="flex-1"
-          >
+          <Button variant="primary" onClick={handleNext} className="flex-1">
             {currentStep === steps.length - 1 ? t('gotIt') : t('next')}
           </Button>
         </div>

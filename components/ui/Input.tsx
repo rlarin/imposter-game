@@ -33,18 +33,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             placeholder-gray-400 dark:placeholder-gray-500
             transition-colors duration-200
             focus:outline-none focus:ring-2 focus:ring-offset-1
-            ${error
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-              : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500'
+            ${
+              error
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500'
             }
             disabled:opacity-50 disabled:cursor-not-allowed
             ${className}
           `}
           {...props}
         />
-        {error && (
-          <p className="mt-1.5 text-sm text-red-500">{error}</p>
-        )}
+        {error && <p className="mt-1.5 text-sm text-red-500">{error}</p>}
         {helperText && !error && (
           <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">{helperText}</p>
         )}

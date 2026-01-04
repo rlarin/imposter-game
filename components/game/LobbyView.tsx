@@ -5,7 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
 import { Button, Card } from '@/components/ui';
-import { generateJoinUrl, copyToClipboard } from '@/lib/utils';
+import { copyToClipboard, generateJoinUrl } from '@/lib/utils';
 import { useLocale } from '@/lib/i18n-context';
 import { getWordCategories } from '@/lib/words/index';
 import PlayerList from './PlayerList';
@@ -23,7 +23,7 @@ export default function LobbyView({
   playerId,
   onStartGame,
   onKickPlayer,
-  onUpdateSettings
+  onUpdateSettings,
 }: LobbyViewProps) {
   const t = useTranslations();
   const { locale } = useLocale();
@@ -31,7 +31,7 @@ export default function LobbyView({
   const selectedCategory = room.settings.category;
 
   const isHost = playerId === room.hostId;
-  const canStart = room.players.filter(p => p.isConnected).length >= 3;
+  const canStart = room.players.filter((p) => p.isConnected).length >= 3;
   const joinUrl = generateJoinUrl(room.roomCode);
   const wordCategories = getWordCategories(locale);
   const timerEnabled = room.settings.timerEnabled ?? true;
@@ -86,7 +86,15 @@ export default function LobbyView({
     }
   };
 
+  const handleClueRoundsChange = (rounds: number) => {
+    if (isHost) {
+      onUpdateSettings({ clueRounds: rounds });
+    }
+  };
+
   const timeOptions = [1, 2, 3, 5]; // Minutes
+  const roundOptions = [2, 3, 5]; // Number of rounds before voting
+  const currentClueRounds = room.settings.clueRounds ?? 2;
 
   return (
     <div className="space-y-6">
@@ -95,7 +103,9 @@ export default function LobbyView({
         <div className="flex items-center justify-between gap-4">
           {/* Room Code Section */}
           <div className="flex-1 text-center">
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">{t('lobby.roomCode')}</p>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
+              {t('lobby.roomCode')}
+            </p>
             <div className="flex items-center justify-center gap-2 sm:gap-3">
               <span className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-widest text-indigo-600 dark:text-indigo-400">
                 {room.roomCode}
@@ -106,28 +116,43 @@ export default function LobbyView({
                 title={t('lobby.copyCode')}
               >
                 {copied ? (
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
                   </svg>
                 )}
               </button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCopyLink}
-              className="mt-2 sm:mt-3"
-            >
+            <Button variant="ghost" size="sm" onClick={handleCopyLink} className="mt-2 sm:mt-3">
               {copied ? t('common.copied') : t('lobby.copyLink')}
             </Button>
           </div>
 
           {/* QR Code Section */}
-          <div className="flex-shrink-0 text-center">
+          <div className="shrink-0 text-center">
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
               {t('lobby.scanToJoin')}
             </p>
@@ -148,7 +173,7 @@ export default function LobbyView({
       <Card>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0 mb-3 sm:mb-4">
           <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
-            {t('lobby.players')} ({room.players.filter(p => p.isConnected).length}/15)
+            {t('lobby.players')} ({room.players.filter((p) => p.isConnected).length}/15)
           </h3>
           {!canStart && (
             <span className="text-xs text-amber-600 dark:text-amber-400">
@@ -179,9 +204,10 @@ export default function LobbyView({
               disabled={!isHost}
               className={`
                 p-2 sm:p-3 rounded-xl text-center transition-all
-                ${selectedCategory === category.id
-                  ? 'bg-indigo-100 dark:bg-indigo-900/50 ring-2 ring-indigo-500'
-                  : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                ${
+                  selectedCategory === category.id
+                    ? 'bg-indigo-100 dark:bg-indigo-900/50 ring-2 ring-indigo-500'
+                    : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }
                 ${!isHost ? 'cursor-default' : 'cursor-pointer'}
               `}
@@ -197,7 +223,8 @@ export default function LobbyView({
 
       {/* Configuración del temporizador */}
       <Card>
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
+        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
+          <span>⏳</span>
           {t('lobby.timerSettings')}
         </h3>
 
@@ -206,7 +233,8 @@ export default function LobbyView({
           <span className="text-sm text-gray-700 dark:text-gray-300">
             {timerEnabled ? t('lobby.timerEnabled') : t('lobby.timerDisabled')}
           </span>
-          {isHost && <button
+          {isHost && (
+            <button
               onClick={handleTimerToggle}
               disabled={!isHost}
               className={`
@@ -214,14 +242,15 @@ export default function LobbyView({
               ${timerEnabled ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'}
               ${!isHost ? 'cursor-default opacity-60' : 'cursor-pointer'}
             `}
-          >
-            <span
+            >
+              <span
                 className={`
                 inline-block h-4 w-4 transform rounded-full bg-white transition-transform
                 ${timerEnabled ? 'translate-x-6' : 'translate-x-1'}
               `}
-            />
-          </button>}
+              />
+            </button>
+          )}
         </div>
 
         {/* Selector de tiempo (solo si el timer está habilitado) */}
@@ -238,9 +267,10 @@ export default function LobbyView({
                   disabled={!isHost}
                   className={`
                     flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all
-                    ${currentTimeMinutes === minutes
-                      ? 'bg-indigo-100 dark:bg-indigo-900/50 ring-2 ring-indigo-500 text-indigo-700 dark:text-indigo-300'
-                      : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ${
+                      currentTimeMinutes === minutes
+                        ? 'bg-indigo-100 dark:bg-indigo-900/50 ring-2 ring-indigo-500 text-indigo-700 dark:text-indigo-300'
+                        : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }
                     ${!isHost ? 'cursor-default' : 'cursor-pointer'}
                   `}
@@ -252,23 +282,22 @@ export default function LobbyView({
           </div>
         )}
 
-        {!isHost && (
-          <p className="text-xs text-gray-500 mt-3 text-center">
-            {t('lobby.hostOnly')}
-          </p>
-        )}
-      </Card>
+        {!isHost && <p className="text-xs text-gray-500 mt-3 text-center">{t('lobby.hostOnly')}</p>}
 
-      {/* Configuración de pista para el impostor */}
-      <Card>
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
+        <hr className="my-4" />
+
+        {/* Configuración de pista para el impostor */}
+        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
+          <span>🕵️‍♀️</span>
           {t('lobby.imposterHintSettings')}
         </h3>
 
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <span className="text-sm text-gray-700 dark:text-gray-300">
-              {imposterHintEnabled ? t('lobby.imposterHintEnabled') : t('lobby.imposterHintDisabled')}
+              {imposterHintEnabled
+                ? t('lobby.imposterHintEnabled')
+                : t('lobby.imposterHintDisabled')}
             </span>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {t('lobby.imposterHintDescription')}
@@ -292,15 +321,11 @@ export default function LobbyView({
           )}
         </div>
 
-        {!isHost && (
-          <p className="text-xs text-gray-500 mt-3 text-center">
-            {t('lobby.hostOnly')}
-          </p>
-        )}
-      </Card>
+        {!isHost && <p className="text-xs text-gray-500 mt-3 text-center">{t('lobby.hostOnly')}</p>}
 
-      {/* Modo Troll */}
-      <Card>
+        <hr className="my-4" />
+        {/* Configuración de modo troll */}
+
         <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
           <span>🎭</span>
           {t('lobby.trollModeSettings')}
@@ -333,11 +358,41 @@ export default function LobbyView({
           )}
         </div>
 
-        {!isHost && (
-          <p className="text-xs text-gray-500 mt-3 text-center">
-            {t('lobby.hostOnly')}
-          </p>
-        )}
+        {!isHost && <p className="text-xs text-gray-500 mt-3 text-center">{t('lobby.hostOnly')}</p>}
+
+        <hr className="my-4" />
+        {/* Configuración de rondas de pistas */}
+
+        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
+          <span>📢️</span>
+          {t('lobby.clueRoundsSettings')}
+        </h3>
+
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
+          {t('lobby.clueRoundsDescription')}
+        </p>
+        <div className="flex gap-2">
+          {roundOptions.map((rounds) => (
+            <button
+              key={rounds}
+              onClick={() => handleClueRoundsChange(rounds)}
+              disabled={!isHost}
+              className={`
+                                flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all
+                                ${
+                                  currentClueRounds === rounds
+                                    ? 'bg-indigo-100 dark:bg-indigo-900/50 ring-2 ring-indigo-500 text-indigo-700 dark:text-indigo-300'
+                                    : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }
+                                ${!isHost ? 'cursor-default' : 'cursor-pointer'}
+                            `}
+            >
+              {rounds} {t('lobby.rounds')}
+            </button>
+          ))}
+        </div>
+
+        {!isHost && <p className="text-xs text-gray-500 mt-3 text-center">{t('lobby.hostOnly')}</p>}
       </Card>
 
       {/* Botón iniciar */}
@@ -348,15 +403,17 @@ export default function LobbyView({
           size="lg"
           className="w-full"
         >
-          {canStart ? t('lobby.startGame') : t('lobby.waitingPlayers', { current: room.players.filter(p => p.isConnected).length })}
+          {canStart
+            ? t('lobby.startGame')
+            : t('lobby.waitingPlayers', {
+                current: room.players.filter((p) => p.isConnected).length,
+              })}
         </Button>
       )}
 
       {!isHost && (
         <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-          <p className="text-gray-600 dark:text-gray-400">
-            {t('lobby.waitingHost')}
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">{t('lobby.waitingHost')}</p>
         </div>
       )}
     </div>

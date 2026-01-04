@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
-import { Button, Input, Card, Timer } from '@/components/ui';
+import { Button, Card, Input, Timer } from '@/components/ui';
 import { validateClue } from '@/lib/utils';
 import { useLocale } from '@/lib/i18n-context';
 import { getCategoryById } from '@/lib/words/index';
 import PlayerList from './PlayerList';
 import WordChangeVoteModal from './WordChangeVoteModal';
+import CluesByPlayer from './CluesByPlayer';
 
 interface ClueRoundProps {
   room: GameRoom;
@@ -18,23 +19,27 @@ interface ClueRoundProps {
   onVoteWordChange: (vote: boolean) => void;
 }
 
-export default function ClueRound({ room, playerId, onSubmitClue, onInitiateWordChange, onVoteWordChange }: ClueRoundProps) {
+export default function ClueRound({
+  room,
+  playerId,
+  onSubmitClue,
+  onInitiateWordChange,
+  onVoteWordChange,
+}: ClueRoundProps) {
   const t = useTranslations();
   const { locale } = useLocale();
   const [clue, setClue] = useState('');
   const [error, setError] = useState('');
 
-  const currentPlayer = room.players.find(p => p.id === playerId);
+  const currentPlayer = room.players.find((p) => p.id === playerId);
   const hasSubmitted = currentPlayer?.hasSubmittedClue ?? false;
   const isImposter = currentPlayer?.isImposter ?? false;
   const category = getCategoryById(locale, room.settings.category);
 
   // Word change voting state
-  const canInitiateWordChange = !room.wordChangeUsed && !room.wordChangeVotingActive && !currentPlayer?.isEliminated;
+  const canInitiateWordChange =
+    !room.wordChangeUsed && !room.wordChangeVotingActive && !currentPlayer?.isEliminated;
   const showVotingModal = room.wordChangeVotingActive;
-
-  // Pistas de rondas anteriores
-  const previousClues = room.clues.filter(c => c.round < room.currentRound);
 
   const handleSubmit = () => {
     const trimmed = clue.trim();
@@ -81,7 +86,9 @@ export default function ClueRound({ room, playerId, onSubmitClue, onInitiateWord
       {/* Palabra secreta (si no es impostor) */}
       {!isImposter && room.secretWord && (
         <Card className="text-center bg-indigo-50 dark:bg-indigo-900/20">
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('game.secretWord')}</p>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            {t('game.secretWord')}
+          </p>
           <p className="text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
             {room.secretWord}
           </p>
@@ -102,7 +109,10 @@ export default function ClueRound({ room, playerId, onSubmitClue, onInitiateWord
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
                 {room.imposterHints.map((hint, i) => (
-                  <span key={i} className="text-lg font-bold text-amber-800 dark:text-amber-300 uppercase px-2 py-1 bg-amber-200/50 dark:bg-amber-800/30 rounded">
+                  <span
+                    key={i}
+                    className="text-lg font-bold text-amber-800 dark:text-amber-300 uppercase px-2 py-1 bg-amber-200/50 dark:bg-amber-800/30 rounded"
+                  >
                     {hint}
                   </span>
                 ))}
@@ -112,24 +122,14 @@ export default function ClueRound({ room, playerId, onSubmitClue, onInitiateWord
         </Card>
       )}
 
-      {/* Pistas de rondas anteriores */}
-      {previousClues.length > 0 && (
-        <Card>
-          <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
-            {t('clue.previousClues')}
-          </h3>
-          <div className="flex flex-wrap gap-1.5 sm:gap-2">
-            {previousClues.map((c, i) => (
-              <span
-                key={i}
-                className="px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs sm:text-sm"
-              >
-                <span className="font-medium">{c.playerName}:</span>{' '}
-                <span className="text-indigo-600 dark:text-indigo-400">{c.word}</span>
-              </span>
-            ))}
-          </div>
-        </Card>
+      {/* All clues grouped by player */}
+      {room.clues.length > 0 && (
+        <CluesByPlayer
+          clues={room.clues}
+          players={room.players}
+          currentRound={room.currentRound}
+          title={t('clue.allClues')}
+        />
       )}
 
       {/* Input de pista */}
@@ -160,9 +160,7 @@ export default function ClueRound({ room, playerId, onSubmitClue, onInitiateWord
           <p className="text-sm sm:text-base font-semibold text-green-600 dark:text-green-400">
             {t('clue.submitted')}
           </p>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            {t('clue.waiting')}
-          </p>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('clue.waiting')}</p>
         </Card>
       )}
 
@@ -172,7 +170,7 @@ export default function ClueRound({ room, playerId, onSubmitClue, onInitiateWord
           {t('lobby.players')}
         </h3>
         <PlayerList
-          players={room.players.filter(p => p.isConnected && !p.isEliminated)}
+          players={room.players.filter((p) => p.isConnected && !p.isEliminated)}
           currentPlayerId={playerId}
           hostId={room.hostId}
         />
@@ -207,11 +205,7 @@ export default function ClueRound({ room, playerId, onSubmitClue, onInitiateWord
 
       {/* Modal de votación de cambio de palabra */}
       {showVotingModal && (
-        <WordChangeVoteModal
-          room={room}
-          playerId={playerId}
-          onVote={onVoteWordChange}
-        />
+        <WordChangeVoteModal room={room} playerId={playerId} onVote={onVoteWordChange} />
       )}
     </div>
   );

@@ -16,7 +16,7 @@ export default function ImposterGuess({ room, playerId, onGuess }: ImposterGuess
   const [guess, setGuess] = useState('');
 
   const isImposter = playerId === room.imposterId;
-  const imposterPlayer = room.players.find(p => p.id === room.imposterId);
+  const imposterPlayer = room.players.find((p) => p.id === room.imposterId);
 
   const handleSubmit = () => {
     if (guess.trim()) {
@@ -71,7 +71,9 @@ export default function ImposterGuess({ room, playerId, onGuess }: ImposterGuess
             <Timer endTime={room.phaseEndsAt} className="mb-4 sm:mb-6" />
 
             <div className="p-3 sm:p-4 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('imposterGuess.wordWas')}</p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {t('imposterGuess.wordWas')}
+              </p>
               <p className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
                 {room.secretWord}
               </p>

@@ -13,13 +13,13 @@ interface WordChangeVoteModalProps {
 export default function WordChangeVoteModal({ room, playerId, onVote }: WordChangeVoteModalProps) {
   const t = useTranslations();
 
-  const currentPlayer = room.players.find(p => p.id === playerId);
+  const currentPlayer = room.players.find((p) => p.id === playerId);
   const hasVoted = currentPlayer?.hasVotedWordChange ?? false;
-  const initiator = room.players.find(p => p.id === room.wordChangeInitiatorId);
+  const initiator = room.players.find((p) => p.id === room.wordChangeInitiatorId);
 
   // Contar votos emitidos
-  const activePlayers = room.players.filter(p => p.isConnected && !p.isEliminated);
-  const votedCount = activePlayers.filter(p => p.hasVotedWordChange).length;
+  const activePlayers = room.players.filter((p) => p.isConnected && !p.isEliminated);
+  const votedCount = activePlayers.filter((p) => p.hasVotedWordChange).length;
   const totalPlayers = activePlayers.length;
 
   if (!room.wordChangeVotingActive) return null;
@@ -40,9 +40,7 @@ export default function WordChangeVoteModal({ room, playerId, onVote }: WordChan
           </p>
 
           {/* Descripción */}
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            {t('wordChange.description')}
-          </p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">{t('wordChange.description')}</p>
 
           {/* Aviso para el impostor */}
           <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
@@ -59,18 +57,10 @@ export default function WordChangeVoteModal({ room, playerId, onVote }: WordChan
           {/* Botones de voto o confirmación */}
           {!hasVoted ? (
             <div className="flex gap-3">
-              <Button
-                onClick={() => onVote(true)}
-                variant="primary"
-                className="flex-1"
-              >
+              <Button onClick={() => onVote(true)} variant="primary" className="flex-1">
                 {t('wordChange.voteYes')}
               </Button>
-              <Button
-                onClick={() => onVote(false)}
-                variant="secondary"
-                className="flex-1"
-              >
+              <Button onClick={() => onVote(false)} variant="secondary" className="flex-1">
                 {t('wordChange.voteNo')}
               </Button>
             </div>

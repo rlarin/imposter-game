@@ -33,13 +33,10 @@ export async function POST(request: Request) {
     return NextResponse.json({
       playerId,
       roomCode: roomCode.toUpperCase(),
-      message: 'Listo para unirse'
+      message: 'Listo para unirse',
     });
   } catch (error) {
     console.error('Error joining room:', error);
-    return NextResponse.json(
-      { error: 'Error al unirse a la sala' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al unirse a la sala' }, { status: 500 });
   }
 }

@@ -44,7 +44,17 @@
     "trollModeSettings": "Modo Troll",
     "trollModeEnabled": "Modo troll activado",
     "trollModeDisabled": "Modo troll desactivado",
-    "trollModeDescription": "20% de probabilidad de que TODOS sean impostores en una ronda"
+    "trollModeDescription": "20% de probabilidad de que TODOS sean impostores en una ronda",
+    "clueRoundsSettings": "Rondas de Pistas",
+    "clueRoundsDescription": "Número de rondas de pistas antes de votar",
+    "rounds": "rondas"
+  },
+  "roundEnd": {
+    "title": "Ronda {round} Completada",
+    "subtitle": "Ronda {current} de {total}",
+    "cluesTitle": "Pistas de esta ronda",
+    "nextRound": "Iniciar Siguiente Ronda",
+    "waitingForHost": "Esperando a que el anfitrión inicie la siguiente ronda..."
   },
   "game": {
     "connecting": "Conectando...",
@@ -64,6 +74,7 @@
   },
   "clue": {
     "previousClues": "Pistas anteriores",
+    "allClues": "Todas las pistas",
     "yourClue": "Tu pista (una sola palabra)",
     "placeholder": "Escribe tu pista...",
     "submit": "Enviar Pista",

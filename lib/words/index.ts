@@ -10,20 +10,20 @@ import { WordCategory, WordHintsMap } from '../types';
 const wordsByLocale: Record<Locale, WordCategory[]> = {
   es: esWordCategories,
   en: enWordCategories,
-  nl: nlWordCategories
+  nl: nlWordCategories,
 };
 
 const hintsByLocale: Record<Locale, WordHintsMap> = {
   es: esWordHints,
   en: enWordHints,
-  nl: nlWordHints
+  nl: nlWordHints,
 };
 
 // Category names for "all" category in each locale
 const allCategoryNames: Record<Locale, string> = {
   es: 'Todas',
   en: 'All',
-  nl: 'Alle'
+  nl: 'Alle',
 };
 
 export function getWordCategories(locale: Locale = 'en'): WordCategory[] {
@@ -34,7 +34,7 @@ export function getWordCategories(locale: Locale = 'en'): WordCategory[] {
     id: 'all',
     name: allCategoryNames[locale] || allCategoryNames.en,
     emoji: '🎲',
-    words: [] // Words are selected dynamically from all categories
+    words: [], // Words are selected dynamically from all categories
   };
 
   return [allCategory, ...categories];
@@ -49,18 +49,18 @@ export function getRandomWord(locale: Locale, categoryId: string): string | null
     return randomCategory.words[Math.floor(Math.random() * randomCategory.words.length)];
   }
 
-  const category = categories.find(c => c.id === categoryId);
+  const category = categories.find((c) => c.id === categoryId);
   if (!category) return null;
   return category.words[Math.floor(Math.random() * category.words.length)];
 }
 
 export function getCategoryById(locale: Locale, categoryId: string): WordCategory | undefined {
   const categories = wordsByLocale[locale] || wordsByLocale.es;
-  return categories.find(c => c.id === categoryId);
+  return categories.find((c) => c.id === categoryId);
 }
 
 export function getAllCategoryIds(): string[] {
-  return esWordCategories.map(c => c.id);
+  return esWordCategories.map((c) => c.id);
 }
 
 /**

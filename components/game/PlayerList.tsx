@@ -22,7 +22,7 @@ export default function PlayerList({
   voteCounts = {},
   onKick,
   isHost = false,
-  isLobby = false
+  isLobby = false,
 }: PlayerListProps) {
   const t = useTranslations();
 
@@ -33,9 +33,10 @@ export default function PlayerList({
           key={player.id}
           className={`
             flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl transition-all
-            ${player.id === currentPlayerId
-              ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-2 ring-indigo-500'
-              : 'bg-gray-50 dark:bg-gray-800/50'
+            ${
+              player.id === currentPlayerId
+                ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-2 ring-indigo-500'
+                : 'bg-gray-50 dark:bg-gray-800/50'
             }
             ${player.isEliminated ? 'opacity-50' : ''}
           `}
@@ -50,7 +51,9 @@ export default function PlayerList({
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-              <span className={`text-sm sm:text-base font-medium truncate ${!player.isConnected ? 'text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+              <span
+                className={`text-sm sm:text-base font-medium truncate ${!player.isConnected ? 'text-gray-400' : 'text-gray-900 dark:text-white'}`}
+              >
                 {player.name}
               </span>
               {player.id === currentPlayerId && (
@@ -70,7 +73,9 @@ export default function PlayerList({
             )}
 
             {!player.isConnected && !player.isEliminated && (
-              <span className="text-[10px] sm:text-xs text-gray-400">{t('player.disconnected')}</span>
+              <span className="text-[10px] sm:text-xs text-gray-400">
+                {t('player.disconnected')}
+              </span>
             )}
           </div>
 
@@ -85,12 +90,18 @@ export default function PlayerList({
 
             {/* Indicador de pista enviada */}
             {player.hasSubmittedClue && (
-              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full" title={t('player.clueSubmitted')} />
+              <span
+                className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full"
+                title={t('player.clueSubmitted')}
+              />
             )}
 
             {/* Indicador de voto emitido */}
             {player.hasVoted && (
-              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full" title={t('player.hasVoted')} />
+              <span
+                className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full"
+                title={t('player.hasVoted')}
+              />
             )}
 
             {/* Botón de expulsar (solo host, solo en lobby) */}
@@ -100,8 +111,18 @@ export default function PlayerList({
                 className="text-gray-400 hover:text-red-500 transition-colors p-0.5 sm:p-1"
                 title={t('player.kick')}
               >
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             )}
