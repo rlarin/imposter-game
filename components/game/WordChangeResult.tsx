@@ -10,7 +10,11 @@ interface WordChangeResultProps {
   onClose: () => void;
 }
 
-export default function WordChangeResult({ passed, newHintsCount, onClose }: WordChangeResultProps) {
+export default function WordChangeResult({
+  passed,
+  newHintsCount,
+  onClose,
+}: WordChangeResultProps) {
   const t = useTranslations();
   const [visible, setVisible] = useState(true);
 
@@ -61,9 +65,7 @@ export default function WordChangeResult({ passed, newHintsCount, onClose }: Wor
             </>
           )}
 
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            {t('wordChange.autoClose')}
-          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{t('wordChange.autoClose')}</p>
         </div>
       </Card>
     </div>

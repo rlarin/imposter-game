@@ -25,13 +25,10 @@ export async function POST(request: Request) {
     return NextResponse.json({
       roomCode: room.roomCode,
       playerId,
-      message: 'Sala creada exitosamente'
+      message: 'Sala creada exitosamente',
     });
   } catch (error) {
     console.error('Error creating room:', error);
-    return NextResponse.json(
-      { error: 'Error al crear la sala' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear la sala' }, { status: 500 });
   }
 }

@@ -12,14 +12,14 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     const variants = {
       default: 'bg-white dark:bg-gray-800 shadow-sm',
       elevated: 'bg-white dark:bg-gray-800 shadow-lg',
-      outlined: 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700'
+      outlined: 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700',
     };
 
     const paddings = {
       none: '',
       sm: 'p-3 sm:p-4',
       md: 'p-4 sm:p-6',
-      lg: 'p-5 sm:p-8'
+      lg: 'p-5 sm:p-8',
     };
 
     return (

@@ -11,7 +11,7 @@ import nlMessages from '@/i18n/messages/nl.json';
 const messages = {
   es: esMessages,
   en: enMessages,
-  nl: nlMessages
+  nl: nlMessages,
 };
 
 export function IntlProvider({ children }: { children: ReactNode }) {

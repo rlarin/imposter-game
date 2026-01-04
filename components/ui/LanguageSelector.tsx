@@ -8,7 +8,10 @@ interface LanguageSelectorProps {
   className?: string;
 }
 
-export default function LanguageSelector({ variant = 'default', className = '' }: LanguageSelectorProps) {
+export default function LanguageSelector({
+  variant = 'default',
+  className = '',
+}: LanguageSelectorProps) {
   const { locale, setLocale } = useLocale();
 
   if (variant === 'compact') {
@@ -35,9 +38,10 @@ export default function LanguageSelector({ variant = 'default', className = '' }
           onClick={() => setLocale(loc)}
           className={`
             px-3 py-1.5 rounded-lg text-sm font-medium transition-all
-            ${locale === loc
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+            ${
+              locale === loc
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
             }
           `}
           title={localeNames[loc]}

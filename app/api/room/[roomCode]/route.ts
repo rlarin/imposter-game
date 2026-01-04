@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import { validateRoomCode } from '@/lib/utils';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ roomCode: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ roomCode: string }> }) {
   try {
     const { roomCode } = await params;
 
@@ -23,7 +20,7 @@ export async function GET(
 
     return NextResponse.json({
       exists: true,
-      roomCode: roomCode.toUpperCase()
+      roomCode: roomCode.toUpperCase(),
     });
   } catch (error) {
     console.error('Error checking room:', error);

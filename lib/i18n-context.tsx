@@ -39,19 +39,19 @@ function getInitialLocale(): Locale {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<I18nState>({
     locale: defaultLocale,
-    isLoaded: false
+    isLoaded: false,
   });
 
   // Initialize locale on mount (client-side only) - single setState call
   useEffect(() => {
     setState({
       locale: getInitialLocale(),
-      isLoaded: true
+      isLoaded: true,
     });
   }, []);
 
   const setLocale = (newLocale: Locale) => {
-    setState(prev => ({ ...prev, locale: newLocale }));
+    setState((prev) => ({ ...prev, locale: newLocale }));
     localStorage.setItem('locale', newLocale);
   };
 

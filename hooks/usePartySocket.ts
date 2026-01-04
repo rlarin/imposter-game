@@ -33,7 +33,7 @@ export function usePartySocket({
   onRoomClosed,
   onWordChangeVoteStarted,
   onWordChangeVoteCast,
-  onWordChangeVoteResult
+  onWordChangeVoteResult,
 }: UsePartySocketOptions) {
   const socketRef = useRef<PartySocket | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
@@ -49,7 +49,7 @@ export function usePartySocket({
     onRoomClosed,
     onWordChangeVoteStarted,
     onWordChangeVoteCast,
-    onWordChangeVoteResult
+    onWordChangeVoteResult,
   });
 
   // Actualizar refs cuando cambian los callbacks
@@ -64,9 +64,20 @@ export function usePartySocket({
       onRoomClosed,
       onWordChangeVoteStarted,
       onWordChangeVoteCast,
-      onWordChangeVoteResult
+      onWordChangeVoteResult,
     };
-  }, [onRoomState, onGameSettings, onError, onPlayerJoined, onPlayerLeft, onPhaseChanged, onRoomClosed, onWordChangeVoteStarted, onWordChangeVoteCast, onWordChangeVoteResult]);
+  }, [
+    onRoomState,
+    onGameSettings,
+    onError,
+    onPlayerJoined,
+    onPlayerLeft,
+    onPhaseChanged,
+    onRoomClosed,
+    onWordChangeVoteStarted,
+    onWordChangeVoteCast,
+    onWordChangeVoteResult,
+  ]);
 
   // Conectar al servidor
   useEffect(() => {
@@ -74,7 +85,7 @@ export function usePartySocket({
 
     const socket = new PartySocket({
       host: PARTYKIT_HOST,
-      room: roomCode
+      room: roomCode,
     });
 
     socketRef.current = socket;
@@ -127,7 +138,10 @@ export function usePartySocket({
             break;
 
           case 'word-change-vote-started':
-            callbacksRef.current.onWordChangeVoteStarted?.(message.initiatorId, message.initiatorName);
+            callbacksRef.current.onWordChangeVoteStarted?.(
+              message.initiatorId,
+              message.initiatorName
+            );
             break;
 
           case 'word-change-vote-cast':
@@ -135,7 +149,10 @@ export function usePartySocket({
             break;
 
           case 'word-change-vote-result':
-            callbacksRef.current.onWordChangeVoteResult?.(message.passed, message.newHintsCount || 0);
+            callbacksRef.current.onWordChangeVoteResult?.(
+              message.passed,
+              message.newHintsCount || 0
+            );
             break;
         }
       } catch (error) {
@@ -166,29 +183,44 @@ export function usePartySocket({
   }, []);
 
   // Acciones del juego
-  const join = useCallback((playerName: string) => {
-    send({ type: 'join', playerName });
-  }, [send]);
+  const join = useCallback(
+    (playerName: string) => {
+      send({ type: 'join', playerName });
+    },
+    [send]
+  );
 
   const leave = useCallback(() => {
     send({ type: 'leave' });
   }, [send]);
 
-  const startGame = useCallback((category: string, locale?: string) => {
-    send({ type: 'start-game', category, locale });
-  }, [send]);
+  const startGame = useCallback(
+    (category: string, locale?: string) => {
+      send({ type: 'start-game', category, locale });
+    },
+    [send]
+  );
 
-  const submitClue = useCallback((word: string) => {
-    send({ type: 'submit-clue', word });
-  }, [send]);
+  const submitClue = useCallback(
+    (word: string) => {
+      send({ type: 'submit-clue', word });
+    },
+    [send]
+  );
 
-  const castVote = useCallback((targetId: string) => {
-    send({ type: 'cast-vote', targetId });
-  }, [send]);
+  const castVote = useCallback(
+    (targetId: string) => {
+      send({ type: 'cast-vote', targetId });
+    },
+    [send]
+  );
 
-  const guessWord = useCallback((word: string) => {
-    send({ type: 'imposter-guess', word });
-  }, [send]);
+  const guessWord = useCallback(
+    (word: string) => {
+      send({ type: 'imposter-guess', word });
+    },
+    [send]
+  );
 
   const playAgain = useCallback(() => {
     send({ type: 'play-again' });
@@ -198,44 +230,72 @@ export function usePartySocket({
     send({ type: 'reset-game' });
   }, [send]);
 
-  const kickPlayer = useCallback((playerId: string) => {
-    send({ type: 'kick-player', playerId });
-  }, [send]);
+  const kickPlayer = useCallback(
+    (playerId: string) => {
+      send({ type: 'kick-player', playerId });
+    },
+    [send]
+  );
 
-  const updateSettings = useCallback((settings: Partial<GameRoom['settings']>) => {
-    send({ type: 'update-settings', settings });
-  }, [send]);
+  const updateSettings = useCallback(
+    (settings: Partial<GameRoom['settings']>) => {
+      send({ type: 'update-settings', settings });
+    },
+    [send]
+  );
 
   const initiateWordChange = useCallback(() => {
     send({ type: 'initiate-word-change' });
   }, [send]);
 
-  const voteWordChange = useCallback((vote: boolean) => {
-    send({ type: 'vote-word-change', vote });
-  }, [send]);
+  const voteWordChange = useCallback(
+    (vote: boolean) => {
+      send({ type: 'vote-word-change', vote });
+    },
+    [send]
+  );
 
   const nextRound = useCallback(() => {
     send({ type: 'next-round' });
   }, [send]);
 
-  const result = useMemo(() => ({
-    isConnected: connectionState === 'connected',
-    isConnecting: connectionState === 'connecting',
-    join,
-    leave,
-    startGame,
-    submitClue,
-    castVote,
-    guessWord,
-    playAgain,
-    resetGame,
-    kickPlayer,
-    updateSettings,
-    initiateWordChange,
-    voteWordChange,
-    nextRound,
-    send
-  }), [connectionState, join, leave, startGame, submitClue, castVote, guessWord, playAgain, resetGame, kickPlayer, updateSettings, initiateWordChange, voteWordChange, nextRound, send]);
+  const result = useMemo(
+    () => ({
+      isConnected: connectionState === 'connected',
+      isConnecting: connectionState === 'connecting',
+      join,
+      leave,
+      startGame,
+      submitClue,
+      castVote,
+      guessWord,
+      playAgain,
+      resetGame,
+      kickPlayer,
+      updateSettings,
+      initiateWordChange,
+      voteWordChange,
+      nextRound,
+      send,
+    }),
+    [
+      connectionState,
+      join,
+      leave,
+      startGame,
+      submitClue,
+      castVote,
+      guessWord,
+      playAgain,
+      resetGame,
+      kickPlayer,
+      updateSettings,
+      initiateWordChange,
+      voteWordChange,
+      nextRound,
+      send,
+    ]
+  );
 
   return result;
 }
