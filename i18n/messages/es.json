@@ -44,7 +44,10 @@
     "trollModeSettings": "Modo Troll",
     "trollModeEnabled": "Modo troll activado",
     "trollModeDisabled": "Modo troll desactivado",
-    "trollModeDescription": "20% de probabilidad de que TODOS sean impostores en una ronda"
+    "trollModeDescription": "20% de probabilidad de que TODOS sean impostores en una ronda",
+    "clueRoundsSettings": "Rondas de Pistas",
+    "clueRoundsDescription": "Número de rondas de pistas antes de votar",
+    "rounds": "rondas"
   },
   "game": {
     "connecting": "Conectando...",
