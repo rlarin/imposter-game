@@ -34,84 +34,9 @@ interface RoomMetrics {
   lastHeartbeat: number;
 }
 
-// KV Helper functions (using Vercel KV REST API directly)
+// KV Helper functions constants
 const KV_PREFIX = 'rooms:';
 const ACTIVE_ROOMS_SET = 'active-rooms';
-
-async function kvRegisterRoom(metrics: RoomMetrics): Promise<void> {
-  const kvUrl = process.env.KV_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN;
-
-  if (!kvUrl || !kvToken) {
-    console.log('[KV] Redis not configured, skipping registration');
-    return;
-  }
-
-  try {
-    const key = `${KV_PREFIX}${metrics.roomCode}`;
-    const data: RoomMetrics = {
-      ...metrics,
-      lastHeartbeat: Date.now(),
-    };
-
-    // Set room data using Upstash REST API (POST with JSON body)
-    const setResponse = await fetch(kvUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${kvToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(['SET', key, JSON.stringify(data)]),
-    });
-    console.log('[KV] SET response:', setResponse.status);
-
-    // Add to active rooms set
-    const saddResponse = await fetch(kvUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${kvToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(['SADD', ACTIVE_ROOMS_SET, metrics.roomCode]),
-    });
-    console.log('[KV] SADD response:', saddResponse.status);
-  } catch (error) {
-    console.error('[KV] Error registering room:', error);
-  }
-}
-
-async function kvUnregisterRoom(roomCode: string): Promise<void> {
-  const kvUrl = process.env.KV_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN;
-
-  if (!kvUrl || !kvToken) return;
-
-  try {
-    const key = `${KV_PREFIX}${roomCode}`;
-
-    // Delete room data
-    await fetch(kvUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${kvToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(['DEL', key]),
-    });
-
-    // Remove from active rooms set
-    await fetch(kvUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${kvToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(['SREM', ACTIVE_ROOMS_SET, roomCode]),
-    });
-  } catch (error) {
-    console.error('[KV] Error unregistering room:', error);
-  }
-}
 
 export default class GameServer implements Party.Server {
     room: GameRoom | null = null;
@@ -791,25 +716,90 @@ export default class GameServer implements Party.Server {
     }
 
     // Report room metrics to KV (non-blocking)
-    private reportToKV() {
+    private async reportToKV() {
         if (!this.room) return;
 
-        const host = this.room.players.find(p => p.id === this.room?.hostId);
-        const connectedPlayers = this.room.players.filter(p => p.isConnected).length;
+        const kvUrl = this.party.env.KV_REST_API_URL as string | undefined;
+        const kvToken = this.party.env.KV_REST_API_TOKEN as string | undefined;
 
-        kvRegisterRoom({
-            roomCode: this.room.roomCode,
-            hostName: host?.name || 'Unknown',
-            playerCount: this.room.players.length,
-            connectedPlayers,
-            phase: this.room.phase,
-            createdAt: this.room.createdAt,
-            lastHeartbeat: Date.now(),
-        }).catch(console.error);
+        if (!kvUrl || !kvToken) {
+            console.log('[KV] Redis not configured, skipping. URL:', !!kvUrl, 'Token:', !!kvToken);
+            return;
+        }
+
+        try {
+            const host = this.room.players.find(p => p.id === this.room?.hostId);
+            const connectedPlayers = this.room.players.filter(p => p.isConnected).length;
+
+            const key = `${KV_PREFIX}${this.room.roomCode}`;
+            const data: RoomMetrics = {
+                roomCode: this.room.roomCode,
+                hostName: host?.name || 'Unknown',
+                playerCount: this.room.players.length,
+                connectedPlayers,
+                phase: this.room.phase,
+                createdAt: this.room.createdAt,
+                lastHeartbeat: Date.now(),
+            };
+
+            // Set room data using Upstash REST API
+            const setResponse = await fetch(kvUrl, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${kvToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(['SET', key, JSON.stringify(data)]),
+            });
+            console.log('[KV] SET response:', setResponse.status);
+
+            // Add to active rooms set
+            const saddResponse = await fetch(kvUrl, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${kvToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(['SADD', ACTIVE_ROOMS_SET, this.room.roomCode]),
+            });
+            console.log('[KV] SADD response:', saddResponse.status);
+        } catch (error) {
+            console.error('[KV] Error registering room:', error);
+        }
     }
 
     // Unregister room from KV (non-blocking)
-    private unregisterFromKV() {
-        kvUnregisterRoom(this.party.id).catch(console.error);
+    private async unregisterFromKV() {
+        const kvUrl = this.party.env.KV_REST_API_URL as string | undefined;
+        const kvToken = this.party.env.KV_REST_API_TOKEN as string | undefined;
+
+        if (!kvUrl || !kvToken) return;
+
+        try {
+            const key = `${KV_PREFIX}${this.party.id}`;
+
+            // Delete room data
+            await fetch(kvUrl, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${kvToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(['DEL', key]),
+            });
+
+            // Remove from active rooms set
+            await fetch(kvUrl, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${kvToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(['SREM', ACTIVE_ROOMS_SET, this.party.id]),
+            });
+            console.log('[KV] Room unregistered:', this.party.id);
+        } catch (error) {
+            console.error('[KV] Error unregistering room:', error);
+        }
     }
 }
