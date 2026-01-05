@@ -74,14 +74,21 @@ export async function unregisterRoom(roomCode: string): Promise<void> {
 
 // Get all active rooms with stats
 export async function getActiveRooms(): Promise<AdminStats> {
+  console.log('[Redis] Config check:', {
+    url: process.env.KV_REST_API_URL ? 'set' : 'missing',
+    token: process.env.KV_REST_API_TOKEN ? 'set' : 'missing',
+  });
+
   const redis = getRedis();
   if (!redis) {
+    console.log('[Redis] Redis client not initialized');
     return { totalRooms: 0, totalPlayers: 0, rooms: [] };
   }
 
   try {
     // Get all room codes from the set
     const roomCodes = await redis.smembers(ACTIVE_ROOMS_SET);
+    console.log('[Redis] Room codes found:', roomCodes);
 
     if (!roomCodes || roomCodes.length === 0) {
       return { totalRooms: 0, totalPlayers: 0, rooms: [] };
