@@ -42,7 +42,10 @@ async function kvRegisterRoom(metrics: RoomMetrics): Promise<void> {
   const kvUrl = process.env.KV_REST_API_URL;
   const kvToken = process.env.KV_REST_API_TOKEN;
 
-  if (!kvUrl || !kvToken) return;
+  if (!kvUrl || !kvToken) {
+    console.log('[KV] Redis not configured, skipping registration');
+    return;
+  }
 
   try {
     const key = `${KV_PREFIX}${metrics.roomCode}`;
@@ -51,15 +54,27 @@ async function kvRegisterRoom(metrics: RoomMetrics): Promise<void> {
       lastHeartbeat: Date.now(),
     };
 
-    // Set room data
-    await fetch(`${kvUrl}/set/${key}/${encodeURIComponent(JSON.stringify(data))}`, {
-      headers: { Authorization: `Bearer ${kvToken}` },
+    // Set room data using Upstash REST API (POST with JSON body)
+    const setResponse = await fetch(kvUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${kvToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(['SET', key, JSON.stringify(data)]),
     });
+    console.log('[KV] SET response:', setResponse.status);
 
     // Add to active rooms set
-    await fetch(`${kvUrl}/sadd/${ACTIVE_ROOMS_SET}/${metrics.roomCode}`, {
-      headers: { Authorization: `Bearer ${kvToken}` },
+    const saddResponse = await fetch(kvUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${kvToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(['SADD', ACTIVE_ROOMS_SET, metrics.roomCode]),
     });
+    console.log('[KV] SADD response:', saddResponse.status);
   } catch (error) {
     console.error('[KV] Error registering room:', error);
   }
@@ -75,13 +90,23 @@ async function kvUnregisterRoom(roomCode: string): Promise<void> {
     const key = `${KV_PREFIX}${roomCode}`;
 
     // Delete room data
-    await fetch(`${kvUrl}/del/${key}`, {
-      headers: { Authorization: `Bearer ${kvToken}` },
+    await fetch(kvUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${kvToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(['DEL', key]),
     });
 
     // Remove from active rooms set
-    await fetch(`${kvUrl}/srem/${ACTIVE_ROOMS_SET}/${roomCode}`, {
-      headers: { Authorization: `Bearer ${kvToken}` },
+    await fetch(kvUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${kvToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(['SREM', ACTIVE_ROOMS_SET, roomCode]),
     });
   } catch (error) {
     console.error('[KV] Error unregistering room:', error);
