@@ -1,5 +1,5 @@
 import type * as Party from 'partykit/server';
-import {ClientMessage, GameRoom, GameSettings, Player, ServerMessage} from '@/lib/types';
+import {ClientMessage, GameRoom, GameSettings, GamePhase, Player, ServerMessage} from '@/lib/types';
 import {
   advancePhase,
   allCluesSubmitted,
@@ -22,6 +22,71 @@ import {generatePlayerId, getRandomAvatarColor} from '@/lib/utils';
 
 // Mapa de conexiones a IDs de jugador
 type ConnectionPlayerMap = Map<string, string>;
+
+// KV Room Metrics interface
+interface RoomMetrics {
+  roomCode: string;
+  hostName: string;
+  playerCount: number;
+  connectedPlayers: number;
+  phase: GamePhase;
+  createdAt: number;
+  lastHeartbeat: number;
+}
+
+// KV Helper functions (using Vercel KV REST API directly)
+const KV_PREFIX = 'rooms:';
+const ACTIVE_ROOMS_SET = 'active-rooms';
+
+async function kvRegisterRoom(metrics: RoomMetrics): Promise<void> {
+  const kvUrl = process.env.KV_REST_API_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN;
+
+  if (!kvUrl || !kvToken) return;
+
+  try {
+    const key = `${KV_PREFIX}${metrics.roomCode}`;
+    const data: RoomMetrics = {
+      ...metrics,
+      lastHeartbeat: Date.now(),
+    };
+
+    // Set room data
+    await fetch(`${kvUrl}/set/${key}/${encodeURIComponent(JSON.stringify(data))}`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+    });
+
+    // Add to active rooms set
+    await fetch(`${kvUrl}/sadd/${ACTIVE_ROOMS_SET}/${metrics.roomCode}`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+    });
+  } catch (error) {
+    console.error('[KV] Error registering room:', error);
+  }
+}
+
+async function kvUnregisterRoom(roomCode: string): Promise<void> {
+  const kvUrl = process.env.KV_REST_API_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN;
+
+  if (!kvUrl || !kvToken) return;
+
+  try {
+    const key = `${KV_PREFIX}${roomCode}`;
+
+    // Delete room data
+    await fetch(`${kvUrl}/del/${key}`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+    });
+
+    // Remove from active rooms set
+    await fetch(`${kvUrl}/srem/${ACTIVE_ROOMS_SET}/${roomCode}`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+    });
+  } catch (error) {
+    console.error('[KV] Error unregistering room:', error);
+  }
+}
 
 export default class GameServer implements Party.Server {
     room: GameRoom | null = null;
@@ -63,6 +128,7 @@ export default class GameServer implements Party.Server {
                 type: 'room-closed',
                 reason: 'host-left'
             });
+            this.unregisterFromKV();
             this.room = null;
             this.connectionPlayers.clear();
             this.clearPhaseTimer();
@@ -82,11 +148,14 @@ export default class GameServer implements Party.Server {
         // Si no quedan jugadores conectados, limpiar la sala
         const connectedPlayers = this.room.players.filter(p => p.isConnected);
         if (connectedPlayers.length === 0) {
+            this.unregisterFromKV();
             this.room = null;
             this.clearPhaseTimer();
         } else {
             // Broadcast updated state to all remaining players
             this.broadcastState();
+            // Report updated stats to KV
+            this.reportToKV();
         }
     }
 
@@ -257,6 +326,9 @@ export default class GameServer implements Party.Server {
 
         // Broadcast state to ALL players (including the new one)
         this.broadcastState();
+
+        // Report to KV
+        this.reportToKV();
     }
 
     // Manejar jugador saliendo
@@ -270,6 +342,7 @@ export default class GameServer implements Party.Server {
                 type: 'room-closed',
                 reason: 'host-left'
             });
+            this.unregisterFromKV();
             this.room = null;
             this.connectionPlayers.clear();
             this.clearPhaseTimer();
@@ -286,6 +359,8 @@ export default class GameServer implements Party.Server {
         // Broadcast updated state to remaining players
         if (this.room.players.length > 0) {
             this.broadcastState();
+            // Report updated stats to KV
+            this.reportToKV();
         }
     }
 
@@ -316,6 +391,9 @@ export default class GameServer implements Party.Server {
 
         this.room = newRoom;
         this.broadcastState();
+
+        // Report phase change to KV
+        this.reportToKV();
 
         // Programar avance automático de fase
         this.schedulePhaseAdvance();
@@ -419,6 +497,9 @@ export default class GameServer implements Party.Server {
         this.clearPhaseTimer();
         this.room = playAgain(this.room);
         this.broadcastState();
+
+        // Report phase change to KV
+        this.reportToKV();
     }
 
     // Reiniciar juego (desde cualquier fase)
@@ -443,6 +524,9 @@ export default class GameServer implements Party.Server {
         this.clearPhaseTimer();
         this.room = playAgain(this.room);
         this.broadcastState();
+
+        // Report phase change to KV
+        this.reportToKV();
     }
 
     // Actualizar configuración
@@ -521,6 +605,9 @@ export default class GameServer implements Party.Server {
 
         // Broadcast updated state to remaining players
         this.broadcastState();
+
+        // Report updated stats to KV
+        this.reportToKV();
     }
 
     // Iniciar votación de cambio de palabra
@@ -676,5 +763,28 @@ export default class GameServer implements Party.Server {
                 });
             }
         }
+    }
+
+    // Report room metrics to KV (non-blocking)
+    private reportToKV() {
+        if (!this.room) return;
+
+        const host = this.room.players.find(p => p.id === this.room?.hostId);
+        const connectedPlayers = this.room.players.filter(p => p.isConnected).length;
+
+        kvRegisterRoom({
+            roomCode: this.room.roomCode,
+            hostName: host?.name || 'Unknown',
+            playerCount: this.room.players.length,
+            connectedPlayers,
+            phase: this.room.phase,
+            createdAt: this.room.createdAt,
+            lastHeartbeat: Date.now(),
+        }).catch(console.error);
+    }
+
+    // Unregister room from KV (non-blocking)
+    private unregisterFromKV() {
+        kvUnregisterRoom(this.party.id).catch(console.error);
     }
 }
