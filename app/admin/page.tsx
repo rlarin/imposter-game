@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui';
 
 interface RoomMetrics {
@@ -16,6 +16,7 @@ interface RoomMetrics {
 interface AdminStats {
   totalRooms: number;
   totalPlayers: number;
+  totalRoomsCreated: number;
   rooms: RoomMetrics[];
 }
 
@@ -137,7 +138,7 @@ export default function AdminPage() {
         </Card>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <Card className="text-center">
             <p className="text-sm text-gray-500 uppercase tracking-wide">Active Rooms</p>
             <p className="text-4xl font-bold text-indigo-600 mt-2">{stats?.totalRooms || 0}</p>
@@ -146,17 +147,21 @@ export default function AdminPage() {
             <p className="text-sm text-gray-500 uppercase tracking-wide">Total Players</p>
             <p className="text-4xl font-bold text-purple-600 mt-2">{stats?.totalPlayers || 0}</p>
           </Card>
+          <Card className="text-center col-span-2 sm:col-span-1">
+            <p className="text-sm text-gray-500 uppercase tracking-wide">Rooms Created</p>
+            <p className="text-4xl font-bold text-pink-600 mt-2">{stats?.totalRoomsCreated || 0}</p>
+          </Card>
         </div>
 
         {/* Rooms List */}
         <Card>
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Active Rooms</h2>
           {stats?.rooms && stats.rooms.length > 0 ? (
-            <div className="space-y-3">
+            <div className="max-h-96 overflow-y-auto pr-2 space-y-3">
               {stats.rooms.map((room) => (
                 <div
                   key={room.roomCode}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg flex-shrink-0"
                 >
                   <div className="flex items-center gap-3">
                     <div className="font-mono text-lg font-bold text-indigo-600">

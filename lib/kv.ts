@@ -16,11 +16,13 @@ export interface RoomMetrics {
 export interface AdminStats {
   totalRooms: number;
   totalPlayers: number;
+  totalRoomsCreated: number;
   rooms: RoomMetrics[];
 }
 
 const ROOMS_PREFIX = 'rooms:';
 const ACTIVE_ROOMS_SET = 'active-rooms';
+const TOTAL_ROOMS_CREATED = 'total-rooms-created';
 const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
 
 // Check if Redis is configured
@@ -36,6 +38,32 @@ function getRedis(): Redis | null {
     url: process.env.KV_REST_API_URL!,
     token: process.env.KV_REST_API_TOKEN!,
   });
+}
+
+// Increment total rooms created counter
+export async function incrementTotalRoomsCreated(): Promise<void> {
+  const redis = getRedis();
+  if (!redis) return;
+
+  try {
+    await redis.incr(TOTAL_ROOMS_CREATED);
+  } catch (error) {
+    console.error('[Redis] Error incrementing total rooms created:', error);
+  }
+}
+
+// Get total rooms created
+export async function getTotalRoomsCreated(): Promise<number> {
+  const redis = getRedis();
+  if (!redis) return 0;
+
+  try {
+    const count = await redis.get<number>(TOTAL_ROOMS_CREATED);
+    return count ?? 0;
+  } catch (error) {
+    console.error('[Redis] Error getting total rooms created:', error);
+    return 0;
+  }
 }
 
 // Register or update a room in the registry
@@ -82,7 +110,7 @@ export async function getActiveRooms(): Promise<AdminStats> {
   const redis = getRedis();
   if (!redis) {
     console.log('[Redis] Redis client not initialized');
-    return { totalRooms: 0, totalPlayers: 0, rooms: [] };
+    return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated: 0, rooms: [] };
   }
 
   try {
@@ -91,7 +119,7 @@ export async function getActiveRooms(): Promise<AdminStats> {
     console.log('[Redis] Room codes found:', roomCodes);
 
     if (!roomCodes || roomCodes.length === 0) {
-      return { totalRooms: 0, totalPlayers: 0, rooms: [] };
+      return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated: 0, rooms: [] };
     }
 
     // Fetch all room data
@@ -131,15 +159,17 @@ export async function getActiveRooms(): Promise<AdminStats> {
 
     // Calculate totals
     const totalPlayers = rooms.reduce((sum, room) => sum + room.playerCount, 0);
+    const totalRoomsCreated = await getTotalRoomsCreated();
 
     return {
       totalRooms: rooms.length,
       totalPlayers,
+      totalRoomsCreated,
       rooms: rooms.sort((a, b) => b.createdAt - a.createdAt),
     };
   } catch (error) {
     console.error('[Redis] Error getting active rooms:', error);
-    return { totalRooms: 0, totalPlayers: 0, rooms: [] };
+    return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated: 0, rooms: [] };
   }
 }
 

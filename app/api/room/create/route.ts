@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRoom } from '@/lib/game-logic';
 import { validatePlayerName } from '@/lib/utils';
+import { incrementTotalRoomsCreated, registerRoom } from '@/lib/kv';
 
 export async function POST(request: Request) {
   try {
@@ -19,8 +20,19 @@ export async function POST(request: Request) {
     // Crear sala
     const { room, playerId } = createRoom(playerName.trim());
 
-    // TODO: Guardar sala en Vercel KV cuando esté configurado
-    // Por ahora, la sala se mantiene solo en PartyKit
+    // Guardar sala en Upstash Redis
+    await registerRoom({
+      roomCode: room.roomCode,
+      hostName: playerName.trim(),
+      playerCount: room.players.length,
+      connectedPlayers: room.players.filter((p) => p.isConnected).length,
+      phase: room.phase,
+      createdAt: Date.now(),
+      lastHeartbeat: Date.now(),
+    });
+
+    // Incrementar contador de salas creadas
+    await incrementTotalRoomsCreated();
 
     return NextResponse.json({
       roomCode: room.roomCode,
