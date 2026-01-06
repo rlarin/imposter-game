@@ -215,6 +215,14 @@
       }
     }
   },
+  "qrScanner": {
+    "title": "Escanear QR",
+    "instructions": "Apunta tu camara al codigo QR de la sala",
+    "starting": "Iniciando camara...",
+    "permissionDenied": "Permiso de camara denegado. Por favor permite el acceso.",
+    "cameraError": "No se pudo acceder a la camara",
+    "invalidCode": "Codigo QR invalido"
+  },
   "video": {
     "title": "Video Chat",
     "toggle": "Alternar video",

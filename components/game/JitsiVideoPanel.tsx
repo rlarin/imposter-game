@@ -60,13 +60,9 @@ export default function JitsiVideoPanel({
       {!isMinimized && (
         <div className="flex items-center justify-between px-3 py-2 bg-gray-800 border-b border-gray-700">
           <div className="flex items-center gap-2">
-            <span className="text-white/80 text-sm font-medium">
-              {t('video.title')}
-            </span>
+            <span className="text-white/80 text-sm font-medium">{t('video.title')}</span>
             {isLoading && (
-              <span className="text-xs text-gray-400 animate-pulse">
-                {t('video.connecting')}
-              </span>
+              <span className="text-xs text-gray-400 animate-pulse">{t('video.connecting')}</span>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -79,7 +75,12 @@ export default function JitsiVideoPanel({
               title="Open in new tab"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
               </svg>
             </a>
             <button
@@ -88,7 +89,12 @@ export default function JitsiVideoPanel({
               title={t('video.minimize')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
             <button
@@ -97,7 +103,12 @@ export default function JitsiVideoPanel({
               title={t('video.close')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -120,7 +131,12 @@ export default function JitsiVideoPanel({
           title={t('video.expand')}
         >
           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+            />
           </svg>
         </button>
       )}

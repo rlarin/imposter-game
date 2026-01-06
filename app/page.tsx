@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Card, Input } from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import Instructions from '@/components/ui/Instructions';
+import QRScanner from '@/components/ui/QRScanner';
 import { validatePlayerName, validateRoomCode } from '@/lib/utils';
 import { Image } from 'next/dist/client/image-component';
 
@@ -19,6 +20,7 @@ export default function Home() {
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState('');
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   // Check for room code in URL params
   const urlRoomCode = searchParams.get('room') || searchParams.get('code') || '';
@@ -110,6 +112,11 @@ export default function Home() {
     }
   };
 
+  const handleQRScan = (scannedRoomCode: string) => {
+    setRoomCode(scannedRoomCode);
+    setShowScanner(false);
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
       {/* Top bar */}
@@ -197,13 +204,22 @@ export default function Home() {
 
           {/* Unirse a partida */}
           <div className="space-y-3">
-            <Input
-              placeholder={t('home.roomCodePlaceholder')}
-              value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-              maxLength={6}
-              className="text-center font-mono text-lg tracking-widest"
-            />
+            <div className="flex gap-2">
+              <Input
+                placeholder={t('home.roomCodePlaceholder')}
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                maxLength={6}
+                className="text-center font-mono text-lg tracking-widest flex-1"
+              />
+              <button
+                onClick={() => setShowScanner(true)}
+                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={t('lobby.scanToJoin')}
+              >
+                📸
+              </button>
+            </div>
             <Button
               onClick={handleJoinGame}
               isLoading={isJoining}
@@ -237,6 +253,9 @@ export default function Home() {
 
       {/* Instructions Modal */}
       <Instructions isOpen={showInstructions} onClose={() => setShowInstructions(false)} />
+
+      {/* QR Scanner Modal */}
+      <QRScanner isOpen={showScanner} onClose={() => setShowScanner(false)} onScan={handleQRScan} />
     </div>
   );
 }
