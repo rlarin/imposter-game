@@ -1,132 +1,148 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Html5Qrcode } from 'html5-qrcode';
 
 interface QRScannerProps {
   isOpen: boolean;
   onClose: () => void;
-  onScan: (roomCode: string) => void;
 }
 
-export default function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
+export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
   const t = useTranslations();
+  const router = useRouter();
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const isScannerRunningRef = useRef(false);
 
-  const startScannerInElement = async (elementId: string) => {
-    // Check if HTTPS or localhost
-    const isSecureContext =
-      window.location.protocol === 'https:' ||
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1';
-    if (!isSecureContext) {
-      setError('Camera access requires HTTPS (or localhost for development)');
-      return;
-    }
-
-    setIsStarting(true);
-    setError(null);
-
-    try {
-      // Check if the element exists
-      const readerElement = document.getElementById(elementId);
-      console.log('QR reader element:', readerElement);
-      if (!readerElement) {
-        console.error('QR reader element not found');
-        setError(t('qrScanner.cameraError'));
-        setIsStarting(false);
+  const startScannerInElement = useCallback(
+    async (elementId: string) => {
+      // Check if HTTPS or localhost
+      const isSecureContext =
+        window.location.protocol === 'https:' ||
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
+      if (!isSecureContext) {
+        setError('Camera access requires HTTPS (or localhost for development)');
         return;
       }
 
-      // Stop existing scanner if any
-      if (scannerRef.current) {
-        await scannerRef.current.stop().catch(() => {});
-      }
+      setIsStarting(true);
+      setError(null);
 
-      const scanner = new Html5Qrcode(elementId);
-      scannerRef.current = scanner;
-
-      // Get available cameras
-      const cameras = await Html5Qrcode.getCameras();
-      console.log('Available cameras:', cameras);
-
-      if (!cameras || cameras.length === 0) {
-        setError(t('qrScanner.cameraError'));
-        setIsStarting(false);
-        return;
-      }
-
-      // Use the back camera if available
-      const cameraId = cameras.length > 1 ? cameras[cameras.length - 1].id : cameras[0].id;
-      console.log('Using camera:', cameraId);
-
-      await scanner.start(
-        cameraId,
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          disableFlip: false,
-        },
-        (decodedText) => {
-          console.log('QR Code detected:', decodedText);
-
-          // Extract room code from URL or use as-is
-          let roomCode = decodedText;
-
-          // Check if it's a URL with room code
-          const urlMatch = decodedText.match(/\/game\/([A-Z0-9]{6})/i);
-          setError(urlMatch?.toString() || 'empty');
-          if (urlMatch) {
-            roomCode = urlMatch[1].toUpperCase();
-          } else if (/^[A-Z0-9]{6}$/i.test(decodedText)) {
-            roomCode = decodedText.toUpperCase();
-          } else {
-            console.warn('Invalid QR code format:', decodedText);
-            setError(t('qrScanner.invalidCode'));
-            return;
-          }
-
-          console.log('Valid room code extracted:', roomCode);
-          // Stop scanner and return result
-          scanner
-            .stop()
-            .then(() => {
-              onScan(roomCode);
-              onClose();
-            })
-            .catch((err) => {
-              console.error('Error stopping scanner:', err);
-            });
-        },
-        (errorMessage) => {
-          // Ignore scan errors (no QR found)
-          console.debug('QR scan attempt:', errorMessage);
-        }
-      );
-
-      console.log('Scanner started successfully');
-      setIsStarting(false);
-    } catch (err) {
-      setIsStarting(false);
-      console.error('Scanner error:', err);
-      if (err instanceof Error) {
-        if (err.message.includes('Permission') || err.message.includes('NotAllowedError')) {
-          setError(t('qrScanner.permissionDenied'));
-        } else if (err.message.includes('NotFoundError') || err.message.includes('no camera')) {
+      try {
+        // Check if the element exists
+        const readerElement = document.getElementById(elementId);
+        console.log('QR reader element:', readerElement);
+        if (!readerElement) {
+          console.error('QR reader element not found');
           setError(t('qrScanner.cameraError'));
-        } else {
-          setError(`${t('qrScanner.cameraError')}: ${err.message}`);
+          setIsStarting(false);
+          return;
         }
-      } else {
-        setError(t('qrScanner.cameraError'));
+
+        // Stop existing scanner if any
+        if (scannerRef.current && isScannerRunningRef.current) {
+          isScannerRunningRef.current = false;
+          await scannerRef.current.stop().catch(() => {});
+        }
+
+        const scanner = new Html5Qrcode(elementId);
+        scannerRef.current = scanner;
+
+        // Get available cameras
+        const cameras = await Html5Qrcode.getCameras();
+        console.log('Available cameras:', cameras);
+
+        if (!cameras || cameras.length === 0) {
+          setError(t('qrScanner.cameraError'));
+          setIsStarting(false);
+          return;
+        }
+
+        // Use the back camera if available
+        const cameraId = cameras.length > 1 ? cameras[cameras.length - 1].id : cameras[0].id;
+        console.log('Using camera:', cameraId);
+
+        await scanner.start(
+          cameraId,
+          {
+            fps: 10,
+            qrbox: { width: 300, height: 300 },
+            disableFlip: false,
+          },
+          (decodedText) => {
+            console.log('QR Code detected:', decodedText);
+
+            // Extract room code from URL or use as-is
+            let roomCode = decodedText;
+
+            // Check if it's a URL with room code
+            // Support both formats: /game/CODE and ?room=CODE
+            let urlMatch = decodedText.match(/\/game\/([A-Z0-9]{6})/i);
+            if (urlMatch) {
+              roomCode = urlMatch[1].toUpperCase();
+            } else {
+              // Try query parameter format
+              urlMatch = decodedText.match(/[?&]room=([A-Z0-9]{6})/i);
+              if (urlMatch) {
+                roomCode = urlMatch[1].toUpperCase();
+              } else if (/^[A-Z0-9]{6}$/i.test(decodedText)) {
+                roomCode = decodedText.toUpperCase();
+              } else {
+                console.warn('Invalid QR code format:', decodedText);
+                setError(t('qrScanner.invalidCode'));
+                return;
+              }
+            }
+
+            console.log('Valid room code extracted:', roomCode);
+            // Stop scanner and return result
+            if (isScannerRunningRef.current) {
+              isScannerRunningRef.current = false;
+              scanner
+                .stop()
+                .then(() => {
+                  // Navigate to room with room code parameter
+                  router.push(`/?room=${roomCode}`);
+                  onClose();
+                })
+                .catch((err) => {
+                  console.error('Error stopping scanner:', err);
+                });
+            }
+          },
+          (errorMessage) => {
+            // Ignore scan errors (no QR found)
+            console.debug('QR scan attempt:', errorMessage);
+          }
+        );
+
+        console.log('Scanner started successfully');
+        setIsStarting(false);
+        isScannerRunningRef.current = true;
+      } catch (err) {
+        setIsStarting(false);
+        console.error('Scanner error:', err);
+        if (err instanceof Error) {
+          if (err.message.includes('Permission') || err.message.includes('NotAllowedError')) {
+            setError(t('qrScanner.permissionDenied'));
+          } else if (err.message.includes('NotFoundError') || err.message.includes('no camera')) {
+            setError(t('qrScanner.cameraError'));
+          } else {
+            setError(`${t('qrScanner.cameraError')}: ${err.message}`);
+          }
+        } else {
+          setError(t('qrScanner.cameraError'));
+        }
       }
-    }
-  };
+    },
+    [t, router, onClose]
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -141,15 +157,17 @@ export default function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
 
     return () => {
       clearTimeout(timeoutId);
-      if (scannerRef.current) {
+      if (scannerRef.current && isScannerRunningRef.current) {
+        isScannerRunningRef.current = false;
         scannerRef.current.stop().catch(() => {});
         scannerRef.current = null;
       }
     };
-  }, [isOpen, isFullscreen, onClose, onScan, t]);
+  }, [isOpen, isFullscreen, startScannerInElement]);
 
   const handleClose = () => {
-    if (scannerRef.current) {
+    if (scannerRef.current && isScannerRunningRef.current) {
+      isScannerRunningRef.current = false;
       scannerRef.current.stop().catch(() => {});
       scannerRef.current = null;
     }
