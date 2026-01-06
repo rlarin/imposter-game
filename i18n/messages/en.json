@@ -215,6 +215,14 @@
       }
     }
   },
+  "qrScanner": {
+    "title": "Scan QR Code",
+    "instructions": "Point your camera at a room QR code",
+    "starting": "Starting camera...",
+    "permissionDenied": "Camera permission denied. Please allow camera access.",
+    "cameraError": "Could not access camera",
+    "invalidCode": "Invalid QR code"
+  },
   "video": {
     "title": "Video Chat",
     "toggle": "Toggle video",

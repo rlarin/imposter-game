@@ -204,6 +204,14 @@
       }
     }
   },
+  "qrScanner": {
+    "title": "QR Code Scannen",
+    "instructions": "Richt je camera op een kamer QR code",
+    "starting": "Camera starten...",
+    "permissionDenied": "Camera toegang geweigerd. Geef alsjeblieft toegang.",
+    "cameraError": "Kon camera niet openen",
+    "invalidCode": "Ongeldige QR code"
+  },
   "video": {
     "title": "Video Chat",
     "toggle": "Video aan/uit",
