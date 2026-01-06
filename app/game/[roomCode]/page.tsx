@@ -273,12 +273,12 @@ export default function GamePage() {
               href="https://www.buymeacoffee.com/rlarin"
               target="_blank"
               rel="noopener noreferrer"
-              className="opacity-50 hover:opacity-100 transition-opacity hidden sm:block"
+              className="opacity-50 hover:opacity-100 transition-opacity"
             >
               <img
                 src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=rlarin&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff"
                 alt="Buy me a coffee"
-                className="h-6"
+                className="h-5 sm:h-6"
               />
             </a>
           </div>
