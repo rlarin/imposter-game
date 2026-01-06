@@ -15,108 +15,128 @@ export default function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const startScannerInElement = async (elementId: string) => {
+    // Check if HTTPS or localhost
+    const isSecureContext =
+      window.location.protocol === 'https:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+    if (!isSecureContext) {
+      setError('Camera access requires HTTPS (or localhost for development)');
+      return;
+    }
+
+    setIsStarting(true);
+    setError(null);
+
+    try {
+      // Check if the element exists
+      const readerElement = document.getElementById(elementId);
+      console.log('QR reader element:', readerElement);
+      if (!readerElement) {
+        console.error('QR reader element not found');
+        setError(t('qrScanner.cameraError'));
+        setIsStarting(false);
+        return;
+      }
+
+      // Stop existing scanner if any
+      if (scannerRef.current) {
+        await scannerRef.current.stop().catch(() => {});
+      }
+
+      const scanner = new Html5Qrcode(elementId);
+      scannerRef.current = scanner;
+
+      // Get available cameras
+      const cameras = await Html5Qrcode.getCameras();
+      console.log('Available cameras:', cameras);
+
+      if (!cameras || cameras.length === 0) {
+        setError(t('qrScanner.cameraError'));
+        setIsStarting(false);
+        return;
+      }
+
+      // Use the back camera if available
+      const cameraId = cameras.length > 1 ? cameras[cameras.length - 1].id : cameras[0].id;
+      console.log('Using camera:', cameraId);
+
+      await scanner.start(
+        cameraId,
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+          disableFlip: false,
+        },
+        (decodedText) => {
+          console.log('QR Code detected:', decodedText);
+
+          // Extract room code from URL or use as-is
+          let roomCode = decodedText;
+
+          // Check if it's a URL with room code
+          const urlMatch = decodedText.match(/\/game\/([A-Z0-9]{6})/i);
+          setError(urlMatch?.toString() || 'empty');
+          if (urlMatch) {
+            roomCode = urlMatch[1].toUpperCase();
+          } else if (/^[A-Z0-9]{6}$/i.test(decodedText)) {
+            roomCode = decodedText.toUpperCase();
+          } else {
+            console.warn('Invalid QR code format:', decodedText);
+            setError(t('qrScanner.invalidCode'));
+            return;
+          }
+
+          console.log('Valid room code extracted:', roomCode);
+          // Stop scanner and return result
+          scanner
+            .stop()
+            .then(() => {
+              onScan(roomCode);
+              onClose();
+            })
+            .catch((err) => {
+              console.error('Error stopping scanner:', err);
+            });
+        },
+        (errorMessage) => {
+          // Ignore scan errors (no QR found)
+          console.debug('QR scan attempt:', errorMessage);
+        }
+      );
+
+      console.log('Scanner started successfully');
+      setIsStarting(false);
+    } catch (err) {
+      setIsStarting(false);
+      console.error('Scanner error:', err);
+      if (err instanceof Error) {
+        if (err.message.includes('Permission') || err.message.includes('NotAllowedError')) {
+          setError(t('qrScanner.permissionDenied'));
+        } else if (err.message.includes('NotFoundError') || err.message.includes('no camera')) {
+          setError(t('qrScanner.cameraError'));
+        } else {
+          setError(`${t('qrScanner.cameraError')}: ${err.message}`);
+        }
+      } else {
+        setError(t('qrScanner.cameraError'));
+      }
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
 
+    // Determine which element to use based on fullscreen state
+    const elementId = isFullscreen ? 'qr-reader-fullscreen' : 'qr-reader';
+
     // Small delay to ensure DOM is fully rendered
     const timeoutId = setTimeout(() => {
-      const startScanner = async () => {
-        // Check if HTTPS or localhost
-        const isSecureContext =
-          window.location.protocol === 'https:' ||
-          window.location.hostname === 'localhost' ||
-          window.location.hostname === '127.0.0.1';
-        if (!isSecureContext) {
-          setError('Camera access requires HTTPS (or localhost for development)');
-          return;
-        }
-
-        setIsStarting(true);
-        setError(null);
-
-        try {
-          // Check if the element exists
-          const readerElement = document.getElementById('qr-reader');
-          console.log('QR reader element:', readerElement);
-          if (!readerElement) {
-            console.error('QR reader element not found');
-            setError(t('qrScanner.cameraError'));
-            setIsStarting(false);
-            return;
-          }
-
-          const scanner = new Html5Qrcode('qr-reader');
-          scannerRef.current = scanner;
-
-          // Get available cameras
-          const cameras = await Html5Qrcode.getCameras();
-          console.log('Available cameras:', cameras);
-
-          if (!cameras || cameras.length === 0) {
-            setError(t('qrScanner.cameraError'));
-            setIsStarting(false);
-            return;
-          }
-
-          // Use the back camera if available
-          const cameraId = cameras.length > 1 ? cameras[cameras.length - 1].id : cameras[0].id;
-          console.log('Using camera:', cameraId);
-
-          await scanner.start(
-            cameraId,
-            {
-              fps: 10,
-              qrbox: { width: 250, height: 250 },
-              aspectRatio: 1.0,
-            },
-            (decodedText) => {
-              // Extract room code from URL or use as-is
-              let roomCode = decodedText;
-
-              // Check if it's a URL with room code
-              const urlMatch = decodedText.match(/\/game\/([A-Z0-9]{6})/i);
-              if (urlMatch) {
-                roomCode = urlMatch[1].toUpperCase();
-              } else if (/^[A-Z0-9]{6}$/i.test(decodedText)) {
-                roomCode = decodedText.toUpperCase();
-              } else {
-                setError(t('qrScanner.invalidCode'));
-                return;
-              }
-
-              // Stop scanner and return result
-              scanner.stop().then(() => {
-                onScan(roomCode);
-                onClose();
-              });
-            },
-            (errorMessage) => {
-              // Ignore scan errors (no QR found)
-              console.debug('QR scan error:', errorMessage);
-            }
-          );
-
-          console.log('Scanner started successfully');
-          setIsStarting(false);
-        } catch (err) {
-          setIsStarting(false);
-          console.error('Scanner error:', err);
-          if (err instanceof Error) {
-            if (err.message.includes('Permission') || err.message.includes('NotAllowedError')) {
-              setError(t('qrScanner.permissionDenied'));
-            } else if (err.message.includes('NotFoundError') || err.message.includes('no camera')) {
-              setError(t('qrScanner.cameraError'));
-            } else {
-              setError(`${t('qrScanner.cameraError')}: ${err.message}`);
-            }
-          } else {
-            setError(t('qrScanner.cameraError'));
-          }
-        }
-      };
-
-      startScanner();
+      startScannerInElement(elementId);
     }, 100);
 
     return () => {
@@ -126,7 +146,7 @@ export default function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
         scannerRef.current = null;
       }
     };
-  }, [isOpen, onClose, onScan, t]);
+  }, [isOpen, isFullscreen, onClose, onScan, t]);
 
   const handleClose = () => {
     if (scannerRef.current) {
@@ -138,11 +158,37 @@ export default function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
 
   if (!isOpen) return null;
 
+  // Fullscreen preview
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
+        <button
+          onClick={() => setIsFullscreen(false)}
+          className="absolute top-4 right-4 z-10 p-3 bg-black/50 hover:bg-black/70 text-white rounded-lg transition-colors"
+          title="Exit fullscreen"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <div className="w-full h-full max-w-full max-h-full">
+          <div id="qr-reader-fullscreen" className="w-full h-full" />
+        </div>
+      </div>
+    );
+  }
+
+  // Normal modal view
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-2 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             {t('qrScanner.title')}
           </h3>
@@ -162,13 +208,17 @@ export default function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
         </div>
 
         {/* Scanner area */}
-        <div className="p-4">
-          <div className="relative bg-black rounded-xl overflow-hidden aspect-square">
+        <div className="p-3 sm:p-4 flex-1 overflow-hidden flex flex-col">
+          <button
+            onClick={() => setIsFullscreen(true)}
+            className="relative bg-black rounded-xl overflow-hidden aspect-square flex-1 cursor-pointer hover:opacity-90 transition-opacity group"
+            title="Click to expand"
+          >
             <div id="qr-reader" className="w-full h-full" />
 
             {/* Scanning overlay */}
             {isStarting && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
                 <div className="text-white text-center">
                   <div className="animate-spin text-3xl mb-2">📷</div>
                   <p className="text-sm">{t('qrScanner.starting')}</p>
@@ -176,18 +226,18 @@ export default function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
               </div>
             )}
 
-            {/* Scanning frame */}
+            {/* Scanning frame - only show when not starting and no error */}
             {!isStarting && !error && (
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div className="w-48 h-48 border-2 border-white/50 rounded-lg">
-                  <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-indigo-400 rounded-tl-lg" />
-                  <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-indigo-400 rounded-tr-lg" />
-                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-indigo-400 rounded-bl-lg" />
-                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-indigo-400 rounded-br-lg" />
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-20">
+                <div className="w-56 h-56 border-2 border-white/60 rounded-lg">
+                  <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-green-400" />
+                  <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-green-400" />
+                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-green-400" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-green-400" />
                 </div>
               </div>
             )}
-          </div>
+          </button>
 
           {/* Error message */}
           {error && (
@@ -197,7 +247,7 @@ export default function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
           )}
 
           {/* Instructions */}
-          <p className="mt-3 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             {t('qrScanner.instructions')}
           </p>
         </div>

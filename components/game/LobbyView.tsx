@@ -28,6 +28,7 @@ export default function LobbyView({
   const t = useTranslations();
   const { locale } = useLocale();
   const [copied, setCopied] = useState(false);
+  const [isQRFullscreen, setIsQRFullscreen] = useState(false);
   const selectedCategory = room.settings.category;
 
   const isHost = playerId === room.hostId;
@@ -156,7 +157,11 @@ export default function LobbyView({
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
               {t('lobby.scanToJoin')}
             </p>
-            <div className="p-2 bg-white rounded-xl">
+            <button
+              onClick={() => setIsQRFullscreen(true)}
+              className="p-2 bg-white rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
+              title="Click to expand QR code"
+            >
               <QRCodeSVG
                 value={joinUrl}
                 size={80}
@@ -164,7 +169,7 @@ export default function LobbyView({
                 marginSize={0}
                 className="w-20 h-20 sm:w-24 sm:h-24"
               />
-            </div>
+            </button>
           </div>
         </div>
       </Card>
@@ -414,6 +419,62 @@ export default function LobbyView({
       {!isHost && (
         <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
           <p className="text-gray-600 dark:text-gray-400">{t('lobby.waitingHost')}</p>
+        </div>
+      )}
+
+      {/* Fullscreen QR Code Modal */}
+      {isQRFullscreen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-2xl max-w-lg w-full">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t('lobby.scanToJoin')}
+              </h3>
+              <button
+                onClick={() => setIsQRFullscreen(false)}
+                className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* QR Code Content */}
+            <div className="p-8 flex flex-col items-center justify-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                {t('lobby.roomCode')}:{' '}
+                <span className="font-mono font-bold text-lg text-indigo-600 dark:text-indigo-400">
+                  {room.roomCode}
+                </span>
+              </p>
+              <div className="bg-white p-6 rounded-xl">
+                <QRCodeSVG
+                  value={joinUrl}
+                  size={300}
+                  level="M"
+                  marginSize={2}
+                  className="w-80 h-80"
+                />
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-6 text-center">
+                {t('qrScanner.instructions')}
+              </p>
+            </div>
+
+            {/* Footer with copy button */}
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <Button onClick={handleCopyLink} variant="secondary" size="sm" className="w-full">
+                {copied ? t('common.copied') : t('lobby.copyLink')}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
