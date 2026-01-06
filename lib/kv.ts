@@ -119,7 +119,8 @@ export async function getActiveRooms(): Promise<AdminStats> {
     console.log('[Redis] Room codes found:', roomCodes);
 
     if (!roomCodes || roomCodes.length === 0) {
-      return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated: 0, rooms: [] };
+      const totalRoomsCreated = await getTotalRoomsCreated();
+      return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated, rooms: [] };
     }
 
     // Fetch all room data
