@@ -123,7 +123,7 @@ export default function Home() {
           <img
             src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=rlarin&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff"
             alt="Buy me a coffee"
-            className="h-7"
+            className="h-5 sm:h-7"
           />
         </a>
         <LanguageSelector variant="compact" />
