@@ -249,25 +249,39 @@ export default function GamePage() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <header className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mb-4 sm:mb-6">
-          <button
-            onClick={() => router.push('/')}
-            className="text-white/80 hover:text-white transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
-          >
-            <svg
-              className="w-4 h-4 sm:w-5 sm:h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => router.push('/')}
+              className="text-white/80 hover:text-white transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              <span className="hidden sm:inline">{t('common.exit')}</span>
+            </button>
+            <a
+              href="https://www.buymeacoffee.com/rlarin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="opacity-50 hover:opacity-100 transition-opacity hidden sm:block"
+            >
+              <img
+                src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=rlarin&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff"
+                alt="Buy me a coffee"
+                className="h-6"
               />
-            </svg>
-            <span className="hidden sm:inline">{t('common.exit')}</span>
-          </button>
+            </a>
+          </div>
 
           <div className="text-center order-first sm:order-0 w-full sm:w-auto">
             <span className="text-white/60 text-xs sm:text-sm">{t('common.room')}</span>

@@ -112,8 +112,20 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
-      {/* Language selector */}
-      <div className="absolute top-4 right-4">
+      {/* Top bar */}
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
+        <a
+          href="https://www.buymeacoffee.com/rlarin"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="opacity-50 hover:opacity-100 transition-opacity"
+        >
+          <img
+            src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=rlarin&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff"
+            alt="Buy me a coffee"
+            className="h-7"
+          />
+        </a>
         <LanguageSelector variant="compact" />
       </div>
 

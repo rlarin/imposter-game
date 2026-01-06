@@ -191,7 +191,21 @@ export default function AdminPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-white/60 text-sm">Auto-refreshes every 10 seconds</p>
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-white/60 text-sm">Auto-refreshes every 10 seconds</p>
+          <a
+            href="https://www.buymeacoffee.com/rlarin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-60 hover:opacity-100 transition-opacity"
+          >
+            <img
+              src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=rlarin&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff"
+              alt="Buy me a coffee"
+              className="h-8"
+            />
+          </a>
+        </div>
       </div>
     </div>
   );
