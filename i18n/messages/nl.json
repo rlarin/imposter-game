@@ -204,6 +204,16 @@
       }
     }
   },
+  "video": {
+    "title": "Video Chat",
+    "toggle": "Video aan/uit",
+    "on": "Video Aan",
+    "off": "Video Uit",
+    "connecting": "Verbinden...",
+    "minimize": "Minimaliseren",
+    "expand": "Uitvouwen",
+    "close": "Video sluiten"
+  },
   "wordChange": {
     "title": "Stemming: Woord Wijzigen",
     "initiateButton": "Het geheime woord wijzigen",

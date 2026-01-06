@@ -18,6 +18,7 @@ import {
 } from '@/components/game';
 import RoundEnd from '@/components/game/RoundEnd';
 import WordChangeResult from '@/components/game/WordChangeResult';
+import JitsiVideoPanel from '@/components/game/JitsiVideoPanel';
 
 export default function GamePage() {
   const params = useParams();
@@ -32,6 +33,7 @@ export default function GamePage() {
     passed: boolean;
     newHintsCount: number;
   } | null>(null);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const hasJoinedRef = useRef(false);
 
   // Callbacks para el socket
@@ -245,7 +247,11 @@ export default function GamePage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 p-2 sm:p-4">
+    <div
+      className={`min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 p-2 sm:p-4 transition-all duration-300 ${
+        isVideoOpen ? 'pt-[calc(35vh+8px)] sm:pt-[calc(30vh+16px)]' : ''
+      }`}
+    >
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <header className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mb-4 sm:mb-6">
@@ -291,6 +297,31 @@ export default function GamePage() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Video toggle button */}
+            <button
+              onClick={() => setIsVideoOpen(!isVideoOpen)}
+              className={`px-2 py-1 sm:px-3 sm:py-1.5 ${
+                isVideoOpen
+                  ? 'bg-green-500/80 hover:bg-green-500'
+                  : 'bg-indigo-500/80 hover:bg-indigo-500'
+              } text-white text-xs sm:text-sm rounded-lg transition-colors flex items-center gap-1`}
+              title={t('video.toggle')}
+            >
+              <svg
+                className="w-3 h-3 sm:w-4 sm:h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+              <span className="hidden sm:inline">{isVideoOpen ? t('video.on') : t('video.off')}</span>
+            </button>
             {room.phase === 'lobby' && <LanguageSelector variant="compact" />}
             {canReset && (
               <button
@@ -344,6 +375,14 @@ export default function GamePage() {
           onClose={() => setWordChangeResult(null)}
         />
       )}
+
+      {/* Jitsi Video Panel */}
+      <JitsiVideoPanel
+        roomCode={roomCode}
+        playerName={currentPlayer?.name || 'Player'}
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
+      />
     </div>
   );
 }

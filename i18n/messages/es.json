@@ -215,6 +215,16 @@
       }
     }
   },
+  "video": {
+    "title": "Video Chat",
+    "toggle": "Alternar video",
+    "on": "Video On",
+    "off": "Video Off",
+    "connecting": "Conectando...",
+    "minimize": "Minimizar",
+    "expand": "Expandir",
+    "close": "Cerrar video"
+  },
   "wordChange": {
     "title": "Votación: Cambiar Palabra",
     "initiateButton": "Cambiar la palabra secreta",
