@@ -122,6 +122,8 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
           }
         );
 
+        console.log('Scanner started successfully');
+        setIsStarting(false);
         isScannerRunningRef.current = true;
       } catch (err) {
         setIsStarting(false);
@@ -225,29 +227,35 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
 
         {/* Scanner area */}
         <div className="p-3 sm:p-4 flex-1 overflow-hidden flex flex-col">
-          <div id="qr-reader" className="w-full h-full" />
+          <button
+            onClick={() => setIsFullscreen(true)}
+            className="relative bg-black rounded-xl overflow-hidden aspect-square flex-1 cursor-pointer hover:opacity-90 transition-opacity group"
+            title="Click to expand"
+          >
+            <div id="qr-reader" className="w-full h-full" />
 
-          {/* Scanning overlay */}
-          {isStarting && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-              <div className="text-white text-center">
-                <div className="animate-spin text-3xl mb-2">📷</div>
-                <p className="text-sm">{t('qrScanner.starting')}</p>
+            {/* Scanning overlay */}
+            {isStarting && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                <div className="text-white text-center">
+                  <div className="animate-spin text-3xl mb-2">📷</div>
+                  <p className="text-sm">{t('qrScanner.starting')}</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Scanning frame - only show when not starting and no error */}
-          {!isStarting && !error && (
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-20">
-              <div className="w-56 h-56 border-2 border-white/60 rounded-lg">
-                <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-green-400" />
-                <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-green-400" />
-                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-green-400" />
-                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-green-400" />
+            {/* Scanning frame - only show when not starting and no error */}
+            {!isStarting && !error && (
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-20">
+                <div className="w-56 h-56 border-2 border-white/60 rounded-lg">
+                  <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-green-400" />
+                  <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-green-400" />
+                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-green-400" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-green-400" />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </button>
 
           {/* Error message */}
           {error && (
