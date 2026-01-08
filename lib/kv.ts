@@ -17,6 +17,7 @@ export interface AdminStats {
   totalRooms: number;
   totalPlayers: number;
   totalRoomsCreated: number;
+  totalLikes: number;
   rooms: RoomMetrics[];
 }
 
@@ -161,11 +162,13 @@ export async function getActiveRooms(): Promise<AdminStats> {
     // Calculate totals
     const totalPlayers = rooms.reduce((sum, room) => sum + room.playerCount, 0);
     const totalRoomsCreated = await getTotalRoomsCreated();
+    const totalLikes = await getTotalLikes();
 
     return {
       totalRooms: rooms.length,
       totalPlayers,
       totalRoomsCreated,
+      totalLikes,
       rooms: rooms.sort((a, b) => b.createdAt - a.createdAt),
     };
   } catch (error) {
@@ -188,5 +191,19 @@ async function cleanupStaleRooms(roomCodes: string[]): Promise<void> {
     console.log(`[Redis] Cleaned up ${roomCodes.length} stale rooms`);
   } catch (error) {
     console.error('[Redis] Error cleaning up stale rooms:', error);
+  }
+}
+
+// Get total likes count
+export async function getTotalLikes(): Promise<number> {
+  const redis = getRedis();
+  if (!redis) return 0;
+
+  try {
+    const likes = await redis.get<number>('likes:total');
+    return likes ?? 0;
+  } catch (error) {
+    console.error('[Redis] Error getting total likes:', error);
+    return 0;
   }
 }
