@@ -111,7 +111,7 @@ export async function getActiveRooms(): Promise<AdminStats> {
   const redis = getRedis();
   if (!redis) {
     console.log('[Redis] Redis client not initialized');
-    return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated: 0, rooms: [] };
+    return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated: 0, totalLikes: 0, rooms: [] };
   }
 
   try {
@@ -121,7 +121,8 @@ export async function getActiveRooms(): Promise<AdminStats> {
 
     if (!roomCodes || roomCodes.length === 0) {
       const totalRoomsCreated = await getTotalRoomsCreated();
-      return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated, rooms: [] };
+      const totalLikes = await getTotalLikes();
+      return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated, totalLikes, rooms: [] };
     }
 
     // Fetch all room data
@@ -173,7 +174,7 @@ export async function getActiveRooms(): Promise<AdminStats> {
     };
   } catch (error) {
     console.error('[Redis] Error getting active rooms:', error);
-    return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated: 0, rooms: [] };
+    return { totalRooms: 0, totalPlayers: 0, totalRoomsCreated: 0, totalLikes: 0, rooms: [] };
   }
 }
 

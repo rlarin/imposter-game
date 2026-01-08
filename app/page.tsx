@@ -112,10 +112,6 @@ export default function Home() {
     }
   };
 
-  const handleQRScan = (scannedRoomCode: string) => {
-    setRoomCode(scannedRoomCode);
-    setShowScanner(false);
-  };
   return (
     <div className="min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
       {/* Top bar */}
@@ -259,7 +255,7 @@ export default function Home() {
       <Instructions isOpen={showInstructions} onClose={() => setShowInstructions(false)} />
 
       {/* QR Scanner Modal */}
-      <QRScanner isOpen={showScanner} onClose={() => setShowScanner(false)} onScan={handleQRScan} />
+      <QRScanner isOpen={showScanner} onClose={() => setShowScanner(false)} />
     </div>
   );
 }
