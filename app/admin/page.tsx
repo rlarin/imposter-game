@@ -17,6 +17,7 @@ interface AdminStats {
   totalRooms: number;
   totalPlayers: number;
   totalRoomsCreated: number;
+  totalLikes: number;
   rooms: RoomMetrics[];
 }
 
@@ -147,9 +148,13 @@ export default function AdminPage() {
             <p className="text-sm text-gray-500 uppercase tracking-wide">Total Players</p>
             <p className="text-4xl font-bold text-purple-600 mt-2">{stats?.totalPlayers || 0}</p>
           </Card>
-          <Card className="text-center col-span-2 sm:col-span-1">
+          <Card className="text-center">
             <p className="text-sm text-gray-500 uppercase tracking-wide">Rooms Created</p>
             <p className="text-4xl font-bold text-pink-600 mt-2">{stats?.totalRoomsCreated || 0}</p>
+          </Card>
+          <Card className="text-center col-span-2 sm:col-span-1">
+            <p className="text-sm text-gray-500 uppercase tracking-wide">Total Likes</p>
+            <p className="text-4xl font-bold text-red-600 mt-2">❤️ {stats?.totalLikes || 0}</p>
           </Card>
         </div>
 

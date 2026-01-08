@@ -216,3 +216,15 @@ export function tallyVotes(votes: { targetId: string }[]): {
 
   return { winnerId: entries[0][0], counts, isTie: false };
 }
+
+// Formatea el número de likes con formato compacto (1, 1k, 1m)
+export function formatLikeCount(count: number): string {
+  if (count === 0) return '0';
+  if (count < 1000) return count.toString();
+  if (count < 1000000) {
+    const thousands = count / 1000;
+    return thousands % 1 === 0 ? `${thousands}k` : `${thousands.toFixed(1)}k`;
+  }
+  const millions = count / 1000000;
+  return millions % 1 === 0 ? `${millions}m` : `${millions.toFixed(1)}m`;
+}

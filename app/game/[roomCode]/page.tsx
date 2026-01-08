@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
 import { usePartySocket } from '@/hooks/usePartySocket';
-import { Card } from '@/components/ui';
+import { Card, LikeButton } from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import {
   ClueRound,
@@ -320,7 +320,9 @@ export default function GamePage() {
                   d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                 />
               </svg>
-              <span className="hidden sm:inline">{isVideoOpen ? t('video.on') : t('video.off')}</span>
+              <span className="hidden sm:inline">
+                {isVideoOpen ? t('video.on') : t('video.off')}
+              </span>
             </button>
             {room.phase === 'lobby' && <LanguageSelector variant="compact" />}
             {canReset && (
@@ -353,6 +355,7 @@ export default function GamePage() {
                 {room.players.filter((p) => p.isConnected).length} {t('common.players')}
               </span>
             </div>
+            <LikeButton />
           </div>
         </header>
 

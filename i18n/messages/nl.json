@@ -44,7 +44,17 @@
     "trollModeSettings": "Troll Modus",
     "trollModeEnabled": "Troll modus ingeschakeld",
     "trollModeDisabled": "Troll modus uitgeschakeld",
-    "trollModeDescription": "20% kans dat IEDEREEN de bedrieger is in een ronde"
+    "trollModeDescription": "20% kans dat IEDEREEN de bedrieger is in een ronde",
+    "clueRoundsSettings": "Hintronden",
+    "clueRoundsDescription": "Aantal hintronden voor het stemmen",
+    "rounds": "ronden"
+  },
+  "roundEnd": {
+    "title": "Ronde {round} Voltooid",
+    "subtitle": "Ronde {current} van {total}",
+    "cluesTitle": "Hints van deze ronde",
+    "nextRound": "Volgende Ronde Starten",
+    "waitingForHost": "Wachten tot de host de volgende ronde start..."
   },
   "game": {
     "connecting": "Verbinden...",
@@ -64,6 +74,7 @@
   },
   "clue": {
     "previousClues": "Vorige hints",
+    "allClues": "Alle hints",
     "yourClue": "Je hint (slechts één woord)",
     "placeholder": "Schrijf je hint...",
     "submit": "Hint Verzenden",
@@ -241,5 +252,9 @@
     "continueWithWord": "Het huidige woord blijft behouden.",
     "autoClose": "Automatisch sluiten...",
     "alreadyUsed": "Woordwijziging is al gebruikt deze ronde"
+  },
+  "like": {
+    "clickToLike": "Klik om dit spel een like te geven",
+    "alreadyLiked": "Je hebt dit spel al een like gegeven!"
   }
 }

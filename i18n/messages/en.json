@@ -252,5 +252,9 @@
     "continueWithWord": "Keeping the current word.",
     "autoClose": "Closing automatically...",
     "alreadyUsed": "Word change was already used this round"
+  },
+  "like": {
+    "clickToLike": "Click to like this game",
+    "alreadyLiked": "You already liked this game!"
   }
 }

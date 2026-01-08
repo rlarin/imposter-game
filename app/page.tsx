@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, LikeButton } from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import Instructions from '@/components/ui/Instructions';
 import QRScanner from '@/components/ui/QRScanner';
@@ -230,6 +230,11 @@ export default function Home() {
 
         {/* Footer */}
         <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 text-center space-y-3">
+          {/* Like Button */}
+          <div className="flex justify-center">
+            <LikeButton />
+          </div>
+
           {/* How to play button */}
           <button
             onClick={() => setShowInstructions(true)}
