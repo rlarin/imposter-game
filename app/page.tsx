@@ -113,9 +113,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-evenly p-4 pt-16">
       {/* Top bar */}
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
+      <div className="absolute top-3 left-4 right-4 flex items-center justify-between">
+        <LanguageSelector variant="compact" />
         <a
           href="https://www.buymeacoffee.com/rlarin"
           target="_blank"
@@ -128,7 +129,6 @@ export default function Home() {
             className="h-5 sm:h-7"
           />
         </a>
-        <LanguageSelector variant="compact" />
       </div>
 
       <Card variant="elevated" padding="lg" className="w-full max-w-md">
