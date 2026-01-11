@@ -69,11 +69,19 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
         console.log('Using camera:', cameraId);
 
         await scanner.start(
-          cameraId,
           {
-            fps: 10,
-            qrbox: { width: 300, height: 300 },
+            deviceId: { exact: cameraId },
+            facingMode: 'environment',
+            advanced: [
+              { zoom: 2.0 } as MediaTrackConstraintSet,
+              { focusMode: 'continuous' } as MediaTrackConstraintSet,
+            ],
+          } as MediaTrackConstraints,
+          {
+            fps: 15,
+            qrbox: { width: 250, height: 250 },
             disableFlip: false,
+            aspectRatio: 1,
           },
           (decodedText) => {
             console.log('QR Code detected:', decodedText);
