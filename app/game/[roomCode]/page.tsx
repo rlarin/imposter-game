@@ -300,15 +300,15 @@ export default function GamePage() {
             {/* Video toggle button */}
             <button
               onClick={() => setIsVideoOpen(!isVideoOpen)}
-              className={`px-2 py-1 sm:px-3 sm:py-1.5 ${
+              className={`px-3 py-1 sm:px-4 sm:py-2 ${
                 isVideoOpen
                   ? 'bg-green-500/80 hover:bg-green-500'
                   : 'bg-indigo-500/80 hover:bg-indigo-500'
-              } text-white text-xs sm:text-sm rounded-lg transition-colors flex items-center gap-1`}
+              } text-white text-sm sm:text-base rounded-xl transition-colors flex items-center gap-1.5`}
               title={t('video.toggle')}
             >
               <svg
-                className="w-3 h-3 sm:w-4 sm:h-4"
+                className="w-5 h-5 sm:w-6 sm:h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -347,12 +347,22 @@ export default function GamePage() {
                 <span className="hidden sm:inline">{t('game.resetGame')}</span>
               </button>
             )}
-            <div className="flex items-center gap-1 sm:gap-2">
-              <span
-                className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}
-              />
-              <span className="text-white/60 text-xs sm:text-sm">
-                {room.players.filter((p) => p.isConnected).length} {t('common.players')}
+            <div className="relative">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 text-white/80"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              <span className="absolute -bottom-1 -right-1 bg-green-500 text-white text-[10px] sm:text-xs font-bold rounded-full min-w-[16px] h-4 sm:min-w-[18px] sm:h-[18px] flex items-center justify-center px-1">
+                {room.players.filter((p) => p.isConnected).length}
               </span>
             </div>
             <LikeButton />

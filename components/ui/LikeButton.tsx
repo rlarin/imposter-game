@@ -92,16 +92,29 @@ export default function LikeButton() {
       disabled={hasLiked || loading}
       title={hasLiked ? t('like.alreadyLiked') : t('like.clickToLike')}
       className={`
-        flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all
-        ${
-          hasLiked
-            ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 cursor-default'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 cursor-pointer active:scale-95'
-        }
+        relative transition-all
+        ${hasLiked ? 'cursor-default' : 'cursor-pointer active:scale-95'}
       `}
     >
-      <span className={`text-lg ${hasLiked ? 'animate-pulse' : ''}`}>❤️</span>
-      <span className="text-sm font-semibold">{formatLikeCount(likes)}</span>
+      <svg
+        className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
+          hasLiked
+            ? 'text-red-500 fill-red-500'
+            : 'text-white/80 hover:text-red-400 fill-none'
+        }`}
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+        />
+      </svg>
+      <span className="absolute -bottom-1 -right-1 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full min-w-[16px] h-4 sm:min-w-[18px] sm:h-[18px] flex items-center justify-center px-1">
+        {formatLikeCount(likes)}
+      </span>
     </button>
   );
 }
