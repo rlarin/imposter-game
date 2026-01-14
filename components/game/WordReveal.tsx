@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui';
 import { Image } from 'next/dist/client/image-component';
+import { useLocale } from '@/lib/i18n-context';
+import { translateText } from '@/lib/translation-service';
+import { Locale } from '@/i18n/config';
 
 interface WordRevealProps {
   secretWord: string | null;
@@ -19,7 +22,49 @@ export default function WordReveal({
   category,
 }: WordRevealProps) {
   const t = useTranslations();
+  const { locale } = useLocale();
   const [countdown, setCountdown] = useState(5);
+  const [translatedWord, setTranslatedWord] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Efecto para traducir palabra secreta
+  useEffect(() => {
+    if (!secretWord || isImposter) return;
+
+    const hostLocale: Locale = 'es';
+
+    // Si es el mismo idioma, no traducir ni tocar estado
+    if (locale === hostLocale) {
+      return;
+    }
+
+    // Cancelar solicitud anterior si existe
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+    let isMounted = true;
+
+    // Realizar traducción de forma asincrónica
+    (async () => {
+      try {
+        const translated = await translateText(secretWord, locale, hostLocale);
+        if (isMounted && !abortControllerRef.current?.signal.aborted) {
+          setTranslatedWord(translated);
+        }
+      } catch (error) {
+        // Silently ignore; show original word
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [secretWord, locale, isImposter]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -80,7 +125,7 @@ export default function WordReveal({
             </h2>
             <div className="p-4 sm:p-6 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl mb-4 sm:mb-6">
               <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
-                {secretWord}
+                {translatedWord || secretWord}
               </p>
             </div>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
