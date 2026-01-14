@@ -6,11 +6,13 @@ import { ReactNode } from 'react';
 
 import esMessages from '@/i18n/messages/es.json';
 import enMessages from '@/i18n/messages/en.json';
+import deMessages from '@/i18n/messages/de.json';
 import nlMessages from '@/i18n/messages/nl.json';
 
 const messages = {
   es: esMessages,
   en: enMessages,
+  de: deMessages,
   nl: nlMessages,
 };
 

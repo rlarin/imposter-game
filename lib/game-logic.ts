@@ -25,7 +25,10 @@ export const defaultSettings: GameSettings = {
 const TROLL_MODE_CHANCE = 0.2;
 
 // Crear una nueva sala
-export function createRoom(hostName: string): { room: GameRoom; playerId: string } {
+export function createRoom(
+  hostName: string,
+  hostLocale: Locale = 'es'
+): { room: GameRoom; playerId: string } {
   const playerId = generatePlayerId();
   const roomCode = generateRoomCode();
 
@@ -33,6 +36,7 @@ export function createRoom(hostName: string): { room: GameRoom; playerId: string
     id: playerId,
     name: hostName,
     avatarColor: getRandomAvatarColor(),
+    locale: hostLocale,
     isHost: true,
     isImposter: false,
     isEliminated: false,
@@ -74,7 +78,8 @@ export function createRoom(hostName: string): { room: GameRoom; playerId: string
 // Agregar jugador a la sala
 export function addPlayer(
   room: GameRoom,
-  playerName: string
+  playerName: string,
+  playerLocale: Locale = 'es'
 ): { room: GameRoom; playerId: string } | null {
   if (room.phase !== 'lobby') return null;
   if (room.players.length >= 15) return null;
@@ -85,6 +90,7 @@ export function addPlayer(
     id: playerId,
     name: playerName,
     avatarColor: getRandomAvatarColor(),
+    locale: playerLocale,
     isHost: false,
     isImposter: false,
     isEliminated: false,
@@ -355,7 +361,12 @@ function processVotes(room: GameRoom): GameRoom {
 }
 
 // Enviar pista
-export function submitClue(room: GameRoom, playerId: string, word: string): GameRoom | null {
+export function submitClue(
+  room: GameRoom,
+  playerId: string,
+  word: string,
+  playerLocale?: Locale
+): GameRoom | null {
   if (room.phase !== 'clue-round') return null;
 
   const player = room.players.find((p) => p.id === playerId);
@@ -365,6 +376,7 @@ export function submitClue(room: GameRoom, playerId: string, word: string): Game
     playerId,
     playerName: player.name,
     word: word.toLowerCase().trim(),
+    originalLocale: playerLocale || player.locale,
     round: room.currentRound,
   };
 

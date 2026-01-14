@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { validatePlayerName, validateRoomCode, generatePlayerId } from '@/lib/utils';
+import { trackActiveUser } from '@/lib/kv';
 
 export async function POST(request: Request) {
   try {
@@ -29,6 +30,9 @@ export async function POST(request: Request) {
 
     // Generar ID para el jugador
     const playerId = generatePlayerId();
+
+    // Track active user for daily stats
+    await trackActiveUser(playerId);
 
     return NextResponse.json({
       playerId,

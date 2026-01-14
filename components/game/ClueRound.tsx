@@ -6,6 +6,7 @@ import { GameRoom } from '@/lib/types';
 import { Button, Card, Input, Timer } from '@/components/ui';
 import { validateClue } from '@/lib/utils';
 import { useLocale } from '@/lib/i18n-context';
+import { Locale } from '@/i18n/config';
 import { getCategoryById } from '@/lib/words/index';
 import PlayerList from './PlayerList';
 import WordChangeVoteModal from './WordChangeVoteModal';
@@ -14,7 +15,7 @@ import CluesByPlayer from './CluesByPlayer';
 interface ClueRoundProps {
   room: GameRoom;
   playerId: string;
-  onSubmitClue: (word: string) => void;
+  onSubmitClue: (word: string, locale?: Locale) => void;
   onInitiateWordChange: () => void;
   onVoteWordChange: (vote: boolean) => void;
 }
@@ -64,7 +65,7 @@ export default function ClueRound({
     }
 
     setError('');
-    onSubmitClue(trimmed);
+    onSubmitClue(trimmed, locale);
     setClue('');
   };
 

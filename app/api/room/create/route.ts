@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRoom } from '@/lib/game-logic';
 import { validatePlayerName } from '@/lib/utils';
-import { incrementTotalRoomsCreated, registerRoom } from '@/lib/kv';
+import { incrementTotalRoomsCreated, incrementDailyRoomsCreated, trackActiveUser, registerRoom } from '@/lib/kv';
 
 export async function POST(request: Request) {
   try {
@@ -31,8 +31,12 @@ export async function POST(request: Request) {
       lastHeartbeat: Date.now(),
     });
 
-    // Incrementar contador de salas creadas
-    await incrementTotalRoomsCreated();
+    // Incrementar contadores de salas creadas
+    await Promise.all([
+      incrementTotalRoomsCreated(),
+      incrementDailyRoomsCreated(),
+      trackActiveUser(playerId),
+    ]);
 
     return NextResponse.json({
       roomCode: room.roomCode,

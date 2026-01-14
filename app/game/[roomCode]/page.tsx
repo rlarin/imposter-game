@@ -135,7 +135,8 @@ export default function GamePage() {
       const playerName = localStorage.getItem('playerName');
       if (playerName) {
         hasJoinedRef.current = true;
-        join(playerName);
+        const localeStr = localStorage.getItem('locale') as any;
+        join(playerName, localeStr);
       } else {
         router.push('/');
       }
