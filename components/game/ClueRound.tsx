@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
 import { Button, Card, Input, Timer } from '@/components/ui';
@@ -8,6 +8,7 @@ import { validateClue } from '@/lib/utils';
 import { useLocale } from '@/lib/i18n-context';
 import { Locale } from '@/i18n/config';
 import { getCategoryById } from '@/lib/words/index';
+import { translateText } from '@/lib/translation-service';
 import PlayerList from './PlayerList';
 import WordChangeVoteModal from './WordChangeVoteModal';
 import CluesByPlayer from './CluesByPlayer';
@@ -29,8 +30,30 @@ export default function ClueRound({
 }: ClueRoundProps) {
   const t = useTranslations();
   const { locale } = useLocale();
+
+  const [translatedSecretWord, setTranslatedSecretWord] = useState<string | null>(null);
   const [clue, setClue] = useState('');
   const [error, setError] = useState('');
+
+  // Traducir palabra secreta cuando cambia
+  useEffect(() => {
+    if (!room.secretWord) return;
+
+    const hostLocale: Locale = 'es'; // Asumir que el host usa español
+
+    // Si es el mismo idioma, no traducir ni tocar estado
+    if (locale === hostLocale) {
+      return;
+    }
+
+    translateText(room.secretWord, locale, hostLocale)
+      .then((translated) => {
+        setTranslatedSecretWord(translated);
+      })
+      .catch(() => {
+        // ignore errors; keep original
+      });
+  }, [room.secretWord, locale]);
 
   const currentPlayer = room.players.find((p) => p.id === playerId);
   const hasSubmitted = currentPlayer?.hasSubmittedClue ?? false;
@@ -91,7 +114,8 @@ export default function ClueRound({
             {t('game.secretWord')}
           </p>
           <p className="text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
-            {room.secretWord}
+            {translatedSecretWord || room.secretWord}
+            {/* {isLoadingTranslation && <span className="text-sm opacity-50"> (traduciendo...)</span>} */}
           </p>
         </Card>
       )}
