@@ -1,0 +1,260 @@
+{
+  "common": {
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "back": "Zurück",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "exit": "Beenden",
+    "room": "Raum",
+    "players": "Spieler"
+  },
+  "home": {
+    "title": "Der Betrüger",
+    "subtitle": "Wer kennt das Geheimwort nicht?",
+    "nameLabel": "Dein Name",
+    "namePlaceholder": "Geben Sie Ihren Namen ein...",
+    "createGame": "Spiel erstellen",
+    "joinGame": "Beitreten",
+    "joinSeparator": "oder treten Sie einem Spiel bei",
+    "roomCodePlaceholder": "Raumcode (z.B. ABC123)",
+    "footer": "3-15 Spieler • Wort-Ratespiel und Deduktionsspiel"
+  },
+  "lobby": {
+    "roomCode": "Raumcode",
+    "copyCode": "Code kopieren",
+    "copyLink": "Einladungslink kopieren",
+    "scanToJoin": "Zum Beitreten scannen",
+    "players": "Spieler",
+    "minPlayers": "Mindestens 3 Spieler",
+    "categoryTitle": "Wort-Kategorie",
+    "hostOnly": "Nur der Host kann Einstellungen ändern",
+    "startGame": "Spiel starten",
+    "waitingPlayers": "Warten auf Spieler ({current}/3)",
+    "waitingHost": "Warten auf den Host zum Starten des Spiels...",
+    "timerSettings": "Timer",
+    "timerEnabled": "Timer aktivieren",
+    "timerDisabled": "Keine Zeitbegrenzung",
+    "timeLimit": "Zeit pro Phase",
+    "minutes": "min",
+    "imposterHintSettings": "Hinweis für Betrüger",
+    "imposterHintEnabled": "Hinweis aktiviert",
+    "imposterHintDisabled": "Kein Hinweis",
+    "imposterHintDescription": "Der Betrüger erhält einen abstrakten Hinweis zum Wort",
+    "trollModeSettings": "Troll-Modus",
+    "trollModeEnabled": "Troll-Modus aktiviert",
+    "trollModeDisabled": "Troll-Modus deaktiviert",
+    "trollModeDescription": "20% Chance, dass ALLE Betrüger in einer Runde sind",
+    "clueRoundsSettings": "Hinweis-Runden",
+    "clueRoundsDescription": "Anzahl der Hinweis-Runden vor der Abstimmung",
+    "rounds": "Runden"
+  },
+  "roundEnd": {
+    "title": "Runde {round} abgeschlossen",
+    "subtitle": "Runde {current} von {total}",
+    "cluesTitle": "Hinweise aus dieser Runde",
+    "nextRound": "Nächste Runde starten",
+    "waitingForHost": "Warten auf Host zum Starten der nächsten Runde..."
+  },
+  "game": {
+    "connecting": "Verbinden...",
+    "loadingRoom": "Raum wird geladen...",
+    "loadingGame": "Spiel wird geladen...",
+    "round": "Runde {current} von {total}",
+    "secretWord": "Geheimwort",
+    "youAreImposter": "DU BIST DER BETRÜGER!",
+    "imposterHint": "Du kennst das Geheimwort nicht.",
+    "imposterTip": "Versuche, es aus den Hinweisen anderer herauszufinden, ohne erwischt zu werden.",
+    "category": "Kategorie",
+    "wordIs": "Das Geheimwort ist:",
+    "dontSayIt": "Sag es nicht laut! Gib subtile Hinweise.",
+    "startsIn": "Runde beginnt in",
+    "imposterHintLabel": "Dein Hinweis:",
+    "resetGame": "Zurücksetzen"
+  },
+  "clue": {
+    "previousClues": "Vorherige Hinweise",
+    "allClues": "Alle Hinweise",
+    "yourClue": "Dein Hinweis (nur ein Wort)",
+    "placeholder": "Schreibe deinen Hinweis...",
+    "submit": "Hinweis absenden",
+    "submitted": "Hinweis eingereicht",
+    "waiting": "Warten auf andere Spieler...",
+    "imposterHint": "Erfinde einen überzeugenden Hinweis"
+  },
+  "voting": {
+    "title": "Wer ist der Betrüger?",
+    "subtitle": "Stimme ab, wer deiner Meinung nach der Betrüger ist",
+    "cluesThisRound": "Hinweise aus dieser Runde",
+    "selectSuspect": "Verdächtigen auswählen",
+    "confirmVote": "Abstimmung bestätigen",
+    "voteRegistered": "Abstimmung registriert",
+    "votingStatus": "Abstimmungsstatus"
+  },
+  "results": {
+    "title": "Abstimmungsergebnisse",
+    "eliminated": "{name} wurde eliminiert",
+    "wasImposter": "Sie waren der BETRÜGER!",
+    "canGuess": "Aber sie können trotzdem versuchen, das Wort zu erraten...",
+    "wasInnocent": "Sie waren unschuldig...",
+    "tie": "Unentschieden! Niemand wird eliminiert",
+    "continuing": "Fahren fort...",
+    "votes": "Stimmen"
+  },
+  "imposterGuess": {
+    "lastChance": "Letzte Chance!",
+    "discovered": "Du wurdest erwischt, aber wenn du das Geheimwort erratest, gewinnst du!",
+    "whatWasWord": "Wie lautete das Wort?",
+    "guess": "Raten",
+    "waiting": "Der Betrüger versucht zu erraten",
+    "lastChanceDesc": "{name} hat eine letzte Chance, das Geheimwort zu erraten.",
+    "wordWas": "Das Wort war:",
+    "ifGuesses": "Falls sie es erraten, gewinnt der Betrüger..."
+  },
+  "gameOver": {
+    "groupWins": "Die Gruppe gewinnt!",
+    "imposterWins": "Der Betrüger gewinnt!",
+    "congrats": "Glückwunsch!",
+    "betterLuck": "Viel Glück beim nächsten Mal",
+    "imposterWas": "Der Betrüger war:",
+    "secretWordWas": "Das Geheimwort war:",
+    "imposterGuessed": "Der Betrüger hat geraten:",
+    "playAgain": "Nochmal spielen",
+    "waitingHost": "Warten auf den Host zum Starten eines weiteren Spiels...",
+    "caughtNoGuess": "Der Betrüger wurde erwischt und hat das Wort nicht erraten.",
+    "caughtTimeout": "Der Betrüger wurde erwischt und hat nicht rechtzeitig versucht zu raten.",
+    "wrongElimination": "Die Gruppe hat einen unschuldigen Spieler eliminiert.",
+    "correctGuess": "Der Betrüger hat das Wort richtig erraten.",
+    "everyoneWasImposter": "ALLE waren Betrüger!",
+    "trollModeActivated": "Troll-Modus aktiviert! Niemand kannte das Wort."
+  },
+  "player": {
+    "you": "Du",
+    "host": "Host",
+    "eliminated": "Eliminiert",
+    "disconnected": "Getrennt",
+    "kick": "Spieler rauswerfen",
+    "clueSubmitted": "Hinweis eingereicht",
+    "hasVoted": "Hat abgestimmt"
+  },
+  "validation": {
+    "invalidName": "Ungültiger Name",
+    "invalidCode": "Ungültiger Code",
+    "invalidClue": "Ungültiger Hinweis",
+    "nameEmpty": "Name kann nicht leer sein",
+    "nameMinLength": "Name muss mindestens 2 Zeichen lang sein",
+    "nameMaxLength": "Name darf nicht länger als 15 Zeichen sein",
+    "nameInvalidChars": "Name enthält ungültige Zeichen",
+    "codeLength": "Code muss 6 Zeichen lang sein",
+    "codeInvalidChars": "Code darf nur Buchstaben und Zahlen enthalten",
+    "clueEmpty": "Hinweis kann nicht leer sein",
+    "writeClue": "Schreibe einen Hinweis",
+    "clueSingleWord": "Hinweis muss ein einzelnes Wort sein",
+    "clueTooLong": "Hinweis ist zu lang",
+    "clueIsSecret": "Du kannst nicht das Geheimwort sagen",
+    "clueTooObvious": "Hinweis ist zu offensichtlich"
+  },
+  "errors": {
+    "connectionError": "Verbindungsfehler",
+    "couldNotConnect": "Konnte keine Verbindung zum Server herstellen",
+    "backToHome": "Zurück zur Startseite",
+    "createRoomError": "Fehler beim Erstellen des Raums",
+    "joinRoomError": "Fehler beim Beitreten zum Raum",
+    "kickedFromRoom": "Du wurdest aus dem Raum entfernt",
+    "hostLeft": "Der Host hat das Spiel verlassen. Der Raum wird geschlossen..."
+  },
+  "categories": {
+    "all": "Alle",
+    "animals": "Tiere",
+    "food": "Lebensmittel",
+    "places": "Orte",
+    "professions": "Berufe",
+    "movies": "Filme",
+    "sports": "Sport",
+    "objects": "Objekte",
+    "nature": "Natur"
+  },
+  "instructions": {
+    "title": "Spielanleitung",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "gotIt": "Verstanden!",
+    "howToPlay": "Wie spielt man?",
+    "steps": {
+      "objective": {
+        "title": "Spielziel",
+        "content": "Der Betrüger ist ein Social-Deduction-Spiel.\n\nNormale Spieler kennen das Geheimwort und müssen den Betrüger finden.\n\nDer Betrüger kennt das Wort NICHT und muss es herausfinden, ohne erwischt zu werden."
+      },
+      "setup": {
+        "title": "Vorbereitung",
+        "content": "Sie benötigen 3 bis 15 Spieler.\n\nEin Spieler erstellt den Raum und teilt den Code mit anderen.\n\nDer Host wählt eine Wortkategorie und konfiguriert Spieloptionen."
+      },
+      "secretWord": {
+        "title": "Das Geheimwort",
+        "content": "Wenn das Spiel beginnt, sieht jeder, ob er der Betrüger ist oder nicht.\n\nNormale Spieler sehen das Geheimwort.\n\nDer Betrüger sieht eine Nachricht, die anzeigt, dass er der Betrüger ist, und kann einen abstrakten Hinweis erhalten."
+      },
+      "imposter": {
+        "title": "Der Betrüger",
+        "content": "Der Betrüger muss so tun, als ob er das Wort kennt.\n\nSie können einen abstrakten Hinweis zum Wort erhalten, um sich besser zu tarnen.\n\nSie müssen überzeugend wirken, ohne zu offensichtlich oder zu vage zu sein."
+      },
+      "clues": {
+        "title": "Hinweis-Runden",
+        "content": "In jeder Runde gibt jeder EIN Wort als Hinweis.\n\nHinweise sollten sich auf das Geheimwort beziehen, ohne es direkt zu nennen.\n\nVorsicht! Wenn du zu offensichtlich bist, errät der Betrüger das Wort. Wenn du zu vage bist, schaust du verdächtig aus."
+      },
+      "voting": {
+        "title": "Abstimmung",
+        "content": "Nach den Hinweisen stimmen alle ab, wer ihrer Meinung nach der Betrüger ist.\n\nDer Spieler mit den meisten Stimmen wird eliminiert.\n\nWenn der Betrüger eliminiert wird, hat er noch eine letzte Chance, das Wort zu erraten."
+      },
+      "winning": {
+        "title": "Wer gewinnt?",
+        "content": "🏆 Die GRUPPE gewinnt, wenn:\n• Sie den Betrüger eliminieren UND dieser das Wort nicht errät\n\n🎭 Der BETRÜGER gewinnt, wenn:\n• Er nicht nach allen Runden entdeckt wird\n• Er eliminiert wird, aber das Wort richtig errät"
+      },
+      "tips": {
+        "title": "Tipps",
+        "content": "💡 Für normale Spieler:\n• Gib spezifische, aber nicht offensichtliche Hinweise\n• Achte auf die Hinweise anderer\n\n🕵️ Für den Betrüger:\n• Achte auf alle Hinweise\n• Gib generische Hinweise, die für viele Wörter funktionieren\n• Geraten Sie nicht in Panik!"
+      }
+    }
+  },
+  "qrScanner": {
+    "title": "QR-Code scannen",
+    "instructions": "Richten Sie Ihre Kamera auf einen Raum-QR-Code",
+    "starting": "Kamera wird gestartet...",
+    "permissionDenied": "Kameraberechtigung verweigert. Bitte aktivieren Sie den Kamerazugriff.",
+    "cameraError": "Kamera konnte nicht aufgerufen werden",
+    "invalidCode": "Ungültiger QR-Code"
+  },
+  "video": {
+    "title": "Videochat",
+    "toggle": "Video umschalten",
+    "on": "Video an",
+    "off": "Video aus",
+    "connecting": "Verbinden...",
+    "minimize": "Minimieren",
+    "expand": "Erweitern",
+    "close": "Video schließen"
+  },
+  "wordChange": {
+    "title": "Abstimmung: Wort ändern",
+    "initiateButton": "Geheimwort ändern",
+    "initiateHint": "Falls Sie vermuten, dass der Betrüger es bereits kennt",
+    "initiatedBy": "{name} hat eine Abstimmung zum Ändern des Wortes eingeleitet",
+    "description": "Falls die Mehrheit mit JA stimmt, wird das Geheimwort geändert und der Betrüger erhält 2 zusätzliche Hinweise.",
+    "imposterWarning": "Warnung! Der Betrüger stimmt auch ab, erhält aber zusätzliche Hinweise, falls es genehmigt wird.",
+    "votesProgress": "{voted} von {total} haben abgestimmt",
+    "voteYes": "JA, ändern",
+    "voteNo": "NEIN, behalten",
+    "voteSubmitted": "Abstimmung registriert",
+    "waitingOthers": "Warten auf andere...",
+    "resultPassed": "Das Wort wurde geändert!",
+    "resultFailed": "Die Abstimmung hat nicht bestanden",
+    "newWordSelected": "Ein neues Geheimwort wurde ausgewählt.",
+    "imposterGotHints": "Der Betrüger hat {count} zusätzliche Hinweise erhalten.",
+    "continueWithWord": "Behält das aktuelle Wort.",
+    "autoClose": "Schließt automatisch...",
+    "alreadyUsed": "Wortänderung wurde bereits diese Runde verwendet"
+  },
+  "like": {
+    "clickToLike": "Klicke hier, um dieses Spiel zu mögen",
+    "alreadyLiked": "Du hast dieses Spiel bereits gemocht!"
+  }
+}
