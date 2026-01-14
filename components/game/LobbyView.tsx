@@ -7,13 +7,14 @@ import { GameRoom } from '@/lib/types';
 import { Button, Card } from '@/components/ui';
 import { copyToClipboard, generateJoinUrl } from '@/lib/utils';
 import { useLocale } from '@/lib/i18n-context';
+import { Locale } from '@/i18n/config';
 import { getWordCategories } from '@/lib/words/index';
 import PlayerList from './PlayerList';
 
 interface LobbyViewProps {
   room: GameRoom;
   playerId: string;
-  onStartGame: (category: string, locale?: string) => void;
+  onStartGame: (category: string, locale?: Locale) => void;
   onKickPlayer: (playerId: string) => void;
   onUpdateSettings: (settings: Partial<GameRoom['settings']>) => void;
 }

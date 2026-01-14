@@ -1,3 +1,5 @@
+import { Locale } from '@/i18n/config';
+
 // Game phase state machine
 export type GamePhase =
   | 'lobby' // Esperando jugadores
@@ -14,6 +16,7 @@ export interface Player {
   id: string; // ID único de conexión
   name: string; // Nombre visible
   avatarColor: string; // Color del avatar
+  locale: Locale; // Idioma seleccionado del jugador
   isHost: boolean; // Puede iniciar el juego
   isImposter: boolean; // Es el impostor (solo se revela al final)
   isEliminated: boolean; // Eliminado por votación
@@ -27,7 +30,9 @@ export interface Player {
 export interface Clue {
   playerId: string;
   playerName: string;
-  word: string;
+  word: string; // Palabra original en el idioma del jugador
+  originalLocale: Locale; // Idioma en que se escribió la pista
+  translations?: Record<Locale, string>; // Cache de traducciones: { 'en': 'Madrid', 'de': 'Madrid', ... }
   round: number;
 }
 
@@ -92,10 +97,10 @@ export interface GameRoom {
 
 // Mensajes del cliente al servidor
 export type ClientMessage =
-  | { type: 'join'; playerName: string }
+  | { type: 'join'; playerName: string; locale?: Locale }
   | { type: 'leave' }
-  | { type: 'start-game'; category: string; locale?: string }
-  | { type: 'submit-clue'; word: string }
+  | { type: 'start-game'; category: string; locale?: Locale }
+  | { type: 'submit-clue'; word: string; locale?: Locale }
   | { type: 'cast-vote'; targetId: string }
   | { type: 'imposter-guess'; word: string }
   | { type: 'play-again' }

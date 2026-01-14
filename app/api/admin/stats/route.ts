@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getActiveRooms } from '@/lib/kv';
+import { getActiveRooms, getUsageHistory } from '@/lib/kv';
 
 // Verify Basic Auth credentials
 function verifyAuth(request: Request): boolean {
@@ -42,8 +42,15 @@ export async function GET(request: Request) {
   }
 
   try {
-    const stats = await getActiveRooms();
-    return NextResponse.json(stats);
+    const [stats, usageHistory] = await Promise.all([
+      getActiveRooms(),
+      getUsageHistory(30), // Last 30 days
+    ]);
+
+    return NextResponse.json({
+      ...stats,
+      usageHistory,
+    });
   } catch (error) {
     console.error('[Admin] Error fetching stats:', error);
     return NextResponse.json({ error: 'Error fetching stats' }, { status: 500 });

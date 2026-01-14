@@ -2,6 +2,18 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface RoomMetrics {
   roomCode: string;
@@ -13,12 +25,19 @@ interface RoomMetrics {
   lastHeartbeat: number;
 }
 
+interface DailyUsageData {
+  date: string;
+  roomsCreated: number;
+  activeUsers: number;
+}
+
 interface AdminStats {
   totalRooms: number;
   totalPlayers: number;
   totalRoomsCreated: number;
   totalLikes: number;
   rooms: RoomMetrics[];
+  usageHistory: DailyUsageData[];
 }
 
 const REFRESH_INTERVAL = 10000; // 10 seconds
@@ -157,6 +176,107 @@ export default function AdminPage() {
             <p className="text-4xl font-bold text-red-600 mt-2">❤️ {stats?.totalLikes || 0}</p>
           </Card>
         </div>
+
+        {/* Usage Chart */}
+        {stats?.usageHistory && stats.usageHistory.length > 0 && (
+          <Card>
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Usage History (Last 30 Days)</h2>
+            <div className="space-y-6">
+              {/* Chart.js Bar Chart */}
+              <div className="h-64 sm:h-80">
+                <Bar
+                  data={{
+                    labels: stats.usageHistory.map((d) =>
+                      new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                    ),
+                    datasets: [
+                      {
+                        label: 'Rooms Created',
+                        data: stats.usageHistory.map((d) => d.roomsCreated),
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderColor: 'rgb(99, 102, 241)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                      },
+                      {
+                        label: 'Active Users',
+                        data: stats.usageHistory.map((d) => d.activeUsers),
+                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                        borderColor: 'rgb(34, 197, 94)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20,
+                        },
+                      },
+                      tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8,
+                      },
+                    },
+                    scales: {
+                      x: {
+                        grid: {
+                          display: false,
+                        },
+                        ticks: {
+                          maxRotation: 45,
+                          minRotation: 45,
+                          font: {
+                            size: 10,
+                          },
+                        },
+                      },
+                      y: {
+                        beginAtZero: true,
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.05)',
+                        },
+                        ticks: {
+                          stepSize: 1,
+                        },
+                      },
+                    },
+                    interaction: {
+                      mode: 'nearest',
+                      axis: 'x',
+                      intersect: false,
+                    },
+                  }}
+                />
+              </div>
+
+              {/* Summary Stats */}
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-indigo-600">
+                    {stats.usageHistory.reduce((sum, d) => sum + d.roomsCreated, 0)}
+                  </p>
+                  <p className="text-xs text-gray-500">Total Rooms (30 days)</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.usageHistory.reduce((sum, d) => sum + d.activeUsers, 0)}
+                  </p>
+                  <p className="text-xs text-gray-500">Total Users (30 days)</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Rooms List */}
         <Card>

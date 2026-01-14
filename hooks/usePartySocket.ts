@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PartySocket from 'partysocket';
-import { GameRoom, ClientMessage, ServerMessage } from '@/lib/types';
+import { ClientMessage, GameRoom, ServerMessage } from '@/lib/types';
+import { Locale } from '@/i18n/config';
 
 const PARTYKIT_HOST = process.env.NEXT_PUBLIC_PARTYKIT_HOST || 'localhost:1999';
 
@@ -184,8 +185,8 @@ export function usePartySocket({
 
   // Acciones del juego
   const join = useCallback(
-    (playerName: string) => {
-      send({ type: 'join', playerName });
+    (playerName: string, locale?: Locale) => {
+      send({ type: 'join', playerName, locale });
     },
     [send]
   );
@@ -195,15 +196,15 @@ export function usePartySocket({
   }, [send]);
 
   const startGame = useCallback(
-    (category: string, locale?: string) => {
+    (category: string, locale?: Locale) => {
       send({ type: 'start-game', category, locale });
     },
     [send]
   );
 
   const submitClue = useCallback(
-    (word: string) => {
-      send({ type: 'submit-clue', word });
+    (word: string, locale?: Locale) => {
+      send({ type: 'submit-clue', word, locale });
     },
     [send]
   );

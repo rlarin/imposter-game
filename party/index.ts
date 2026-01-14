@@ -7,6 +7,7 @@ import {
   Player,
   ServerMessage,
 } from '@/lib/types';
+import { Locale } from '@/i18n/config';
 import {
   advancePhase,
   allCluesSubmitted,
@@ -24,7 +25,6 @@ import {
   startNextRound,
   submitClue,
 } from '@/lib/game-logic';
-import { Locale } from '@/i18n/config';
 import { generatePlayerId, getRandomAvatarColor } from '@/lib/utils'; // Mapa de conexiones a IDs de jugador
 
 // Mapa de conexiones a IDs de jugador
@@ -181,9 +181,10 @@ export default class GameServer implements Party.Server {
   }
 
   // Manejar jugador uniéndose
-  private async handleJoin(conn: Party.Connection, playerName: string) {
+  private async handleJoin(conn: Party.Connection, playerName: string, playerLocale?: Locale) {
     const playerId = generatePlayerId();
     this.connectionPlayers.set(conn.id, playerId);
+    const locale = playerLocale || 'es';
 
     if (!this.room) {
       // Crear nueva sala
@@ -191,6 +192,7 @@ export default class GameServer implements Party.Server {
         id: playerId,
         name: playerName,
         avatarColor: getRandomAvatarColor(),
+        locale,
         isHost: true,
         isImposter: false,
         isEliminated: false,
@@ -262,6 +264,7 @@ export default class GameServer implements Party.Server {
           id: playerId,
           name: playerName,
           avatarColor: getRandomAvatarColor(),
+          locale,
           isHost: false,
           isImposter: false,
           isEliminated: false,

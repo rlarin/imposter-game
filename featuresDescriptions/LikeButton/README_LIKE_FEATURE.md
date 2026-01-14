@@ -382,19 +382,19 @@ All documentation files explain:
 
 Documentation:
 
-- [Feature Summary](LIKE_FEATURE_SUMMARY.md)
-- [Testing Guide](LIKE_FEATURE_TESTING.md)
-- [API Reference](LIKE_FEATURE_API_DOCS.md)
-- [Quick Reference](LIKE_FEATURE_QUICKREF.md)
-- [Architecture](ARCHITECTURE_DIAGRAMS.md)
-- [Verification](FINAL_VERIFICATION_CHECKLIST.md)
+- [Feature Summary](featuresDescriptions/LikeButton/LIKE_FEATURE_SUMMARY.mdkeButton/LIKE_FEATURE_SUMMARY.md)
+- [Testing Guide](featuresDescriptions/LikeButton/LIKE_FEATURE_TESTING.mdkeButton/LIKE_FEATURE_TESTING.md)
+- [API Reference](featuresDescriptions/LikeButton/LIKE_FEATURE_API_DOCS.mdeButton/LIKE_FEATURE_API_DOCS.md)
+- [Quick Reference](featuresDescriptions/LikeButton/LIKE_FEATURE_QUICKREF.mdeButton/LIKE_FEATURE_QUICKREF.md)
+- [Architecture](featuresDescriptions/LikeButton/ARCHITECTURE_DIAGRAMS.mdeButton/ARCHITECTURE_DIAGRAMS.md)
+- [Verification](featuresDescriptions/LikeButton/FINAL_VERIFICATION_CHECKLIST.md/FINAL_VERIFICATION_CHECKLIST.md)
 
 Code Locations:
 
-- [LikeButton Component](components/ui/LikeButton.tsx)
+- [LikeButton Component](../../components/ui/LikeButton.tsx)
 - [API Routes](app/api/likes/)
-- [Format Function](lib/utils.ts#L221)
-- [KV Integration](lib/kv.ts#L214)
+- [Format Function](../../lib/utils.ts#L221)
+- [KV Integration](../../lib/kv.ts#L214)
 
 ## 🎯 Next Steps
 

@@ -24,7 +24,21 @@ export interface AdminStats {
 const ROOMS_PREFIX = 'rooms:';
 const ACTIVE_ROOMS_SET = 'active-rooms';
 const TOTAL_ROOMS_CREATED = 'total-rooms-created';
+const DAILY_ROOMS_PREFIX = 'stats:rooms:';
+const DAILY_USERS_PREFIX = 'stats:users:';
 const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+
+// Daily usage data point
+export interface DailyUsageData {
+  date: string;
+  roomsCreated: number;
+  activeUsers: number;
+}
+
+// Get current date string in YYYY-MM-DD format
+function getDateString(date: Date = new Date()): string {
+  return date.toISOString().split('T')[0];
+}
 
 // Check if Redis is configured
 function isRedisConfigured(): boolean {
@@ -206,5 +220,72 @@ export async function getTotalLikes(): Promise<number> {
   } catch (error) {
     console.error('[Redis] Error getting total likes:', error);
     return 0;
+  }
+}
+
+// Increment daily rooms created counter
+export async function incrementDailyRoomsCreated(): Promise<void> {
+  const redis = getRedis();
+  if (!redis) return;
+
+  try {
+    const dateKey = `${DAILY_ROOMS_PREFIX}${getDateString()}`;
+    await redis.incr(dateKey);
+    // Set expiry to 90 days to auto-cleanup old data
+    await redis.expire(dateKey, 90 * 24 * 60 * 60);
+  } catch (error) {
+    console.error('[Redis] Error incrementing daily rooms:', error);
+  }
+}
+
+// Track active user for today (using player ID)
+export async function trackActiveUser(playerId: string): Promise<void> {
+  const redis = getRedis();
+  if (!redis) return;
+
+  try {
+    const dateKey = `${DAILY_USERS_PREFIX}${getDateString()}`;
+    await redis.sadd(dateKey, playerId);
+    // Set expiry to 90 days to auto-cleanup old data
+    await redis.expire(dateKey, 90 * 24 * 60 * 60);
+  } catch (error) {
+    console.error('[Redis] Error tracking active user:', error);
+  }
+}
+
+// Get usage data for the last N days
+export async function getUsageHistory(days: number = 30): Promise<DailyUsageData[]> {
+  const redis = getRedis();
+  if (!redis) return [];
+
+  try {
+    const result: DailyUsageData[] = [];
+    const today = new Date();
+
+    // Generate date keys for the last N days
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = getDateString(date);
+
+      const roomsKey = `${DAILY_ROOMS_PREFIX}${dateStr}`;
+      const usersKey = `${DAILY_USERS_PREFIX}${dateStr}`;
+
+      const [roomsCreated, activeUsers] = await Promise.all([
+        redis.get<number>(roomsKey),
+        redis.scard(usersKey),
+      ]);
+
+      result.push({
+        date: dateStr,
+        roomsCreated: roomsCreated ?? 0,
+        activeUsers: activeUsers ?? 0,
+      });
+    }
+
+    return result;
+  } catch (error) {
+    console.error('[Redis] Error getting usage history:', error);
+    return [];
   }
 }

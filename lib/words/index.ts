@@ -1,8 +1,10 @@
 import { esWordCategories } from './es';
 import { enWordCategories } from './en';
+import { deWordCategories } from './de';
 import { nlWordCategories } from './nl';
 import { esWordHints } from './es-hints';
 import { enWordHints } from './en-hints';
+import { deWordHints } from './de-hints';
 import { nlWordHints } from './nl-hints';
 import { Locale } from '@/i18n/config';
 import { WordCategory, WordHintsMap } from '../types';
@@ -10,12 +12,14 @@ import { WordCategory, WordHintsMap } from '../types';
 const wordsByLocale: Record<Locale, WordCategory[]> = {
   es: esWordCategories,
   en: enWordCategories,
+  de: deWordCategories,
   nl: nlWordCategories,
 };
 
 const hintsByLocale: Record<Locale, WordHintsMap> = {
   es: esWordHints,
   en: enWordHints,
+  de: deWordHints,
   nl: nlWordHints,
 };
 
@@ -23,6 +27,7 @@ const hintsByLocale: Record<Locale, WordHintsMap> = {
 const allCategoryNames: Record<Locale, string> = {
   es: 'Todas',
   en: 'All',
+  de: 'Alle',
   nl: 'Alle',
 };
 
