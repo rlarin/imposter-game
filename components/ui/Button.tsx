@@ -4,10 +4,26 @@ import { ButtonHTMLAttributes, forwardRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'soft';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
+
+const variants = {
+  primary:
+    'bg-accent hover:bg-accent-hover text-white shadow-[0_10px_28px_rgba(124,58,237,0.35)] disabled:shadow-none',
+  secondary: 'bg-white/6 hover:bg-white/10 border border-line-strong text-fg',
+  danger:
+    'bg-danger hover:bg-danger-hover text-white shadow-[0_10px_28px_rgba(225,29,72,0.30)] disabled:shadow-none',
+  ghost: 'bg-transparent hover:bg-white/6 text-fg-soft',
+  soft: 'bg-accent/18 hover:bg-accent/26 border border-accent-soft/40 text-accent-fg',
+};
+
+const sizes = {
+  sm: 'h-10 px-3.5 text-sm rounded-xl gap-1.5',
+  md: 'h-11 px-5 text-[15px] rounded-xl gap-2',
+  lg: 'h-14 px-7 text-base rounded-2xl gap-2',
+};
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -15,34 +31,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const t = useTranslations();
-    const baseStyles =
-      'font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
-
-    const variants = {
-      primary: 'bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500',
-      secondary:
-        'bg-gray-200 hover:bg-gray-300 text-gray-900 focus:ring-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white',
-      danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500',
-      ghost:
-        'bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-400 dark:hover:bg-gray-800 dark:text-gray-300',
-    };
-
-    const sizes = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-5 py-2.5 text-base',
-      lg: 'px-8 py-4 text-lg',
-    };
 
     return (
       <button
         ref={ref}
-        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+        className={`inline-flex items-center justify-center font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 ${variants[variant]} ${sizes[size]} ${className}`}
         disabled={disabled || isLoading}
         {...props}
       >
         {isLoading ? (
           <span className="flex items-center justify-center gap-2">
-            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+            <svg className="animate-spin size-4" viewBox="0 0 24 24" aria-hidden="true">
               <circle
                 className="opacity-25"
                 cx="12"

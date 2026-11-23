@@ -2,7 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
-import { Button, Card, Avatar } from '@/components/ui';
+import { ActionBar, ActionBarSpacer, Avatar, Button } from '@/components/ui';
+import { Stage, StageIcon } from './Stage';
 
 interface GameOverProps {
   room: GameRoom;
@@ -38,111 +39,85 @@ export default function GameOver({ room, playerId, onPlayAgain }: GameOverProps)
     }
   };
 
+  const guessedRight =
+    room.imposterGuess && room.imposterGuess.toLowerCase() === room.secretWord?.toLowerCase();
+
   return (
-    <div className="flex items-center justify-center min-h-[60vh] px-4">
-      <Card variant="elevated" padding="lg" className="text-center max-w-md w-full">
-        {/* Resultado principal */}
-        <div
-          className={`
-          text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4
-          ${everyoneWasImposter ? 'animate-spin' : playerWon ? 'animate-bounce' : 'animate-pulse'}
-        `}
-        >
-          {everyoneWasImposter ? '🎭' : playerWon ? '🎉' : '😢'}
+    <>
+      <Stage>
+        <StageIcon
+          name={everyoneWasImposter ? 'sparkles' : playerWon ? 'trophy' : 'frown'}
+          tone={everyoneWasImposter ? 'accent' : playerWon ? 'success' : 'danger'}
+          className={playerWon || everyoneWasImposter ? 'animate-bounce' : ''}
+        />
+
+        <div>
+          <h1
+            className={`font-display text-3xl font-bold lg:text-4xl ${
+              everyoneWasImposter ? 'text-accent-fg' : groupWon ? 'text-success' : 'text-danger-fg'
+            }`}
+          >
+            {everyoneWasImposter
+              ? t('gameOver.everyoneWasImposter')
+              : groupWon
+                ? t('gameOver.groupWins')
+                : t('gameOver.imposterWins')}
+          </h1>
+          <p className="mt-2 text-lg text-muted">
+            {everyoneWasImposter
+              ? t('gameOver.trollModeActivated')
+              : playerWon
+                ? t('gameOver.congrats')
+                : t('gameOver.betterLuck')}
+          </p>
         </div>
 
-        <h2
-          className={`
-          text-2xl sm:text-3xl font-bold mb-1 sm:mb-2
-          ${
-            everyoneWasImposter
-              ? 'text-purple-600 dark:text-purple-400'
-              : groupWon
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-red-600 dark:text-red-400'
-          }
-        `}
-        >
-          {everyoneWasImposter
-            ? t('gameOver.everyoneWasImposter')
-            : groupWon
-              ? t('gameOver.groupWins')
-              : t('gameOver.imposterWins')}
-        </h2>
-
-        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
-          {everyoneWasImposter
-            ? t('gameOver.trollModeActivated')
-            : playerWon
-              ? t('gameOver.congrats')
-              : t('gameOver.betterLuck')}
-        </p>
-
-        {/* Info del impostor (solo si NO es troll mode) */}
-        {!everyoneWasImposter && (
-          <div className="p-3 sm:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-4 sm:mb-6">
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
-              {t('gameOver.imposterWas')}
-            </p>
-            {imposterPlayer && (
-              <div className="flex items-center justify-center gap-2 sm:gap-3">
-                <Avatar name={imposterPlayer.name} color={imposterPlayer.avatarColor} size="md" />
-                <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-                  {imposterPlayer.name}
-                </span>
+        <div className="grid w-full gap-3 sm:grid-cols-2">
+          {!everyoneWasImposter && imposterPlayer && (
+            <div className="flex flex-col items-center gap-2 rounded-2xl border border-danger-fg/35 bg-danger/10 p-4">
+              <p className="text-xs font-semibold text-danger-fg">{t('gameOver.imposterWas')}</p>
+              <div className="flex items-center gap-2.5">
+                <Avatar name={imposterPlayer.name} color={imposterPlayer.avatarColor} size="sm" />
+                <span className="font-display text-xl font-bold">{imposterPlayer.name}</span>
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Palabra secreta */}
-        <div className="p-3 sm:p-4 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl mb-4 sm:mb-6">
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            {t('gameOver.secretWordWas')}
-          </p>
-          <p className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
-            {room.secretWord}
-          </p>
-
-          {/* Si el impostor intentó adivinar */}
-          {room.imposterGuess && (
-            <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-indigo-200 dark:border-indigo-800">
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                {t('gameOver.imposterGuessed')}
-              </p>
-              <p
-                className={`
-                text-lg sm:text-xl font-bold
-                ${
-                  room.imposterGuess.toLowerCase() === room.secretWord?.toLowerCase()
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-red-600 dark:text-red-400'
-                }
-              `}
-              >
-                {room.imposterGuess}
-                {room.imposterGuess.toLowerCase() === room.secretWord?.toLowerCase() ? ' ✓' : ' ✗'}
-              </p>
             </div>
           )}
+
+          <div
+            className={`flex flex-col items-center gap-1 rounded-2xl border border-accent-soft/35 bg-accent/16 p-4 ${
+              everyoneWasImposter || !imposterPlayer ? 'sm:col-span-2' : ''
+            }`}
+          >
+            <p className="text-xs font-semibold text-accent-fg">{t('gameOver.secretWordWas')}</p>
+            <p className="font-display text-2xl font-bold uppercase">{room.secretWord}</p>
+            {room.imposterGuess && (
+              <p
+                className={`text-sm font-semibold ${guessedRight ? 'text-success' : 'text-danger-fg'}`}
+              >
+                {t('gameOver.imposterGuessed')} {room.imposterGuess} {guessedRight ? '✓' : '✗'}
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Explicación de cómo ganó */}
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-6">
-          {getWinReason()}
-        </p>
+        <p className="text-sm text-muted">{getWinReason()}</p>
+      </Stage>
 
-        {/* Botón de jugar de nuevo */}
+      <ActionBar className="lg:mt-5">
         {isHost ? (
-          <Button onClick={onPlayAgain} size="lg" className="w-full">
-            {t('gameOver.playAgain')}
-          </Button>
+          <div className="mx-auto max-w-xl">
+            <Button onClick={onPlayAgain} size="lg" className="w-full">
+              {t('gameOver.playAgain')}
+            </Button>
+          </div>
         ) : (
-          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+          <div className="mx-auto flex h-14 max-w-xl items-center justify-center gap-2.5 rounded-2xl bg-white/5 text-[15px] text-fg-soft lg:border lg:border-line">
+            <span className="size-2 animate-pulse rounded-full bg-accent-soft" />
             {t('gameOver.waitingHost')}
-          </p>
+          </div>
         )}
-      </Card>
-    </div>
+      </ActionBar>
+      <ActionBarSpacer />
+    </>
   );
 }

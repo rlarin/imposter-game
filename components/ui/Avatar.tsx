@@ -1,13 +1,34 @@
 'use client';
 
+import Icon from './Icon';
+
 interface AvatarProps {
   name: string;
   color: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   isConnected?: boolean;
   isEliminated?: boolean;
+  /** Highlight ring for the current player. */
+  isSelf?: boolean;
+  showStatus?: boolean;
   className?: string;
 }
+
+const sizes = {
+  xs: 'size-7 text-xs',
+  sm: 'size-9 text-sm',
+  md: 'size-12 text-lg',
+  lg: 'size-14 text-xl',
+  xl: 'size-16 text-2xl',
+};
+
+const dotSizes = {
+  xs: 'size-2',
+  sm: 'size-2.5',
+  md: 'size-3',
+  lg: 'size-3.5',
+  xl: 'size-4',
+};
 
 export default function Avatar({
   name,
@@ -15,49 +36,33 @@ export default function Avatar({
   size = 'md',
   isConnected = true,
   isEliminated = false,
+  isSelf = false,
+  showStatus = false,
   className = '',
 }: AvatarProps) {
-  const sizes = {
-    sm: 'w-8 h-8 text-sm',
-    md: 'w-12 h-12 text-lg',
-    lg: 'w-16 h-16 text-2xl',
-  };
-
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <div className={`relative inline-block ${className}`}>
+    <div className={`relative inline-block shrink-0 ${className}`}>
       <div
         className={`
           ${sizes[size]}
           rounded-full flex items-center justify-center font-bold text-white
-          transition-all duration-200
+          [text-shadow:0_1px_2px_rgba(0,0,0,0.35)] transition-all duration-200
+          ${isSelf ? 'ring-2 ring-accent-soft ring-offset-2 ring-offset-ink' : ''}
           ${isEliminated ? 'opacity-40 grayscale' : ''}
-          ${!isConnected && !isEliminated ? 'opacity-60' : ''}
+          ${!isConnected && !isEliminated ? 'opacity-50' : ''}
         `}
         style={{ backgroundColor: color }}
       >
-        {isEliminated ? (
-          <svg className="w-1/2 h-1/2" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        ) : (
-          initial
-        )}
+        {isEliminated ? <Icon name="x" className="size-1/2" /> : initial}
       </div>
 
-      {/* Connection status indicator */}
-      {!isEliminated && (
+      {showStatus && !isEliminated && (
         <span
-          className={`
-            absolute bottom-0 right-0 block rounded-full ring-2 ring-white dark:ring-gray-900
-            ${size === 'sm' ? 'w-2.5 h-2.5' : size === 'md' ? 'w-3 h-3' : 'w-4 h-4'}
-            ${isConnected ? 'bg-green-500' : 'bg-gray-400'}
-          `}
+          className={`absolute bottom-0 right-0 block rounded-full ring-2 ring-ink ${dotSizes[size]} ${
+            isConnected ? 'bg-success' : 'bg-subtle'
+          }`}
         />
       )}
     </div>

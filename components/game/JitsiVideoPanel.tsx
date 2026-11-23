@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Icon } from '@/components/ui';
 
 // Public Jitsi server; must allow iframe embedding (no X-Frame-Options / frame-ancestors block).
 // meet.ffmuc.net stopped allowing embeds in 2026. Override with NEXT_PUBLIC_JITSI_DOMAIN.
@@ -21,7 +22,7 @@ export default function JitsiVideoPanel({
   onClose,
 }: JitsiVideoPanelProps) {
   const t = useTranslations();
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleClose = useCallback(() => {
@@ -50,98 +51,83 @@ export default function JitsiVideoPanel({
 
   if (!isOpen) return null;
 
+  const iconButton =
+    'flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-white/8 hover:text-fg';
+
+  // Floating window on mobile/tablet (never pushes the game content);
+  // docked into the right column on large desktops (xl:static inside the aside).
   return (
-    <div
-      className={`fixed z-50 transition-all duration-300 ease-in-out ${
-        isMinimized
-          ? 'bottom-4 right-4 w-24 h-24 rounded-full overflow-hidden shadow-lg'
-          : 'top-0 left-0 right-0 h-[35vh] sm:h-[30vh] bg-gray-900/95 shadow-xl'
+    <section
+      aria-label={t('ui.videoTitle')}
+      className={`fixed z-40 flex flex-col overflow-hidden rounded-2xl border border-line-strong bg-surface shadow-[0_16px_40px_rgba(0,0,0,0.55)] transition-all duration-300 animate-rise xl:static xl:z-auto xl:w-full xl:rounded-[20px] xl:border-line xl:shadow-none ${
+        isExpanded
+          ? 'inset-x-2 top-[76px] h-[45dvh] sm:inset-x-6 xl:h-[520px]'
+          : 'right-3 bottom-28 h-60 w-44 sm:h-72 sm:w-60 xl:h-[340px]'
       }`}
     >
-      {/* Header - only show when not minimized */}
-      {!isMinimized && (
-        <div className="flex items-center justify-between px-3 py-2 bg-gray-800 border-b border-gray-700">
-          <div className="flex items-center gap-2">
-            <span className="text-white/80 text-sm font-medium">{t('video.title')}</span>
-            {isLoading && (
-              <span className="text-xs text-gray-400 animate-pulse">{t('video.connecting')}</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Open in new tab button */}
-            <a
-              href={jitsiUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
-              title="Open in new tab"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-            </a>
-            <button
-              onClick={() => setIsMinimized(true)}
-              className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
-              title={t('video.minimize')}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={handleClose}
-              className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded transition-colors"
-              title={t('video.close')}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="flex h-11 shrink-0 items-center gap-1 pl-3 pr-1">
+        <span className="size-2 rounded-full bg-danger-fg" />
+        <span className="ml-1.5 flex-1 truncate text-xs font-semibold xl:text-sm">
+          {isLoading ? t('video.connecting') : t('ui.videoTitle')}
+        </span>
+        <button
+          type="button"
+          onClick={() => setIsExpanded((v) => !v)}
+          className={iconButton}
+          aria-label={isExpanded ? t('video.minimize') : t('video.expand')}
+          title={isExpanded ? t('video.minimize') : t('video.expand')}
+        >
+          <Icon name={isExpanded ? 'minimize' : 'maximize'} className="size-4" />
+        </button>
+        <a
+          href={jitsiUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${iconButton} hidden sm:flex`}
+          aria-label={t('ui.openInNewTab')}
+          title={t('ui.openInNewTab')}
+        >
+          <Icon name="external" className="size-4" />
+        </a>
+        <button
+          type="button"
+          onClick={handleClose}
+          className={`${iconButton} hover:text-danger-fg`}
+          aria-label={t('video.close')}
+          title={t('video.close')}
+        >
+          <Icon name="x" className="size-4" />
+        </button>
+      </div>
 
-      {/* Jitsi iframe */}
       <iframe
         src={jitsiUrl}
-        className={`bg-gray-900 ${isMinimized ? 'w-full h-full' : 'w-full h-[calc(100%-40px)]'}`}
+        title={t('ui.videoTitle')}
+        className="w-full flex-1 bg-surface-3"
         allow="camera; microphone; fullscreen; display-capture; autoplay"
         onLoad={() => setIsLoading(false)}
       />
+    </section>
+  );
+}
 
-      {/* Minimized expand button */}
-      {isMinimized && (
-        <button
-          onClick={() => setIsMinimized(false)}
-          className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/20 transition-colors"
-          title={t('video.expand')}
-        >
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
-            />
-          </svg>
-        </button>
-      )}
-    </div>
+export function VideoInvite({ onJoin }: { onJoin: () => void }) {
+  const t = useTranslations();
+  return (
+    <section className="flex flex-col gap-3 rounded-[20px] border border-line bg-surface p-4">
+      <div className="flex items-center gap-2">
+        <span className="size-2 rounded-full bg-subtle" />
+        <h2 className="font-display text-lg font-semibold">{t('ui.videoTitle')}</h2>
+      </div>
+      <p className="text-sm leading-relaxed text-muted">{t('ui.videoHint')}</p>
+      <button
+        type="button"
+        onClick={onJoin}
+        className="flex h-11 items-center justify-center gap-2 rounded-xl border border-accent-soft/40 bg-accent/18 text-sm font-semibold text-accent-fg transition-colors hover:bg-accent/26"
+      >
+        <Icon name="video" className="size-4" />
+        {t('ui.videoJoin')}
+      </button>
+    </section>
   );
 }

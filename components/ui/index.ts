@@ -4,3 +4,8 @@ export { default as Card } from './Card';
 export { default as Timer } from './Timer';
 export { default as Avatar } from './Avatar';
 export { default as LikeButton } from './LikeButton';
+export { default as Icon } from './Icon';
+export type { IconName } from './Icon';
+export { default as Switch } from './Switch';
+export { default as Segmented } from './Segmented';
+export { default as ActionBar, ActionBarSpacer } from './ActionBar';

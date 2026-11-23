@@ -1,15 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
 import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
-import { Button, Card } from '@/components/ui';
-import { copyToClipboard, generateJoinUrl } from '@/lib/utils';
+import {
+  ActionBar,
+  ActionBarSpacer,
+  Avatar,
+  Button,
+  Card,
+  Icon,
+  Segmented,
+  Switch,
+} from '@/components/ui';
 import { useLocale } from '@/lib/i18n-context';
 import { Locale } from '@/i18n/config';
 import { getWordCategories } from '@/lib/words/index';
-import PlayerList from './PlayerList';
+import { InvitePanel } from './SidePanels';
 
 interface LobbyViewProps {
   room: GameRoom;
@@ -17,7 +23,11 @@ interface LobbyViewProps {
   onStartGame: (category: string, locale?: Locale) => void;
   onKickPlayer: (playerId: string) => void;
   onUpdateSettings: (settings: Partial<GameRoom['settings']>) => void;
+  onCopied?: (message: string) => void;
 }
+
+const MIN_PLAYERS = 3;
+const MAX_PLAYERS = 15;
 
 export default function LobbyView({
   room,
@@ -25,398 +35,271 @@ export default function LobbyView({
   onStartGame,
   onKickPlayer,
   onUpdateSettings,
+  onCopied,
 }: LobbyViewProps) {
   const t = useTranslations();
   const { locale } = useLocale();
-  const [copied, setCopied] = useState(false);
   const selectedCategory = room.settings.category;
 
   const isHost = playerId === room.hostId;
-  const canStart = room.players.filter((p) => p.isConnected).length >= 3;
-  const joinUrl = generateJoinUrl(room.roomCode);
+  const host = room.players.find((p) => p.id === room.hostId);
+  const connectedPlayers = room.players.filter((p) => p.isConnected);
+  const canStart = connectedPlayers.length >= MIN_PLAYERS;
   const wordCategories = getWordCategories(locale);
   const timerEnabled = room.settings.timerEnabled ?? true;
   const currentTimeMinutes = Math.round((room.settings.clueTimeLimit || 180) / 60);
   const imposterHintEnabled = room.settings.imposterHintEnabled ?? false;
   const trollModeEnabled = room.settings.trollModeEnabled ?? false;
-
-  const handleCopyLink = async () => {
-    const success = await copyToClipboard(joinUrl);
-    if (success) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleCopyCode = async () => {
-    const success = await copyToClipboard(room.roomCode);
-    if (success) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleCategoryChange = (category: string) => {
-    if (isHost) {
-      onUpdateSettings({ category });
-    }
-  };
-
-  const handleTimerToggle = () => {
-    if (isHost) {
-      onUpdateSettings({ timerEnabled: !timerEnabled });
-    }
-  };
-
-  const handleTimeLimitChange = (minutes: number) => {
-    if (isHost) {
-      const seconds = minutes * 60;
-      onUpdateSettings({ clueTimeLimit: seconds, voteTimeLimit: seconds });
-    }
-  };
-
-  const handleImposterHintToggle = () => {
-    if (isHost) {
-      onUpdateSettings({ imposterHintEnabled: !imposterHintEnabled });
-    }
-  };
-
-  const handleTrollModeToggle = () => {
-    if (isHost) {
-      onUpdateSettings({ trollModeEnabled: !trollModeEnabled });
-    }
-  };
-
-  const handleClueRoundsChange = (rounds: number) => {
-    if (isHost) {
-      onUpdateSettings({ clueRounds: rounds });
-    }
-  };
+  const currentClueRounds = room.settings.clueRounds ?? 2;
+  const categoryName =
+    wordCategories.find((c) => c.id === selectedCategory)?.name ?? selectedCategory;
 
   const timeOptions = [1, 2, 3, 5]; // Minutes
   const roundOptions = [2, 3, 5]; // Number of rounds before voting
-  const currentClueRounds = room.settings.clueRounds ?? 2;
+
+  const update = (settings: Partial<GameRoom['settings']>) => {
+    if (isHost) onUpdateSettings(settings);
+  };
+
+  const summary = [
+    categoryName,
+    timerEnabled ? t('ui.settingsSummaryTimer', { minutes: currentTimeMinutes }) : t('ui.noTimer'),
+    t('ui.settingsSummaryRounds', { count: currentClueRounds }),
+    imposterHintEnabled ? t('ui.hintOn') : t('ui.hintOff'),
+    ...(trollModeEnabled ? [t('ui.trollOn')] : []),
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Código de sala y QR */}
-      <Card>
-        <div className="flex items-center justify-between gap-4">
-          {/* Room Code Section */}
-          <div className="flex-1 text-center">
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
-              {t('lobby.roomCode')}
-            </p>
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
-              <span className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-widest text-indigo-600 dark:text-indigo-400">
-                {room.roomCode}
-              </span>
-              <button
-                onClick={handleCopyCode}
-                className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
-                title={t('lobby.copyCode')}
-              >
-                {copied ? (
-                  <svg
-                    className="w-5 h-5 sm:w-6 sm:h-6 text-green-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+    <div className="flex flex-col gap-4 lg:gap-5">
+      <div className="hidden lg:block">
+        <h1 className="font-display text-3xl font-bold">{t('ui.lobbyTitle')}</h1>
+        <p className="mt-1 text-[15px] text-muted">
+          {isHost ? t('ui.lobbyHostSub') : t('ui.lobbyGuestSub', { name: host?.name ?? '' })}
+        </p>
+      </div>
+
+      <div className="xl:hidden">
+        <InvitePanel roomCode={room.roomCode} compact onCopied={onCopied} />
+      </div>
+
+      {/* Players (mobile/tablet; desktop shows the side panel) */}
+      <section className="lg:hidden">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="font-display text-lg font-semibold">{t('lobby.players')}</h2>
+          <span className="text-[13px] text-muted">
+            {t('ui.playersOf', { count: connectedPlayers.length, max: MAX_PLAYERS })}
+          </span>
+        </div>
+        <ul className="grid grid-cols-4 gap-x-2 gap-y-3 sm:grid-cols-6">
+          {connectedPlayers.map((player) => {
+            const isSelf = player.id === playerId;
+            return (
+              <li key={player.id} className="relative flex flex-col items-center gap-1.5">
+                <div className="relative">
+                  <Avatar name={player.name} color={player.avatarColor} size="lg" isSelf={isSelf} />
+                  {player.id === room.hostId && (
+                    <span
+                      title={t('player.host')}
+                      className="absolute -right-1 -top-1 flex size-5.5 items-center justify-center rounded-full border-2 border-ink bg-amber-400 text-ink"
+                    >
+                      <Icon name="crown" className="size-3" />
+                    </span>
+                  )}
+                  {isHost && !isSelf && (
+                    <button
+                      type="button"
+                      onClick={() => onKickPlayer(player.id)}
+                      aria-label={`${t('player.kick')}: ${player.name}`}
+                      className="absolute -left-2 -top-2 flex size-7 items-center justify-center rounded-full border-2 border-ink bg-surface-3 text-muted transition-colors hover:bg-danger hover:text-white"
+                    >
+                      <Icon name="x" className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+                <span className="max-w-full truncate text-xs font-medium text-fg-soft">
+                  {isSelf ? t('player.you') : player.name}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        {!canStart && (
+          <p className="mt-3 text-center text-xs font-medium text-hint">{t('lobby.minPlayers')}</p>
+        )}
+      </section>
+
+      {/* Settings */}
+      {isHost ? (
+        <Card className="flex flex-col gap-5">
+          <h2 className="font-display text-lg font-semibold">{t('ui.settingsTitle')}</h2>
+
+          <div className="flex flex-col gap-2.5">
+            <span className="text-[13px] font-semibold text-muted">{t('lobby.categoryTitle')}</span>
+            <div
+              role="radiogroup"
+              aria-label={t('lobby.categoryTitle')}
+              className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 py-0.5 sm:-mx-5 sm:px-5 lg:mx-0 lg:grid lg:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:overflow-visible lg:px-0"
+            >
+              {wordCategories.map((category) => {
+                const selected = selectedCategory === category.id;
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => update({ category: category.id })}
+                    className={`flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition-colors lg:h-12 lg:rounded-2xl ${
+                      selected
+                        ? 'border-accent-soft bg-accent/24 text-fg'
+                        : 'border-white/10 bg-white/4 text-gray-300 hover:bg-white/8'
+                    }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-5 h-5 sm:w-6 sm:h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    />
-                  </svg>
-                )}
-              </button>
+                    <span aria-hidden="true">{category.emoji}</span>
+                    {category.name}
+                  </button>
+                );
+              })}
             </div>
-            <Button variant="ghost" size="sm" onClick={handleCopyLink} className="mt-2 sm:mt-3">
-              {copied ? t('common.copied') : t('lobby.copyLink')}
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <SettingTile
+              title={t('lobby.timerSettings')}
+              description={t('ui.timerDescription')}
+              control={
+                <Switch
+                  checked={timerEnabled}
+                  onChange={(v) => update({ timerEnabled: v })}
+                  label={t('lobby.timerSettings')}
+                />
+              }
+            >
+              {timerEnabled && (
+                <Segmented
+                  label={t('lobby.timeLimit')}
+                  value={currentTimeMinutes}
+                  onChange={(minutes) =>
+                    update({ clueTimeLimit: minutes * 60, voteTimeLimit: minutes * 60 })
+                  }
+                  options={timeOptions.map((m) => ({
+                    value: m,
+                    label: `${m} ${t('lobby.minutes')}`,
+                  }))}
+                />
+              )}
+            </SettingTile>
+
+            <SettingTile
+              title={t('lobby.clueRoundsSettings')}
+              description={t('lobby.clueRoundsDescription')}
+            >
+              <Segmented
+                label={t('lobby.clueRoundsSettings')}
+                value={currentClueRounds}
+                onChange={(rounds) => update({ clueRounds: rounds })}
+                options={roundOptions.map((r) => ({ value: r, label: String(r) }))}
+              />
+            </SettingTile>
+
+            <SettingTile
+              title={t('lobby.imposterHintSettings')}
+              description={t('lobby.imposterHintDescription')}
+              control={
+                <Switch
+                  checked={imposterHintEnabled}
+                  onChange={(v) => update({ imposterHintEnabled: v })}
+                  label={t('lobby.imposterHintSettings')}
+                />
+              }
+            />
+
+            <SettingTile
+              title={t('lobby.trollModeSettings')}
+              description={t('lobby.trollModeDescription')}
+              control={
+                <Switch
+                  checked={trollModeEnabled}
+                  onChange={(v) => update({ trollModeEnabled: v })}
+                  label={t('lobby.trollModeSettings')}
+                />
+              }
+            />
+          </div>
+        </Card>
+      ) : (
+        <Card className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-display text-lg font-semibold">{t('ui.settingsTitle')}</h2>
+            <span className="text-xs text-muted">
+              {t('ui.settingsBy', { name: host?.name ?? '' })}
+            </span>
+          </div>
+          <ul className="flex flex-wrap gap-2">
+            {summary.map((item) => (
+              <li
+                key={item}
+                className="flex h-8 items-center rounded-full bg-white/6 px-3 text-[13px] font-medium text-fg-soft"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      <ActionBar>
+        {isHost ? (
+          <div className="flex items-center gap-4 lg:rounded-[20px] lg:border lg:border-line lg:bg-surface lg:p-4">
+            <p className="hidden flex-1 text-sm text-muted lg:block">
+              {canStart ? summary.join(' · ') : t('lobby.minPlayers')}
+            </p>
+            <Button
+              onClick={() => onStartGame(selectedCategory, locale)}
+              disabled={!canStart}
+              size="lg"
+              className="w-full lg:w-auto"
+            >
+              {canStart
+                ? t('lobby.startGame')
+                : t('lobby.waitingPlayers', { current: connectedPlayers.length })}
             </Button>
           </div>
-
-          {/* QR Code Section */}
-          <div className="shrink-0 text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">
-              {t('lobby.scanToJoin')}
-            </p>
-            <div className="p-2 bg-white rounded-xl">
-              <QRCodeSVG
-                value={joinUrl}
-                size={80}
-                level="M"
-                marginSize={0}
-                className="w-20 h-20 sm:w-24 sm:h-24"
-              />
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Lista de jugadores */}
-      <Card>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0 mb-3 sm:mb-4">
-          <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
-            {t('lobby.players')} ({room.players.filter((p) => p.isConnected).length}/15)
-          </h3>
-          {!canStart && (
-            <span className="text-xs text-amber-600 dark:text-amber-400">
-              {t('lobby.minPlayers')}
-            </span>
-          )}
-        </div>
-        <PlayerList
-          players={room.players}
-          currentPlayerId={playerId}
-          hostId={room.hostId}
-          isHost={isHost}
-          isLobby={true}
-          onKick={onKickPlayer}
-        />
-      </Card>
-
-      {/* Configuración (solo host) */}
-      <Card>
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
-          {t('lobby.categoryTitle')}
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
-          {wordCategories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => handleCategoryChange(category.id)}
-              disabled={!isHost}
-              className={`
-                p-2 sm:p-3 rounded-xl text-center transition-all
-                ${
-                  selectedCategory === category.id
-                    ? 'bg-indigo-100 dark:bg-indigo-900/50 ring-2 ring-indigo-500'
-                    : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }
-                ${!isHost ? 'cursor-default' : 'cursor-pointer'}
-              `}
-            >
-              <span className="text-xl sm:text-2xl block mb-0.5 sm:mb-1">{category.emoji}</span>
-              <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-                {category.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      {/* Configuración del temporizador */}
-      <Card>
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
-          <span>⏳</span>
-          {t('lobby.timerSettings')}
-        </h3>
-
-        {/* Toggle del timer */}
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            {timerEnabled ? t('lobby.timerEnabled') : t('lobby.timerDisabled')}
-          </span>
-          {isHost && (
-            <button
-              onClick={handleTimerToggle}
-              disabled={!isHost}
-              className={`
-              relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-              ${timerEnabled ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'}
-              ${!isHost ? 'cursor-default opacity-60' : 'cursor-pointer'}
-            `}
-            >
-              <span
-                className={`
-                inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                ${timerEnabled ? 'translate-x-6' : 'translate-x-1'}
-              `}
-              />
-            </button>
-          )}
-        </div>
-
-        {/* Selector de tiempo (solo si el timer está habilitado) */}
-        {timerEnabled && (
-          <div>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
-              {t('lobby.timeLimit')}
-            </p>
-            <div className="flex gap-2">
-              {timeOptions.map((minutes) => (
-                <button
-                  key={minutes}
-                  onClick={() => handleTimeLimitChange(minutes)}
-                  disabled={!isHost}
-                  className={`
-                    flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all
-                    ${
-                      currentTimeMinutes === minutes
-                        ? 'bg-indigo-100 dark:bg-indigo-900/50 ring-2 ring-indigo-500 text-indigo-700 dark:text-indigo-300'
-                        : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }
-                    ${!isHost ? 'cursor-default' : 'cursor-pointer'}
-                  `}
-                >
-                  {minutes} {t('lobby.minutes')}
-                </button>
-              ))}
-            </div>
+        ) : (
+          <div className="flex h-14 items-center justify-center gap-2.5 rounded-2xl bg-white/5 text-[15px] text-fg-soft lg:border lg:border-line">
+            <span className="size-2 animate-pulse rounded-full bg-accent-soft" />
+            {t('lobby.waitingHost')}
           </div>
         )}
+      </ActionBar>
+      <ActionBarSpacer />
+    </div>
+  );
+}
 
-        {!isHost && <p className="text-xs text-gray-500 mt-3 text-center">{t('lobby.hostOnly')}</p>}
-
-        <hr className="my-4" />
-
-        {/* Configuración de pista para el impostor */}
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
-          <span>🕵️‍♀️</span>
-          {t('lobby.imposterHintSettings')}
-        </h3>
-
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              {imposterHintEnabled
-                ? t('lobby.imposterHintEnabled')
-                : t('lobby.imposterHintDisabled')}
-            </span>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {t('lobby.imposterHintDescription')}
-            </p>
-          </div>
-          {isHost && (
-            <button
-              onClick={handleImposterHintToggle}
-              className={`
-                relative inline-flex h-6 w-11 items-center rounded-full transition-colors ml-4
-                ${imposterHintEnabled ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'}
-              `}
-            >
-              <span
-                className={`
-                  inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                  ${imposterHintEnabled ? 'translate-x-6' : 'translate-x-1'}
-                `}
-              />
-            </button>
+function SettingTile({
+  title,
+  description,
+  control,
+  children,
+}: {
+  title: string;
+  description?: string;
+  control?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-white/6 bg-white/3 p-4">
+      <div className="flex items-center gap-3">
+        <div className="flex flex-1 flex-col gap-0.5">
+          <span className="text-[15px] font-semibold">{title}</span>
+          {description && (
+            <span className="text-[13px] leading-snug text-muted">{description}</span>
           )}
         </div>
-
-        {!isHost && <p className="text-xs text-gray-500 mt-3 text-center">{t('lobby.hostOnly')}</p>}
-
-        <hr className="my-4" />
-        {/* Configuración de modo troll */}
-
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
-          <span>🎭</span>
-          {t('lobby.trollModeSettings')}
-        </h3>
-
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              {trollModeEnabled ? t('lobby.trollModeEnabled') : t('lobby.trollModeDisabled')}
-            </span>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {t('lobby.trollModeDescription')}
-            </p>
-          </div>
-          {isHost && (
-            <button
-              onClick={handleTrollModeToggle}
-              className={`
-                relative inline-flex h-6 w-11 items-center rounded-full transition-colors ml-4
-                ${trollModeEnabled ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}
-              `}
-            >
-              <span
-                className={`
-                  inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                  ${trollModeEnabled ? 'translate-x-6' : 'translate-x-1'}
-                `}
-              />
-            </button>
-          )}
-        </div>
-
-        {!isHost && <p className="text-xs text-gray-500 mt-3 text-center">{t('lobby.hostOnly')}</p>}
-
-        <hr className="my-4" />
-        {/* Configuración de rondas de pistas */}
-
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
-          <span>📢️</span>
-          {t('lobby.clueRoundsSettings')}
-        </h3>
-
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
-          {t('lobby.clueRoundsDescription')}
-        </p>
-        <div className="flex gap-2">
-          {roundOptions.map((rounds) => (
-            <button
-              key={rounds}
-              onClick={() => handleClueRoundsChange(rounds)}
-              disabled={!isHost}
-              className={`
-                                flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all
-                                ${
-                                  currentClueRounds === rounds
-                                    ? 'bg-indigo-100 dark:bg-indigo-900/50 ring-2 ring-indigo-500 text-indigo-700 dark:text-indigo-300'
-                                    : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                }
-                                ${!isHost ? 'cursor-default' : 'cursor-pointer'}
-                            `}
-            >
-              {rounds} {t('lobby.rounds')}
-            </button>
-          ))}
-        </div>
-
-        {!isHost && <p className="text-xs text-gray-500 mt-3 text-center">{t('lobby.hostOnly')}</p>}
-      </Card>
-
-      {/* Botón iniciar */}
-      {isHost && (
-        <Button
-          onClick={() => onStartGame(selectedCategory, locale)}
-          disabled={!canStart}
-          size="lg"
-          className="w-full"
-        >
-          {canStart
-            ? t('lobby.startGame')
-            : t('lobby.waitingPlayers', {
-                current: room.players.filter((p) => p.isConnected).length,
-              })}
-        </Button>
-      )}
-
-      {!isHost && (
-        <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-          <p className="text-gray-600 dark:text-gray-400">{t('lobby.waitingHost')}</p>
-        </div>
-      )}
+        {control}
+      </div>
+      {children}
     </div>
   );
 }
