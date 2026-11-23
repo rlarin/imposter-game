@@ -1,26 +1,119 @@
 @import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* The app is dark-first ("Noche de misterio"): `dark:` utilities always apply. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Surfaces */
+  --color-ink: #0b0a14;
+  --color-surface: #15131f;
+  --color-surface-2: #1c1a29;
+  --color-surface-3: #221f33;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+
+  /* Text */
+  --color-fg: #f4f2ff;
+  --color-fg-soft: #d6d3e6;
+  --color-muted: #a09cb8;
+  --color-subtle: #8a86a3;
+
+  /* Accents */
+  --color-accent: #7c3aed;
+  --color-accent-hover: #6d28d9;
+  --color-accent-soft: #a78bfa;
+  --color-accent-fg: #c4b5fd;
+  --color-danger: #e11d48;
+  --color-danger-hover: #be123c;
+  --color-danger-fg: #fb7185;
+  --color-hint: #fcd34d;
+  --color-success: #34d399;
+
+  /* Legacy gray scale remapped to the violet-tinted ink palette */
+  --color-gray-300: #c9c5dc;
+  --color-gray-400: #a09cb8;
+  --color-gray-500: #8a86a3;
+  --color-gray-600: #3a3652;
+  --color-gray-700: #2a2740;
+  --color-gray-800: #1c1a29;
+  --color-gray-900: #15131f;
+
+  --animate-rise: rise 0.35s ease-out both;
+  --animate-sheet: sheet 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  /* Opacity-only: safe on ancestors of position:fixed elements (no containing block). */
+  --animate-fade-in: fade-in 0.3s ease-out both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes sheet {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
   }
 }
 
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+:root {
+  color-scheme: dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-soft);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

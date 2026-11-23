@@ -3,13 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { GameRoom } from '@/lib/types';
-import { Button, Card, Input, Timer } from '@/components/ui';
+import { ActionBar, ActionBarSpacer, Button, Card, Icon, Input, Timer } from '@/components/ui';
 import { validateClue } from '@/lib/utils';
 import { useLocale } from '@/lib/i18n-context';
 import { Locale } from '@/i18n/config';
 import { getCategoryById } from '@/lib/words/index';
 import { translateText } from '@/lib/translation-service';
-import PlayerList from './PlayerList';
 import WordChangeVoteModal from './WordChangeVoteModal';
 import CluesByPlayer from './CluesByPlayer';
 
@@ -92,143 +91,149 @@ export default function ClueRound({
     setClue('');
   };
 
+  const activePlayers = room.players.filter((p) => p.isConnected && !p.isEliminated);
+  const doneCount = activePlayers.filter((p) => p.hasSubmittedClue).length;
+  const myClue = room.clues.find((c) => c.playerId === playerId && c.round === room.currentRound);
+  const imposterHints =
+    room.imposterHints && room.imposterHints.length > 0
+      ? room.imposterHints
+      : room.imposterHint
+        ? [room.imposterHint]
+        : [];
+
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header con timer */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
-        <div>
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-            {t('game.round', { current: room.currentRound, total: room.settings.clueRounds })}
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            {category?.emoji} {category?.name}
-          </p>
-        </div>
-        <Timer endTime={room.phaseEndsAt} />
-      </div>
-
-      {/* Palabra secreta (si no es impostor) */}
-      {!isImposter && room.secretWord && (
-        <Card className="text-center bg-indigo-50 dark:bg-indigo-900/20">
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            {t('game.secretWord')}
-          </p>
-          <p className="text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
-            {translatedSecretWord || room.secretWord}
-            {/* {isLoadingTranslation && <span className="text-sm opacity-50"> (traduciendo...)</span>} */}
-          </p>
-        </Card>
-      )}
-
-      {/* Indicador de impostor con hints */}
-      {isImposter && (
-        <Card className="text-center bg-red-50 dark:bg-red-900/20">
-          <p className="text-xs sm:text-sm text-red-500">{t('game.youAreImposter')}</p>
-          <p className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400 mb-2">
-            {t('clue.imposterHint')}
-          </p>
-          {room.imposterHints && room.imposterHints.length > 0 && (
-            <div className="mt-2 p-2 sm:p-3 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
-              <p className="text-xs text-amber-700 dark:text-amber-400 mb-1">
-                {t('game.imposterHintLabel')} ({room.imposterHints.length})
-              </p>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {room.imposterHints.map((hint, i) => (
+    <div className="flex flex-col gap-4 lg:gap-5">
+      {/* Secret word / imposter banner */}
+      {isImposter ? (
+        <Card variant="danger" className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-danger-fg">
+              <Icon name="eyeOff" className="size-4" />
+              {t('game.youAreImposter')}
+            </span>
+            {imposterHints.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-muted">{t('game.imposterHintLabel')}</span>
+                {imposterHints.map((hint, i) => (
                   <span
                     key={i}
-                    className="text-lg font-bold text-amber-800 dark:text-amber-300 uppercase px-2 py-1 bg-amber-200/50 dark:bg-amber-800/30 rounded"
+                    className="font-display text-xl font-bold uppercase text-hint lg:text-2xl"
                   >
                     {hint}
                   </span>
                 ))}
               </div>
-            </div>
-          )}
-        </Card>
-      )}
-
-      {/* All clues grouped by player */}
-      {room.clues.length > 0 && (
-        <CluesByPlayer
-          clues={room.clues}
-          players={room.players}
-          currentRound={room.currentRound}
-          title={t('clue.allClues')}
-        />
-      )}
-
-      {/* Input de pista */}
-      {!hasSubmitted ? (
-        <Card>
-          <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
-            {t('clue.yourClue')}
-          </h3>
-          <div className="space-y-3">
-            <Input
-              value={clue}
-              onChange={(e) => setClue(e.target.value.replace(/\s/g, ''))}
-              placeholder={t('clue.placeholder')}
-              maxLength={20}
-              error={error}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSubmit();
-              }}
-            />
-            <Button onClick={handleSubmit} className="w-full">
-              {t('clue.submit')}
-            </Button>
+            ) : (
+              <span className="font-display text-lg font-semibold">{t('clue.imposterHint')}</span>
+            )}
           </div>
+          <span className="flex h-8 items-center rounded-full bg-white/8 px-3 text-xs text-fg-soft">
+            {category?.name}
+          </span>
         </Card>
       ) : (
-        <Card className="text-center bg-green-50 dark:bg-green-900/20">
-          <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">✓</div>
-          <p className="text-sm sm:text-base font-semibold text-green-600 dark:text-green-400">
-            {t('clue.submitted')}
-          </p>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('clue.waiting')}</p>
-        </Card>
-      )}
-
-      {/* Estado de jugadores */}
-      <Card>
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
-          {t('lobby.players')}
-        </h3>
-        <PlayerList
-          players={room.players.filter((p) => p.isConnected && !p.isEliminated)}
-          currentPlayerId={playerId}
-          hostId={room.hostId}
-        />
-      </Card>
-
-      {/* Botón para cambiar palabra */}
-      {canInitiateWordChange && (
-        <Card className="text-center">
-          <button
-            onClick={onInitiateWordChange}
-            className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 border border-purple-300 dark:border-purple-700 rounded-lg transition-colors"
-          >
-            <span className="text-xl">🔄</span>
-            <div className="text-left">
-              <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                {t('wordChange.initiateButton')}
-              </p>
-              <p className="text-xs text-purple-600/70 dark:text-purple-400/70">
-                {t('wordChange.initiateHint')}
-              </p>
+        room.secretWord && (
+          <Card variant="accent" className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="text-xs font-semibold text-accent-fg">{t('ui.yourWord')}</span>
+              <span className="break-words font-display text-[26px] font-bold uppercase leading-tight lg:text-3xl">
+                {translatedSecretWord || room.secretWord}
+              </span>
             </div>
-          </button>
-        </Card>
+            <span className="flex h-8 items-center rounded-full bg-white/8 px-3 text-xs text-fg-soft">
+              {category?.name}
+            </span>
+          </Card>
+        )
       )}
 
-      {/* Indicador de que ya se usó el cambio de palabra */}
+      {/* Round status */}
+      <div className="flex items-center gap-3">
+        <h2 className="flex-1 font-display text-lg font-semibold lg:text-xl">
+          {t('game.round', { current: room.currentRound, total: room.settings.clueRounds })}
+        </h2>
+        <span className="text-[13px] text-muted">
+          {t('ui.submittedCount', { done: doneCount, total: activePlayers.length })}
+        </span>
+        <Timer endTime={room.phaseEndsAt} />
+      </div>
+
+      <CluesByPlayer
+        clues={room.clues}
+        players={room.players}
+        currentRound={room.currentRound}
+        currentPlayerId={playerId}
+        showPending
+      />
+
+      {canInitiateWordChange && (
+        <button
+          type="button"
+          onClick={onInitiateWordChange}
+          className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-dashed border-accent-soft/40 px-4 py-2 text-sm font-semibold text-accent-fg transition-colors hover:bg-accent/10"
+          title={t('wordChange.initiateHint')}
+        >
+          <Icon name="refresh" className="size-4" />
+          {t('wordChange.initiateButton')}
+        </button>
+      )}
       {room.wordChangeUsed && !room.wordChangeVotingActive && (
-        <div className="text-center text-xs text-gray-400 dark:text-gray-500">
-          {t('wordChange.alreadyUsed')}
-        </div>
+        <p className="text-center text-xs text-subtle">{t('wordChange.alreadyUsed')}</p>
       )}
 
-      {/* Modal de votación de cambio de palabra */}
+      {/* Clue input */}
+      <ActionBar>
+        {!hasSubmitted ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+            className="flex items-start gap-2 lg:items-end lg:gap-3 lg:rounded-[20px] lg:border lg:border-accent-soft/30 lg:bg-surface lg:p-4"
+          >
+            <div className="min-w-0 flex-1">
+              <Input
+                label={t('ui.yourClueRound', { round: room.currentRound })}
+                hideLabel
+                value={clue}
+                onChange={(e) => {
+                  setClue(e.target.value.replace(/\s/g, ''));
+                  if (error) setError('');
+                }}
+                placeholder={t('clue.placeholder')}
+                maxLength={20}
+                error={error}
+                autoComplete="off"
+                enterKeyHint="send"
+              />
+            </div>
+            <Button
+              type="submit"
+              size="lg"
+              disabled={!clue.trim()}
+              aria-label={t('clue.submit')}
+              className="w-14 shrink-0 px-0! lg:w-auto lg:px-7!"
+            >
+              <Icon name="send" />
+              <span className="hidden lg:inline">{t('clue.submit')}</span>
+            </Button>
+          </form>
+        ) : (
+          <div className="flex min-h-14 items-center gap-3 lg:rounded-[20px] lg:border lg:border-success/35 lg:bg-success/8 lg:p-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-success/16 text-success">
+              <Icon name="check" className="size-5" />
+            </span>
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-[15px] font-semibold text-success">
+                {myClue ? t('ui.clueSent', { word: myClue.word }) : t('clue.submitted')}
+              </span>
+              <span className="text-[13px] text-muted">{t('clue.waiting')}</span>
+            </div>
+          </div>
+        )}
+      </ActionBar>
+      <ActionBarSpacer />
+
       {showVotingModal && (
         <WordChangeVoteModal room={room} playerId={playerId} onVote={onVoteWordChange} />
       )}

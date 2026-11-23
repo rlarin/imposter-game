@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, Icon } from '@/components/ui';
 import { GameRoom } from '@/lib/types';
 
 interface WordChangeVoteModalProps {
@@ -25,14 +25,14 @@ export default function WordChangeVoteModal({ room, playerId, onVote }: WordChan
   if (!room.wordChangeVotingActive) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="max-w-md w-full bg-white dark:bg-gray-800 shadow-2xl">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <Card className="max-w-md w-full shadow-[0_24px_60px_rgba(0,0,0,0.55)] animate-rise">
         <div className="text-center space-y-4">
           {/* Header */}
-          <div className="text-4xl">🔄</div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            {t('wordChange.title')}
-          </h2>
+          <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-accent/18 text-accent-fg">
+            <Icon name="refresh" className="size-7" />
+          </div>
+          <h2 className="text-xl font-bold text-fg">{t('wordChange.title')}</h2>
 
           {/* Iniciador */}
           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -57,16 +57,21 @@ export default function WordChangeVoteModal({ room, playerId, onVote }: WordChan
           {/* Botones de voto o confirmación */}
           {!hasVoted ? (
             <div className="flex gap-3">
-              <Button onClick={() => onVote(true)} variant="primary" className="flex-1">
+              <Button onClick={() => onVote(true)} variant="primary" size="lg" className="flex-1">
                 {t('wordChange.voteYes')}
               </Button>
-              <Button onClick={() => onVote(false)} variant="secondary" className="flex-1">
+              <Button
+                onClick={() => onVote(false)}
+                variant="secondary"
+                size="lg"
+                className="flex-1"
+              >
                 {t('wordChange.voteNo')}
               </Button>
             </div>
           ) : (
             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div className="text-2xl mb-1">✓</div>
+              <Icon name="check" className="mx-auto mb-1 size-6 text-success" />
               <p className="text-sm font-medium text-green-600 dark:text-green-400">
                 {t('wordChange.voteSubmitted')}
               </p>

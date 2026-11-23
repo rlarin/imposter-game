@@ -79,11 +79,11 @@ export default function Instructions({ isOpen, onClose }: InstructionsProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <Card className="max-w-lg w-full bg-white dark:bg-gray-800 shadow-2xl max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <Card className="max-w-lg w-full shadow-[0_24px_60px_rgba(0,0,0,0.55)] animate-rise max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3 mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-fg flex items-center gap-2">
             <span>📖</span> {t('title')}
           </h2>
           <button
@@ -114,10 +114,10 @@ export default function Instructions({ isOpen, onClose }: InstructionsProps) {
               onClick={() => setCurrentStep(index)}
               className={`flex-1 h-1.5 rounded-full transition-colors ${
                 index === currentStep
-                  ? 'bg-indigo-500'
+                  ? 'bg-accent-soft'
                   : index < currentStep
-                    ? 'bg-indigo-300 dark:bg-indigo-700'
-                    : 'bg-gray-200 dark:bg-gray-600'
+                    ? 'bg-accent/45'
+                    : 'bg-white/10'
               }`}
             />
           ))}
@@ -128,7 +128,7 @@ export default function Instructions({ isOpen, onClose }: InstructionsProps) {
           <div className="text-center mb-4">
             <span className="text-5xl">{steps[currentStep].icon}</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white text-center mb-3">
+          <h3 className="text-lg font-semibold text-fg text-center mb-3">
             {steps[currentStep].title}
           </h3>
           <p className="text-gray-600 dark:text-gray-300 text-center leading-relaxed whitespace-pre-line">

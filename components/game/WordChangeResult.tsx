@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card } from '@/components/ui';
+import { Card, Icon } from '@/components/ui';
 
 interface WordChangeResultProps {
   passed: boolean;
@@ -31,13 +31,15 @@ export default function WordChangeResult({
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="max-w-md w-full bg-white dark:bg-gray-800 shadow-2xl animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <Card className="max-w-md w-full shadow-[0_24px_60px_rgba(0,0,0,0.55)] animate-rise">
         <div className="text-center space-y-4">
           {passed ? (
             <>
               {/* Votación aprobada */}
-              <div className="text-5xl">✅</div>
+              <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-success/16 text-success">
+                <Icon name="check" className="size-8" />
+              </div>
               <h2 className="text-xl font-bold text-green-600 dark:text-green-400">
                 {t('wordChange.resultPassed')}
               </h2>
@@ -55,7 +57,9 @@ export default function WordChangeResult({
           ) : (
             <>
               {/* Votación rechazada */}
-              <div className="text-5xl">❌</div>
+              <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-danger/18 text-danger-fg">
+                <Icon name="x" className="size-8" />
+              </div>
               <h2 className="text-xl font-bold text-red-600 dark:text-red-400">
                 {t('wordChange.resultFailed')}
               </h2>

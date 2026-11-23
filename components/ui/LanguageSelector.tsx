@@ -64,40 +64,43 @@ export default function LanguageSelector({
         <select
           value={locale}
           onChange={(e) => setLocale(e.target.value as Locale)}
-          className="bg-white/10 border border-white/20 rounded-lg pl-9 pr-3 py-1.5 text-sm text-white cursor-pointer hover:bg-white/20 transition-colors font-medium appearance-none"
+          aria-label="Language"
+          className="h-11 bg-white/5 border border-line rounded-xl pl-10 pr-4 text-sm text-fg cursor-pointer hover:bg-white/10 transition-colors font-medium appearance-none"
         >
           {locales.map((loc) => (
-            <option key={loc} value={loc} className="text-gray-900 bg-white">
+            <option key={loc} value={loc} className="text-fg bg-surface">
               {localeNames[loc]}
             </option>
           ))}
         </select>
         <FlagIcon
           locale={locale}
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-4 rounded-sm pointer-events-none"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-4 rounded-sm pointer-events-none"
         />
       </div>
     );
   }
 
   return (
-    <div className={`flex gap-1 ${className}`}>
+    <div className={`grid grid-cols-4 gap-1 ${className}`}>
       {locales.map((loc) => (
         <button
           key={loc}
+          type="button"
           onClick={() => setLocale(loc)}
+          aria-pressed={locale === loc}
           className={`
-            flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-bold transition-all uppercase
+            flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-colors uppercase
             ${
               locale === loc
-                ? 'bg-white text-indigo-600 shadow-md'
-                : 'bg-white/20 text-white hover:bg-white/30'
+                ? 'bg-accent/24 text-fg ring-1 ring-accent-soft'
+                : 'bg-white/5 text-muted hover:bg-white/10 hover:text-fg'
             }
           `}
           title={localeNames[loc]}
         >
-          <FlagIcon locale={loc} className="w-5 h-4 rounded-sm shadow-sm" />
-          <span className="hidden sm:inline">{loc}</span>
+          <FlagIcon locale={loc} className="w-5 h-4 rounded-sm" />
+          <span>{loc}</span>
         </button>
       ))}
     </div>

@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card } from '@/components/ui';
-import { Image } from 'next/dist/client/image-component';
+import { Icon } from '@/components/ui';
 import { useLocale } from '@/lib/i18n-context';
 import { translateText } from '@/lib/translation-service';
 import { Locale } from '@/i18n/config';
@@ -24,6 +23,7 @@ export default function WordReveal({
   const t = useTranslations();
   const { locale } = useLocale();
   const [countdown, setCountdown] = useState(5);
+  const [revealed, setRevealed] = useState(false);
   const [translatedWord, setTranslatedWord] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -75,74 +75,85 @@ export default function WordReveal({
   }, []);
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh] px-4">
-      <Card variant="elevated" padding="lg" className="text-center max-w-md w-full">
-        {isImposter ? (
-          <>
-            <div className="mb-4 sm:mb-6 flex justify-center">
-              <Image
-                alt="Imposter"
-                src="/imposter192x192.png"
-                loading="eager"
-                width={100}
-                height={100}
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24"
-              />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400 mb-3 sm:mb-4">
-              {t('game.youAreImposter')}
-            </h2>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-1 sm:mb-2">
-              {t('game.imposterHint')}
-            </p>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
-              {t('game.imposterTip')}
-            </p>
-            <div className="p-3 sm:p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-4 sm:mb-6">
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                {t('game.category')}
-              </p>
-              <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white capitalize">
-                {t(`categories.${category}`)}
-              </p>
-            </div>
-            {imposterHint && (
-              <div className="p-3 sm:p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-xl">
-                <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-400 mb-1">
-                  {t('game.imposterHintLabel')}
-                </p>
-                <p className="text-lg sm:text-xl font-bold text-amber-800 dark:text-amber-300 uppercase">
-                  {imposterHint}
-                </p>
-              </div>
-            )}
-          </>
-        ) : (
-          <>
-            <div className="text-4xl sm:text-5xl md:text-6xl mb-4 sm:mb-6">🤫</div>
-            <h2 className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
-              {t('game.wordIs')}
-            </h2>
-            <div className="p-4 sm:p-6 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl mb-4 sm:mb-6">
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 uppercase">
-                {translatedWord || secretWord}
-              </p>
-            </div>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-              {t('game.dontSayIt')}
-            </p>
-          </>
-        )}
+    <section className="flex min-h-[calc(100dvh-180px)] flex-col items-center justify-center gap-6 py-4 text-center lg:min-h-[640px] lg:rounded-3xl lg:border lg:border-line lg:bg-surface lg:p-8">
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-display text-[26px] font-bold lg:text-3xl">{t('ui.yourRole')}</h1>
+        <p className="text-sm text-muted lg:text-[15px]">{t('ui.keepHidden')}</p>
+      </div>
 
-        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            {t('game.startsIn')}
-          </p>
-          <p className="text-3xl sm:text-4xl font-bold text-indigo-600 dark:text-indigo-400">
-            {countdown}
-          </p>
+      <button
+        type="button"
+        onClick={() => setRevealed((v) => !v)}
+        aria-label={revealed ? t('ui.hideRole') : t('ui.revealRole')}
+        aria-pressed={revealed}
+        className="h-[400px] w-[min(300px,100%)] perspective-distant lg:h-[440px] lg:w-[330px]"
+      >
+        <div
+          className={`relative size-full transition-transform duration-700 ease-[cubic-bezier(.2,.8,.2,1)] transform-3d ${
+            revealed ? 'rotate-y-180' : ''
+          }`}
+        >
+          {/* Front */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-[28px] border border-accent-soft/30 bg-surface-2 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backface-hidden">
+            <div className="flex size-20 items-center justify-center rounded-full bg-accent/18 text-accent-fg">
+              <Icon name="eye" className="size-9" />
+            </div>
+            <span className="font-display text-xl font-semibold">{t('ui.tapToReveal')}</span>
+            <span className="text-[13px] text-muted">{t('ui.tapToHide')}</span>
+          </div>
+
+          {/* Back */}
+          <div
+            className={`absolute inset-0 flex rotate-y-180 flex-col items-center justify-center gap-4 rounded-[28px] border p-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backface-hidden ${
+              isImposter ? 'border-danger-fg/55 bg-[#2a1220]' : 'border-accent-soft/55 bg-[#22173d]'
+            }`}
+          >
+            {isImposter ? (
+              <>
+                <div className="flex size-16 items-center justify-center rounded-full bg-danger/18 text-danger-fg">
+                  <Icon name="eyeOff" className="size-8" />
+                </div>
+                <span className="font-display text-3xl font-bold text-danger-fg">
+                  {t('game.youAreImposter')}
+                </span>
+                <span className="flex h-8 items-center rounded-full bg-white/8 px-3 text-[13px] text-fg-soft">
+                  {t('game.category')}: {t(`categories.${category}`)}
+                </span>
+                {imposterHint && (
+                  <span className="flex min-h-9 items-center rounded-full border border-hint/35 bg-hint/14 px-4 text-sm font-semibold uppercase text-hint">
+                    {t('game.imposterHintLabel')} {imposterHint}
+                  </span>
+                )}
+                <span className="max-w-60 text-[13px] leading-relaxed text-muted">
+                  {t('game.imposterTip')}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-[13px] font-semibold uppercase tracking-wider text-accent-fg">
+                  {t('ui.yourSecretWord')}
+                </span>
+                <span className="break-words font-display text-[40px] font-bold uppercase leading-tight lg:text-5xl">
+                  {translatedWord || secretWord}
+                </span>
+                <span className="flex h-8 items-center rounded-full bg-white/8 px-3 text-[13px] text-fg-soft">
+                  {t(`categories.${category}`)}
+                </span>
+                <span className="max-w-60 text-[13px] leading-relaxed text-muted">
+                  {t('game.dontSayIt')}
+                </span>
+              </>
+            )}
+          </div>
         </div>
-      </Card>
-    </div>
+      </button>
+
+      <div className="flex items-center gap-3 rounded-full border border-line bg-white/5 py-2 pl-4 pr-2">
+        <span className="text-sm text-muted">{t('game.startsIn')}</span>
+        <span className="flex size-9 items-center justify-center rounded-full bg-accent font-mono text-lg font-bold text-white tabular-nums">
+          {countdown}
+        </span>
+      </div>
+    </section>
   );
 }

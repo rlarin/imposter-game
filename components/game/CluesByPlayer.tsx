@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Card } from '@/components/ui';
+import { Avatar, Icon } from '@/components/ui';
 import { Clue, Player } from '@/lib/types';
 import { useLocale } from '@/lib/i18n-context';
 import { useClueTranslation } from '@/hooks/useClueTranslation';
@@ -11,94 +11,109 @@ interface CluesByPlayerProps {
   clues: Clue[];
   players: Player[];
   currentRound: number;
+  currentPlayerId?: string;
+  /** Show a "thinking…" placeholder for players that have not sent the current round's clue. */
+  showPending?: boolean;
   title?: string;
 }
 
-function ClueItem({ clue, currentRound }: { clue: Clue; currentRound: number }) {
+export function ClueChip({
+  clue,
+  highlight = false,
+  size = 'md',
+}: {
+  clue: Clue;
+  highlight?: boolean;
+  size?: 'sm' | 'md';
+}) {
   const { locale } = useLocale();
   const { translatedWord, isLoading } = useClueTranslation(clue, locale);
   const showOriginalLocale = clue.originalLocale && clue.originalLocale !== locale;
 
   return (
     <span
-      key={`${clue.playerId}-${clue.round}`}
-      className={`
-        inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-sm
-        ${
-          clue.round === currentRound
-            ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-600'
-            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-        }
-      `}
+      className={`inline-flex items-center gap-1.5 rounded-lg ${
+        size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-[13px]'
+      } ${highlight ? 'bg-accent/24 font-semibold text-[#ede9fe]' : 'bg-white/6 text-gray-300'}`}
       title={
         showOriginalLocale ? `${clue.word} (${clue.originalLocale?.toUpperCase()})` : undefined
       }
     >
-      <span className="opacity-50 text-[10px]">R{clue.round}</span>
-      <span className="font-semibold">{isLoading ? clue.word : translatedWord}</span>
+      <span className="text-[10px] font-semibold text-subtle">R{clue.round}</span>
+      <span>{isLoading ? clue.word : translatedWord}</span>
       {showOriginalLocale && clue.originalLocale && (
-        <span className="text-[10px] opacity-75 ml-0.5">{localeFlags[clue.originalLocale]}</span>
+        <span className="text-[10px] opacity-75">{localeFlags[clue.originalLocale]}</span>
       )}
     </span>
   );
 }
 
-export default function CluesByPlayer({ clues, players, currentRound, title }: CluesByPlayerProps) {
+export default function CluesByPlayer({
+  clues,
+  players,
+  currentRound,
+  currentPlayerId,
+  showPending = false,
+  title,
+}: CluesByPlayerProps) {
   const t = useTranslations();
 
-  // Group clues by player
-  const cluesByPlayer = players
-    .filter((p) => !p.isEliminated)
-    .map((player) => {
-      const playerClues = clues
-        .filter((c) => c.playerId === player.id)
-        .sort((a, b) => a.round - b.round);
-      return {
-        player,
-        clues: playerClues,
-      };
-    })
-    .filter((entry) => entry.clues.length > 0);
+  const rows = players
+    .filter((p) => !p.isEliminated && (p.isConnected || clues.some((c) => c.playerId === p.id)))
+    .map((player) => ({
+      player,
+      clues: clues.filter((c) => c.playerId === player.id).sort((a, b) => a.round - b.round),
+    }))
+    .filter((row) => showPending || row.clues.length > 0);
 
-  if (cluesByPlayer.length === 0) {
-    return null;
-  }
+  if (rows.length === 0) return null;
 
   return (
-    <Card>
-      <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-3">
-        {title || t('clue.previousClues')}
-      </h3>
-      <div className="space-y-2">
-        {cluesByPlayer.map(({ player, clues: playerClues }) => (
-          <div
-            key={player.id}
-            className="flex items-center gap-2 p-2 sm:p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
-          >
-            {/* Player name */}
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-              style={{ backgroundColor: player.avatarColor }}
+    <section className="flex flex-col gap-3">
+      {title && <h2 className="font-display text-lg font-semibold">{title}</h2>}
+      <ul className="grid gap-2 sm:grid-cols-2 sm:gap-3 2xl:grid-cols-3">
+        {rows.map(({ player, clues: playerClues }) => {
+          const isSelf = player.id === currentPlayerId;
+          const done = playerClues.some((c) => c.round === currentRound);
+          return (
+            <li
+              key={player.id}
+              className={`flex items-center gap-3 rounded-2xl border bg-surface p-3 ${
+                isSelf ? 'border-accent-soft/45' : 'border-white/6'
+              }`}
             >
-              {player.name.charAt(0).toUpperCase()}
-            </div>
-            <span className="font-medium text-gray-900 dark:text-white text-sm min-w-[80px]">
-              {player.name}
-            </span>
-
-            {/* Player's clues with round indicators */}
-            <div className="flex flex-wrap gap-1.5 flex-1">
-              {playerClues.map((clue) => (
-                <ClueItem
-                  key={`${clue.playerId}-${clue.round}`}
-                  clue={clue}
-                  currentRound={currentRound}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
+              <Avatar name={player.name} color={player.avatarColor} size="sm" />
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                <span className="truncate text-sm font-semibold">
+                  {isSelf ? t('player.you') : player.name}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {playerClues.map((clue) => (
+                    <ClueChip
+                      key={`${clue.playerId}-${clue.round}`}
+                      clue={clue}
+                      highlight={clue.round === currentRound}
+                    />
+                  ))}
+                  {showPending && !done && (
+                    <span className="inline-flex animate-pulse items-center rounded-lg border border-dashed border-white/22 px-2.5 py-0.5 text-[13px] text-subtle">
+                      {isSelf ? t('ui.yourTurn') : t('ui.thinking')}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {showPending && done && (
+                <span
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-success/16 text-success"
+                  title={t('player.clueSubmitted')}
+                >
+                  <Icon name="check" className="size-4" />
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

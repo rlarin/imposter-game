@@ -3,8 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { formatLikeCount } from '@/lib/utils';
+import Icon from './Icon';
 
-export default function LikeButton() {
+interface LikeButtonProps {
+  /** `pill`: compact standalone button; `row`: full-width menu item. */
+  variant?: 'pill' | 'row';
+  className?: string;
+}
+
+export default function LikeButton({ variant = 'pill', className = '' }: LikeButtonProps) {
   const t = useTranslations();
   const [likes, setLikes] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
@@ -86,35 +93,39 @@ export default function LikeButton() {
     }
   };
 
+  const heart = (
+    <Icon
+      name="heart"
+      className={`size-5 transition-colors ${hasLiked ? 'text-danger-fg fill-danger-fg' : ''}`}
+    />
+  );
+
+  if (variant === 'row') {
+    return (
+      <button
+        type="button"
+        onClick={handleLike}
+        disabled={hasLiked || loading}
+        title={hasLiked ? t('like.alreadyLiked') : t('like.clickToLike')}
+        className={`flex h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-[15px] font-medium text-fg transition-colors enabled:hover:bg-white/6 disabled:cursor-default ${className}`}
+      >
+        {heart}
+        <span className="flex-1">{hasLiked ? t('ui.liked') : t('ui.like')}</span>
+        <span className="text-sm text-muted tabular-nums">{formatLikeCount(likes)}</span>
+      </button>
+    );
+  }
+
   return (
     <button
+      type="button"
       onClick={handleLike}
       disabled={hasLiked || loading}
       title={hasLiked ? t('like.alreadyLiked') : t('like.clickToLike')}
-      className={`
-        relative transition-all
-        ${hasLiked ? 'cursor-default' : 'cursor-pointer active:scale-95'}
-      `}
+      className={`inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-white/5 px-4 text-sm font-semibold text-fg transition-all enabled:hover:bg-white/10 enabled:active:scale-95 disabled:cursor-default ${className}`}
     >
-      <svg
-        className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
-          hasLiked
-            ? 'text-red-500 fill-red-500'
-            : 'text-white/80 hover:text-red-400 fill-none'
-        }`}
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-        />
-      </svg>
-      <span className="absolute -bottom-1 -right-1 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full min-w-[16px] h-4 sm:min-w-[18px] sm:h-[18px] flex items-center justify-center px-1">
-        {formatLikeCount(likes)}
-      </span>
+      {heart}
+      <span className="tabular-nums">{formatLikeCount(likes)}</span>
     </button>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { formatTime } from '@/lib/utils';
+import Icon from './Icon';
 
 interface TimerProps {
   endTime: number | null;
@@ -45,31 +46,25 @@ export default function Timer({ endTime, onTimeUp, className = '' }: TimerProps)
 
   if (!endTime) return null;
 
-  const isLow = remaining <= 10;
-  const isCritical = remaining <= 5;
+  const isLow = remaining <= 30;
+  const isCritical = remaining <= 10;
 
   return (
     <div
+      role="timer"
       className={`
-        inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-lg font-bold
+        inline-flex items-center gap-2 h-10 px-3.5 rounded-xl border font-mono text-base font-bold tabular-nums
         ${
           isCritical
-            ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 animate-pulse'
+            ? 'bg-danger/15 border-danger-fg/40 text-danger-fg animate-pulse'
             : isLow
-              ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
-              : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+              ? 'bg-hint/10 border-hint/30 text-hint'
+              : 'bg-white/5 border-line text-fg'
         }
         ${className}
       `}
     >
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
+      <Icon name="clock" className="size-4" />
       {formatTime(remaining)}
     </div>
   );
