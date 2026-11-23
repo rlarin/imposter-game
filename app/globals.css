@@ -99,6 +99,11 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Set by the inline boot script in app/layout.tsx until the visitor's language is applied. */
+html[data-locale-pending] body {
+  visibility: hidden;
+}
+
 button:not(:disabled),
 [role='button']:not(:disabled) {
   cursor: pointer;
