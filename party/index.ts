@@ -737,10 +737,7 @@ export class GameServer extends Server<Env> {
     const kvUrl = this.env.KV_REST_API_URL;
     const kvToken = this.env.KV_REST_API_TOKEN;
 
-    console.log('[KV] URL present:', !!kvUrl, 'Token present:', !!kvToken);
-
     if (!kvUrl || !kvToken) {
-      console.log('[KV] Redis not configured, skipping');
       return;
     }
 
@@ -768,7 +765,6 @@ export class GameServer extends Server<Env> {
         },
         body: JSON.stringify(['SET', key, JSON.stringify(data)]),
       });
-      console.log('[KV] SET response:', setResponse.status);
       if (!setResponse.ok) {
         console.error(
           '[KV] SET failed for host',
@@ -781,7 +777,7 @@ export class GameServer extends Server<Env> {
       if (!this.room) return;
 
       // Add to active rooms set
-      const saddResponse = await fetch(kvUrl, {
+      await fetch(kvUrl, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${kvToken}`,
@@ -789,7 +785,6 @@ export class GameServer extends Server<Env> {
         },
         body: JSON.stringify(['SADD', ACTIVE_ROOMS_SET, room.roomCode]),
       });
-      console.log('[KV] SADD response:', saddResponse.status);
     } catch (error) {
       console.error('[KV] Error registering room:', error);
     }
@@ -824,7 +819,6 @@ export class GameServer extends Server<Env> {
         },
         body: JSON.stringify(['SREM', ACTIVE_ROOMS_SET, this.name]),
       });
-      console.log('[KV] Room unregistered:', this.name);
     } catch (error) {
       console.error('[KV] Error unregistering room:', error);
     }
