@@ -338,6 +338,9 @@
     "homeFeature3": "Built-in video call",
     "scanQr": "Scan QR",
     "or": "or",
-    "phases": "Game phases"
+    "phases": "Game phases",
+    "retry": "Try again",
+    "flashlight": "Flashlight",
+    "switchCamera": "Switch camera"
   }
 }
