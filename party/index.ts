@@ -730,7 +730,9 @@ export class GameServer extends Server<Env> {
 
   // Report room metrics to KV (non-blocking)
   private async reportToKV() {
-    if (!this.room) return;
+    // Snapshot: this.room can become null (host left) while a fetch is awaiting
+    const room = this.room;
+    if (!room) return;
 
     const kvUrl = this.env.KV_REST_API_URL;
     const kvToken = this.env.KV_REST_API_TOKEN;
@@ -743,17 +745,17 @@ export class GameServer extends Server<Env> {
     }
 
     try {
-      const host = this.room.players.find((p) => p.id === this.room?.hostId);
-      const connectedPlayers = this.room.players.filter((p) => p.isConnected).length;
+      const host = room.players.find((p) => p.id === room.hostId);
+      const connectedPlayers = room.players.filter((p) => p.isConnected).length;
 
-      const key = `${KV_PREFIX}${this.room.roomCode}`;
+      const key = `${KV_PREFIX}${room.roomCode}`;
       const data: RoomMetrics = {
-        roomCode: this.room.roomCode,
+        roomCode: room.roomCode,
         hostName: host?.name || 'Unknown',
-        playerCount: this.room.players.length,
+        playerCount: room.players.length,
         connectedPlayers,
-        phase: this.room.phase,
-        createdAt: this.room.createdAt,
+        phase: room.phase,
+        createdAt: room.createdAt,
         lastHeartbeat: Date.now(),
       };
 
@@ -767,6 +769,16 @@ export class GameServer extends Server<Env> {
         body: JSON.stringify(['SET', key, JSON.stringify(data)]),
       });
       console.log('[KV] SET response:', setResponse.status);
+      if (!setResponse.ok) {
+        console.error(
+          '[KV] SET failed for host',
+          new URL(kvUrl).host,
+          (await setResponse.text()).slice(0, 300)
+        );
+      }
+
+      // Room closed while SET was in flight: don't re-add it to the active set
+      if (!this.room) return;
 
       // Add to active rooms set
       const saddResponse = await fetch(kvUrl, {
@@ -775,7 +787,7 @@ export class GameServer extends Server<Env> {
           Authorization: `Bearer ${kvToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(['SADD', ACTIVE_ROOMS_SET, this.room.roomCode]),
+        body: JSON.stringify(['SADD', ACTIVE_ROOMS_SET, room.roomCode]),
       });
       console.log('[KV] SADD response:', saddResponse.status);
     } catch (error) {
