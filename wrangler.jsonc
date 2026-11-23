@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "imposter-game",
+  "main": "party/index.ts",
+  "compatibility_date": "2026-11-01",
+  "observability": { "enabled": true },
+  "durable_objects": {
+    "bindings": [{ "name": "Main", "class_name": "GameServer" }],
+  },
+  // SQLite-backed Durable Objects are required on the Workers Free plan
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["GameServer"] }],
+  // Secrets (not stored here): npx wrangler secret put KV_REST_API_URL / KV_REST_API_TOKEN
+  // Local dev: put them in .dev.vars
+}

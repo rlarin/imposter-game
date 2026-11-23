@@ -1,4 +1,4 @@
-import type * as Party from 'partykit/server';
+import { routePartykitRequest, Server, type Connection } from 'partyserver';
 import {
   ClientMessage,
   GamePhase,
@@ -25,7 +25,7 @@ import {
   startNextRound,
   submitClue,
 } from '@/lib/game-logic';
-import { generatePlayerId, getRandomAvatarColor } from '@/lib/utils'; // Mapa de conexiones a IDs de jugador
+import { generatePlayerId, getRandomAvatarColor } from '@/lib/utils';
 
 // Mapa de conexiones a IDs de jugador
 type ConnectionPlayerMap = Map<string, string>;
@@ -45,13 +45,18 @@ interface RoomMetrics {
 const KV_PREFIX = 'rooms:';
 const ACTIVE_ROOMS_SET = 'active-rooms';
 
-export default class GameServer implements Party.Server {
+// Cloudflare bindings and secrets (see wrangler.jsonc)
+export interface Env {
+  Main: DurableObjectNamespace<GameServer>;
+  KV_REST_API_URL?: string;
+  KV_REST_API_TOKEN?: string;
+}
+
+export class GameServer extends Server<Env> {
   room: GameRoom | null = null;
   connectionPlayers: ConnectionPlayerMap = new Map();
   phaseTimer: ReturnType<typeof setTimeout> | null = null;
   gameLocale: Locale = 'en';
-
-  constructor(readonly party: Party.Party) {}
 
   // Inicializar sala cuando se crea
   async onStart() {
@@ -59,7 +64,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Cuando un cliente se conecta
-  async onConnect(conn: Party.Connection) {
+  async onConnect(conn: Connection) {
     // Enviar estado actual si existe
     if (this.room) {
       const playerId = this.connectionPlayers.get(conn.id);
@@ -74,13 +79,13 @@ export default class GameServer implements Party.Server {
   }
 
   // Cuando un cliente se desconecta
-  async onClose(conn: Party.Connection) {
+  async onClose(conn: Connection) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
     // If the host disconnects, close the room for everyone
     if (playerId === this.room.hostId) {
-      this.broadcast({
+      this.broadcastMessage({
         type: 'room-closed',
         reason: 'host-left',
       });
@@ -114,8 +119,9 @@ export default class GameServer implements Party.Server {
   }
 
   // Procesar mensajes del cliente
-  async onMessage(message: string, sender: Party.Connection) {
+  async onMessage(sender: Connection, message: string | ArrayBuffer | ArrayBufferView) {
     try {
+      if (typeof message !== 'string') return;
       const event = JSON.parse(message) as ClientMessage;
 
       switch (event.type) {
@@ -181,7 +187,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Manejar jugador uniéndose
-  private async handleJoin(conn: Party.Connection, playerName: string, playerLocale?: Locale) {
+  private async handleJoin(conn: Connection, playerName: string, playerLocale?: Locale) {
     const playerId = generatePlayerId();
     this.connectionPlayers.set(conn.id, playerId);
     const locale = playerLocale || 'es';
@@ -203,7 +209,7 @@ export default class GameServer implements Party.Server {
       };
 
       this.room = {
-        roomCode: this.party.id,
+        roomCode: this.name,
         hostId: playerId,
         players: [player],
         phase: 'lobby',
@@ -289,13 +295,13 @@ export default class GameServer implements Party.Server {
   }
 
   // Manejar jugador saliendo
-  private async handleLeave(conn: Party.Connection) {
+  private async handleLeave(conn: Connection) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
     // If the host leaves, close the room for everyone
     if (playerId === this.room.hostId) {
-      this.broadcast({
+      this.broadcastMessage({
         type: 'room-closed',
         reason: 'host-left',
       });
@@ -322,7 +328,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Iniciar juego
-  private async handleStartGame(conn: Party.Connection, category: string, locale?: string) {
+  private async handleStartGame(conn: Connection, category: string, locale?: string) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -357,7 +363,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Enviar pista
-  private async handleSubmitClue(conn: Party.Connection, word: string) {
+  private async handleSubmitClue(conn: Connection, word: string) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -388,7 +394,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Votar
-  private async handleCastVote(conn: Party.Connection, targetId: string) {
+  private async handleCastVote(conn: Connection, targetId: string) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -419,7 +425,7 @@ export default class GameServer implements Party.Server {
   }
 
   // El impostor adivina
-  private async handleImposterGuess(conn: Party.Connection, word: string) {
+  private async handleImposterGuess(conn: Connection, word: string) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -438,7 +444,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Jugar de nuevo
-  private async handlePlayAgain(conn: Party.Connection) {
+  private async handlePlayAgain(conn: Connection) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -460,7 +466,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Reiniciar juego (desde cualquier fase)
-  private async handleResetGame(conn: Party.Connection) {
+  private async handleResetGame(conn: Connection) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -487,7 +493,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Actualizar configuración
-  private async handleUpdateSettings(conn: Party.Connection, settings: Partial<GameSettings>) {
+  private async handleUpdateSettings(conn: Connection, settings: Partial<GameSettings>) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -515,7 +521,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Expulsar jugador
-  private async handleKickPlayer(conn: Party.Connection, targetPlayerId: string) {
+  private async handleKickPlayer(conn: Connection, targetPlayerId: string) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -545,7 +551,7 @@ export default class GameServer implements Party.Server {
 
     // Send kick notification to the kicked player before removing them
     if (kickedConnId) {
-      const kickedConn = this.party.getConnection(kickedConnId);
+      const kickedConn = this.getConnection(kickedConnId);
       if (kickedConn) {
         this.sendToConnection(kickedConn, {
           type: 'player-kicked',
@@ -568,7 +574,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Iniciar votación de cambio de palabra
-  private async handleInitiateWordChange(conn: Party.Connection) {
+  private async handleInitiateWordChange(conn: Connection) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -587,7 +593,7 @@ export default class GameServer implements Party.Server {
     const initiator = this.room.players.find((p) => p.id === playerId);
 
     // Broadcast que se inició la votación
-    this.broadcast({
+    this.broadcastMessage({
       type: 'word-change-vote-started',
       initiatorId: playerId,
       initiatorName: initiator?.name || 'Jugador',
@@ -597,7 +603,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Votar en cambio de palabra
-  private async handleVoteWordChange(conn: Party.Connection, vote: boolean) {
+  private async handleVoteWordChange(conn: Connection, vote: boolean) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -613,7 +619,7 @@ export default class GameServer implements Party.Server {
     this.room = newRoom;
 
     // Broadcast que alguien votó
-    this.broadcast({
+    this.broadcastMessage({
       type: 'word-change-vote-cast',
       voterId: playerId,
     });
@@ -624,7 +630,7 @@ export default class GameServer implements Party.Server {
       this.room = result.room;
 
       // Broadcast resultado
-      this.broadcast({
+      this.broadcastMessage({
         type: 'word-change-vote-result',
         passed: result.passed,
         newHintsCount: result.newHintsCount,
@@ -635,7 +641,7 @@ export default class GameServer implements Party.Server {
   }
 
   // Iniciar la siguiente ronda (solo el host)
-  private async handleNextRound(conn: Party.Connection) {
+  private async handleNextRound(conn: Connection) {
     const playerId = this.connectionPlayers.get(conn.id);
     if (!playerId || !this.room) return;
 
@@ -697,13 +703,13 @@ export default class GameServer implements Party.Server {
   }
 
   // Enviar mensaje a una conexión
-  private sendToConnection(conn: Party.Connection, message: ServerMessage) {
+  private sendToConnection(conn: Connection, message: ServerMessage) {
     conn.send(JSON.stringify(message));
   }
 
   // Broadcast a todos
-  private broadcast(message: ServerMessage) {
-    this.party.broadcast(JSON.stringify(message));
+  private broadcastMessage(message: ServerMessage) {
+    this.broadcast(JSON.stringify(message));
   }
 
   // Broadcast estado completo (cada jugador recibe su versión)
@@ -711,7 +717,7 @@ export default class GameServer implements Party.Server {
     if (!this.room) return;
 
     for (const [connId, playerId] of this.connectionPlayers.entries()) {
-      const conn = this.party.getConnection(connId);
+      const conn = this.getConnection(connId);
       if (conn) {
         this.sendToConnection(conn, {
           type: 'room-state',
@@ -726,11 +732,8 @@ export default class GameServer implements Party.Server {
   private async reportToKV() {
     if (!this.room) return;
 
-    // Debug: log the entire env object
-    console.log('[KV] party.env keys:', Object.keys(this.party.env || {}));
-
-    const kvUrl = (this.party.env as Record<string, string>).KV_REST_API_URL;
-    const kvToken = (this.party.env as Record<string, string>).KV_REST_API_TOKEN;
+    const kvUrl = this.env.KV_REST_API_URL;
+    const kvToken = this.env.KV_REST_API_TOKEN;
 
     console.log('[KV] URL present:', !!kvUrl, 'Token present:', !!kvToken);
 
@@ -782,13 +785,13 @@ export default class GameServer implements Party.Server {
 
   // Unregister room from KV (non-blocking)
   private async unregisterFromKV() {
-    const kvUrl = this.party.env.KV_REST_API_URL as string | undefined;
-    const kvToken = this.party.env.KV_REST_API_TOKEN as string | undefined;
+    const kvUrl = this.env.KV_REST_API_URL;
+    const kvToken = this.env.KV_REST_API_TOKEN;
 
     if (!kvUrl || !kvToken) return;
 
     try {
-      const key = `${KV_PREFIX}${this.party.id}`;
+      const key = `${KV_PREFIX}${this.name}`;
 
       // Delete room data
       await fetch(kvUrl, {
@@ -807,11 +810,18 @@ export default class GameServer implements Party.Server {
           Authorization: `Bearer ${kvToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(['SREM', ACTIVE_ROOMS_SET, this.party.id]),
+        body: JSON.stringify(['SREM', ACTIVE_ROOMS_SET, this.name]),
       });
-      console.log('[KV] Room unregistered:', this.party.id);
+      console.log('[KV] Room unregistered:', this.name);
     } catch (error) {
       console.error('[KV] Error unregistering room:', error);
     }
   }
 }
+
+// Worker entry: routes /parties/main/<room> to the GameServer Durable Object (binding "Main")
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    return (await routePartykitRequest(request, env)) ?? new Response('Not found', { status: 404 });
+  },
+} satisfies ExportedHandler<Env>;
