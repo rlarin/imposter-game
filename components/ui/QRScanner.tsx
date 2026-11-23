@@ -3,270 +3,370 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import Icon from './Icon';
 
 interface QRScannerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const READER_ID = 'qr-reader';
+
+type ZoomRange = { min: number; max: number; step: number };
+
+/** Extracts a room code from a scanned value (join URL, /game/CODE URL or bare code). */
+function parseRoomCode(text: string): string | null {
+  const match =
+    text.match(/[?&]room=([A-Z0-9]{6})/i) ||
+    text.match(/\/game\/([A-Z0-9]{6})/i) ||
+    text.match(/^([A-Z0-9]{6})$/i);
+  return match ? match[1].toUpperCase() : null;
+}
+
+/**
+ * Video constraints for scanning. `facingMode: environment` lets the OS pick the *main* back
+ * camera (on multi-lens phones it can also switch lenses automatically for close focus),
+ * instead of an arbitrary lens such as the ultra-wide or telephoto, which can't focus up close.
+ */
+function buildConstraints(deviceId?: string): MediaTrackConstraints {
+  return {
+    ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: 'environment' } }),
+    width: { ideal: 1920 },
+    height: { ideal: 1080 },
+  };
+}
+
 export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
   const t = useTranslations();
   const router = useRouter();
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const runningRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const noticeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isStarting, setIsStarting] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const isScannerRunningRef = useRef(false);
+  const [zoomRange, setZoomRange] = useState<ZoomRange | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [torchSupported, setTorchSupported] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
+  const [cameras, setCameras] = useState<{ id: string; label: string }[]>([]);
+  const [cameraIndex, setCameraIndex] = useState<number | null>(null);
 
-  const startScannerInElement = useCallback(
-    async (elementId: string) => {
-      // Check if HTTPS or localhost
-      const isSecureContext =
-        window.location.protocol === 'https:' ||
-        window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1';
-      if (!isSecureContext) {
+  const stopScanner = useCallback(async () => {
+    const scanner = scannerRef.current;
+    scannerRef.current = null;
+    if (scanner && runningRef.current) {
+      runningRef.current = false;
+      await scanner.stop().catch(() => {});
+    }
+  }, []);
+
+  const handleDecoded = useCallback(
+    (decodedText: string) => {
+      const roomCode = parseRoomCode(decodedText);
+      if (!roomCode) {
+        // Keep scanning; just tell the user this QR is not a room invite.
+        if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+        setNotice(t('qrScanner.invalidCode'));
+        noticeTimerRef.current = setTimeout(() => setNotice(null), 2000);
+        return;
+      }
+      if ('vibrate' in navigator) navigator.vibrate?.(60);
+      stopScanner().then(() => {
+        router.push(`/?room=${roomCode}`);
+        onClose();
+      });
+    },
+    [onClose, router, stopScanner, t]
+  );
+
+  const startScanner = useCallback(
+    async (deviceId?: string) => {
+      if (!window.isSecureContext) {
         setError('Camera access requires HTTPS (or localhost for development)');
         return;
       }
 
       setIsStarting(true);
       setError(null);
+      setZoomRange(null);
+      setTorchSupported(false);
+      setTorchOn(false);
 
       try {
-        // Check if the element exists
-        const readerElement = document.getElementById(elementId);
-        console.log('QR reader element:', readerElement);
-        if (!readerElement) {
-          console.error('QR reader element not found');
-          setError(t('qrScanner.cameraError'));
-          setIsStarting(false);
-          return;
-        }
+        await stopScanner();
 
-        // Stop existing scanner if any
-        if (scannerRef.current && isScannerRunningRef.current) {
-          isScannerRunningRef.current = false;
-          await scannerRef.current.stop().catch(() => {});
-        }
-
-        const scanner = new Html5Qrcode(elementId);
+        const scanner = new Html5Qrcode(READER_ID, {
+          verbose: false,
+          formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+          // Native BarcodeDetector (Android Chrome & others) is faster and more robust.
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+        });
         scannerRef.current = scanner;
 
-        // Get available cameras
-        const cameras = await Html5Qrcode.getCameras();
-        console.log('Available cameras:', cameras);
-
-        if (!cameras || cameras.length === 0) {
-          setError(t('qrScanner.cameraError'));
-          setIsStarting(false);
-          return;
-        }
-
-        // Use the back camera if available
-        const cameraId = cameras.length > 1 ? cameras[cameras.length - 1].id : cameras[0].id;
-        console.log('Using camera:', cameraId);
-
+        const constraints = buildConstraints(deviceId);
         await scanner.start(
-          cameraId,
+          deviceId ?? { facingMode: 'environment' },
           {
-            fps: 15,
-            qrbox: { width: 250, height: 250 },
-            disableFlip: false,
-            aspectRatio: 1,
+            fps: 12,
+            // Scan the whole frame: works at any distance and lets the user hold the phone
+            // further away (where it can focus) instead of fitting the code in a small box.
+            videoConstraints: constraints,
           },
-          (decodedText) => {
-            console.log('QR Code detected:', decodedText);
-
-            // Extract room code from URL or use as-is
-            let roomCode = decodedText;
-
-            // Check if it's a URL with room code
-            // Support both formats: /game/CODE and ?room=CODE
-            let urlMatch = decodedText.match(/\/game\/([A-Z0-9]{6})/i);
-            if (urlMatch) {
-              roomCode = urlMatch[1].toUpperCase();
-            } else {
-              // Try query parameter format
-              urlMatch = decodedText.match(/[?&]room=([A-Z0-9]{6})/i);
-              if (urlMatch) {
-                roomCode = urlMatch[1].toUpperCase();
-              } else if (/^[A-Z0-9]{6}$/i.test(decodedText)) {
-                roomCode = decodedText.toUpperCase();
-              } else {
-                console.warn('Invalid QR code format:', decodedText);
-                setError(t('qrScanner.invalidCode'));
-                return;
-              }
-            }
-
-            console.log('Valid room code extracted:', roomCode);
-            // Stop scanner and return result
-            if (isScannerRunningRef.current) {
-              isScannerRunningRef.current = false;
-              scanner
-                .stop()
-                .then(() => {
-                  // Navigate to room with room code parameter
-                  router.push(`/?room=${roomCode}`);
-                  onClose();
-                })
-                .catch((err) => {
-                  console.error('Error stopping scanner:', err);
-                });
-            }
-          },
-          (errorMessage) => {
-            // Ignore scan errors (no QR found)
-            console.debug('QR scan attempt:', errorMessage);
+          handleDecoded,
+          () => {
+            // No QR in this frame: ignore.
           }
         );
+        runningRef.current = true;
 
-        console.log('Scanner started successfully');
-        setIsStarting(false);
-        isScannerRunningRef.current = true;
+        // Continuous autofocus where the browser exposes it.
+        const caps = scanner.getRunningTrackCapabilities() as MediaTrackCapabilities & {
+          focusMode?: string[];
+        };
+        if (caps.focusMode?.includes('continuous')) {
+          await scanner
+            .applyVideoConstraints({
+              advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet],
+            })
+            .catch(() => {});
+        }
+
+        // Zoom & torch controls (supported on most Android devices).
+        const cameraCaps = scanner.getRunningTrackCameraCapabilities();
+        const zoomFeature = cameraCaps.zoomFeature();
+        if (zoomFeature.isSupported() && zoomFeature.max() > zoomFeature.min()) {
+          setZoomRange({
+            min: zoomFeature.min(),
+            max: Math.min(zoomFeature.max(), 5),
+            step: zoomFeature.step() || 0.1,
+          });
+          setZoom(zoomFeature.value() ?? zoomFeature.min());
+        }
+        setTorchSupported(cameraCaps.torchFeature().isSupported());
+
+        // Camera list (labels are available once permission is granted) for manual switching.
+        Html5Qrcode.getCameras()
+          .then((list) => setCameras(list))
+          .catch(() => {});
       } catch (err) {
-        setIsStarting(false);
-        console.error('Scanner error:', err);
-        if (err instanceof Error) {
-          if (err.message.includes('Permission') || err.message.includes('NotAllowedError')) {
-            setError(t('qrScanner.permissionDenied'));
-          } else if (err.message.includes('NotFoundError') || err.message.includes('no camera')) {
-            setError(t('qrScanner.cameraError'));
-          } else {
-            setError(`${t('qrScanner.cameraError')}: ${err.message}`);
-          }
+        const message = err instanceof Error ? err.message : String(err);
+        if (/Permission|NotAllowed/i.test(message)) {
+          setError(t('qrScanner.permissionDenied'));
         } else {
           setError(t('qrScanner.cameraError'));
         }
+      } finally {
+        setIsStarting(false);
       }
     },
-    [t, router, onClose]
+    [handleDecoded, stopScanner, t]
   );
 
   useEffect(() => {
     if (!isOpen) return;
-
-    // Determine which element to use based on fullscreen state
-    const elementId = isFullscreen ? 'qr-reader-fullscreen' : 'qr-reader';
-
-    // Small delay to ensure DOM is fully rendered
-    const timeoutId = setTimeout(() => {
-      startScannerInElement(elementId);
-    }, 100);
-
+    const cameraId = cameraIndex !== null ? cameras[cameraIndex]?.id : undefined;
+    // Small delay to ensure the reader element is in the DOM.
+    const timeoutId = setTimeout(() => startScanner(cameraId), 50);
     return () => {
       clearTimeout(timeoutId);
-      if (scannerRef.current && isScannerRunningRef.current) {
-        isScannerRunningRef.current = false;
-        scannerRef.current.stop().catch(() => {});
-        scannerRef.current = null;
-      }
+      if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+      stopScanner();
     };
-  }, [isOpen, isFullscreen, startScannerInElement]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restart only when opened or the camera changes
+  }, [isOpen, cameraIndex]);
+
+  const applyZoom = async (value: number) => {
+    setZoom(value);
+    const scanner = scannerRef.current;
+    if (!scanner || !runningRef.current) return;
+    await scanner
+      .getRunningTrackCameraCapabilities()
+      .zoomFeature()
+      .apply(value)
+      .catch(() => {});
+  };
+
+  const toggleTorch = async () => {
+    const scanner = scannerRef.current;
+    if (!scanner || !runningRef.current) return;
+    const next = !torchOn;
+    await scanner
+      .getRunningTrackCameraCapabilities()
+      .torchFeature()
+      .apply(next)
+      .then(() => setTorchOn(next))
+      .catch(() => {});
+  };
+
+  const switchCamera = () => {
+    if (cameras.length < 2) return;
+    setCameraIndex((i) => (i === null ? 0 : (i + 1) % cameras.length));
+  };
 
   const handleClose = () => {
-    if (scannerRef.current && isScannerRunningRef.current) {
-      isScannerRunningRef.current = false;
-      scannerRef.current.stop().catch(() => {});
-      scannerRef.current = null;
-    }
+    stopScanner();
+    setCameraIndex(null);
     onClose();
   };
 
   if (!isOpen) return null;
 
-  // Fullscreen preview
-  if (isFullscreen) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
-        <button
-          onClick={() => setIsFullscreen(false)}
-          className="absolute top-4 right-4 z-10 p-3 bg-black/50 hover:bg-black/70 text-white rounded-lg transition-colors"
-          title="Exit fullscreen"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <div className="w-full h-full max-w-full max-h-full">
-          <div id="qr-reader-fullscreen" className="w-full h-full" />
-        </div>
-      </div>
-    );
-  }
+  const zoomPresets = zoomRange
+    ? [1, 2, 3].filter((z) => z >= zoomRange.min && z <= zoomRange.max)
+    : [];
+  const controlButton =
+    'flex size-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur transition-colors hover:bg-black/70';
 
-  // Normal modal view
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-2 sm:p-4">
-      <div className="bg-surface border border-line rounded-[20px] w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
-          <h3 className="text-lg font-semibold text-fg">{t('qrScanner.title')}</h3>
-          <button
-            onClick={handleClose}
-            className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('qrScanner.title')}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black sm:bg-black/80 sm:p-4 sm:backdrop-blur-sm"
+    >
+      <div className="relative flex size-full flex-col overflow-hidden bg-black sm:h-auto sm:max-h-[90dvh] sm:max-w-md sm:rounded-[20px] sm:border sm:border-line">
+        {/* Camera viewport */}
+        <div
+          className="relative flex flex-1 items-center justify-center overflow-hidden sm:aspect-square sm:flex-none"
+          style={{ containerType: 'size' }}
+        >
+          <div
+            id={READER_ID}
+            className="w-full [&_video]:mx-auto [&_video]:block [&_video]:max-h-full"
+          />
 
-        {/* Scanner area */}
-        <div className="p-3 sm:p-4 flex-1 overflow-hidden flex flex-col">
-          <button
-            onClick={() => setIsFullscreen(true)}
-            className="relative bg-black rounded-xl overflow-hidden aspect-square flex-1 cursor-pointer hover:opacity-90 transition-opacity group"
-            title="Click to expand"
-          >
-            <div id="qr-reader" className="w-full h-full" />
-
-            {/* Scanning overlay */}
-            {isStarting && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-                <div className="text-white text-center">
-                  <div className="animate-spin text-3xl mb-2">📷</div>
-                  <p className="text-sm">{t('qrScanner.starting')}</p>
-                </div>
+          {/* Viewfinder (decorative: the whole frame is scanned) */}
+          {!isStarting && !error && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div
+                className="relative aspect-square rounded-3xl shadow-[0_0_0_200vmax_rgba(0,0,0,0.35)]"
+                style={{ width: 'min(72cqw, 72cqh)' }}
+              >
+                <span className="absolute left-0 top-0 size-8 rounded-tl-3xl border-l-4 border-t-4 border-accent-soft" />
+                <span className="absolute right-0 top-0 size-8 rounded-tr-3xl border-r-4 border-t-4 border-accent-soft" />
+                <span className="absolute bottom-0 left-0 size-8 rounded-bl-3xl border-b-4 border-l-4 border-accent-soft" />
+                <span className="absolute bottom-0 right-0 size-8 rounded-br-3xl border-b-4 border-r-4 border-accent-soft" />
               </div>
-            )}
-
-            {/* Scanning frame - only show when not starting and no error */}
-            {!isStarting && !error && (
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-20">
-                <div className="w-56 h-56 border-2 border-white/60 rounded-lg">
-                  <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-green-400" />
-                  <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-green-400" />
-                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-green-400" />
-                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-green-400" />
-                </div>
-              </div>
-            )}
-          </button>
-
-          {/* Error message */}
-          {error && (
-            <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 rounded-lg text-red-600 dark:text-red-400 text-sm text-center">
-              {error}
             </div>
           )}
 
-          {/* Instructions */}
-          <p className="mt-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            {t('qrScanner.instructions')}
-          </p>
+          {isStarting && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white">
+              <div className="size-10 animate-spin rounded-full border-4 border-white/25 border-t-white" />
+              <p className="text-sm">{t('qrScanner.starting')}</p>
+            </div>
+          )}
+
+          {/* Top bar */}
+          <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+            <span className="rounded-full bg-black/55 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur">
+              {t('qrScanner.title')}
+            </span>
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label={t('ui.close')}
+              className={controlButton}
+            >
+              <Icon name="x" />
+            </button>
+          </div>
+
+          {/* Camera controls */}
+          {!isStarting && !error && (
+            <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 p-4">
+              {zoomPresets.length > 1 && (
+                <div
+                  role="radiogroup"
+                  aria-label="Zoom"
+                  className="flex gap-1 rounded-full bg-black/55 p-1 backdrop-blur"
+                >
+                  {zoomPresets.map((z) => {
+                    const selected = Math.abs(zoom - z) < 0.25;
+                    return (
+                      <button
+                        key={z}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => applyZoom(z)}
+                        className={`flex size-11 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                          selected ? 'bg-white text-black' : 'text-white hover:bg-white/15'
+                        }`}
+                      >
+                        {z}×
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {zoomRange && (
+                <input
+                  type="range"
+                  aria-label="Zoom"
+                  min={zoomRange.min}
+                  max={zoomRange.max}
+                  step={zoomRange.step}
+                  value={zoom}
+                  onChange={(e) => applyZoom(Number(e.target.value))}
+                  className="w-56 accent-accent-soft"
+                />
+              )}
+              <div className="flex gap-3">
+                {torchSupported && (
+                  <button
+                    type="button"
+                    onClick={toggleTorch}
+                    aria-pressed={torchOn}
+                    aria-label={t('ui.flashlight')}
+                    className={`${controlButton} ${torchOn ? 'bg-hint! text-black!' : ''}`}
+                  >
+                    <Icon name="flashlight" />
+                  </button>
+                )}
+                {cameras.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={switchCamera}
+                    aria-label={t('ui.switchCamera')}
+                    className={controlButton}
+                  >
+                    <Icon name="switchCamera" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer: error / instructions */}
+        <div className="shrink-0 bg-surface px-4 pt-3 pb-safe text-center sm:pb-4">
+          {error ? (
+            <div
+              role="alert"
+              className="flex flex-col items-center gap-3 rounded-2xl border border-danger-fg/40 bg-danger/12 p-3 text-sm text-danger-fg"
+            >
+              {error}
+              <button
+                type="button"
+                onClick={() => {
+                  const id = cameraIndex !== null ? cameras[cameraIndex]?.id : undefined;
+                  startScanner(id);
+                }}
+                className="font-semibold text-fg underline underline-offset-4"
+              >
+                {t('ui.retry')}
+              </button>
+            </div>
+          ) : notice ? (
+            <p role="status" className="text-sm font-semibold text-hint">
+              {notice}
+            </p>
+          ) : (
+            <p className="text-sm text-muted">{t('qrScanner.instructions')}</p>
+          )}
         </div>
       </div>
     </div>

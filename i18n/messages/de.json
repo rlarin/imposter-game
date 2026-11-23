@@ -338,6 +338,9 @@
     "homeFeature3": "Integrierter Videoanruf",
     "scanQr": "QR scannen",
     "or": "oder",
-    "phases": "Spielphasen"
+    "phases": "Spielphasen",
+    "retry": "Erneut versuchen",
+    "flashlight": "Taschenlampe",
+    "switchCamera": "Kamera wechseln"
   }
 }

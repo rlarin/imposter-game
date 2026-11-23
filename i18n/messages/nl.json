@@ -338,6 +338,9 @@
     "homeFeature3": "Ingebouwd videogesprek",
     "scanQr": "QR scannen",
     "or": "of",
-    "phases": "Spelfases"
+    "phases": "Spelfases",
+    "retry": "Opnieuw proberen",
+    "flashlight": "Zaklamp",
+    "switchCamera": "Camera wisselen"
   }
 }

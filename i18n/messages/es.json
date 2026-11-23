@@ -338,6 +338,9 @@
     "homeFeature3": "Videollamada integrada",
     "scanQr": "Escanear QR",
     "or": "o",
-    "phases": "Fases de la partida"
+    "phases": "Fases de la partida",
+    "retry": "Reintentar",
+    "flashlight": "Linterna",
+    "switchCamera": "Cambiar cámara"
   }
 }
