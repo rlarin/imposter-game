@@ -1,15 +1,15 @@
 {
-  "name": "El Impostor",
-  "short_name": "Impostor",
-  "description": "Multiplayer word guessing and deduction game - Who doesn't know the secret word?",
+  "name": "El Impostor – The Imposter word game",
+  "short_name": "El Impostor",
+  "description": "Free multiplayer social deduction word game for 3–15 players. Everyone knows the secret word except the imposter: give clues, vote and unmask them.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#6366f1",
-  "theme_color": "#6366f1",
+  "background_color": "#0b0a14",
+  "theme_color": "#0b0a14",
   "orientation": "portrait",
   "scope": "/",
-  "lang": "es",
-  "categories": ["games", "entertainment"],
+  "lang": "en",
+  "categories": ["games", "entertainment", "social"],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -75,7 +75,12 @@
       "short_name": "Crear",
       "description": "Crear una nueva partida",
       "url": "/?action=create",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

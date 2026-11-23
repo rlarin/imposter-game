@@ -74,15 +74,18 @@ This prints the host, e.g. `https://imposter-game.<subdomain>.workers.dev`. Prod
 
 Vercel deploys automatically from `main`. Set these in **Project → Settings → Environment Variables**:
 
-| Variable                    | Value                                                                        |
-| --------------------------- | ---------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_PARTYKIT_HOST` | Worker host **without** `https://`, e.g. `imposter-game.rlarinf.workers.dev` |
-| `KV_REST_API_URL`           | Upstash REST URL (same database as the worker)                               |
-| `KV_REST_API_TOKEN`         | Upstash REST token (same database as the worker)                             |
-| `ADMIN_USERNAME`            | Admin login (default `admin`)                                                |
-| `ADMIN_PASSWORD`            | Admin password; `/admin` is locked without it                                |
+| Variable                    | Value                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_PARTYKIT_HOST` | Worker host **without** `https://`, e.g. `imposter-game.rlarinf.workers.dev`  |
+| `KV_REST_API_URL`           | Upstash REST URL (same database as the worker)                                |
+| `KV_REST_API_TOKEN`         | Upstash REST token (same database as the worker)                              |
+| `ADMIN_USERNAME`            | Admin login (default `admin`)                                                 |
+| `ADMIN_PASSWORD`            | Admin password; `/admin` is locked without it                                 |
+| `NEXT_PUBLIC_SITE_URL`      | Public URL for SEO links (optional on Vercel), e.g. `https://your-domain.com` |
 
 `NEXT_PUBLIC_*` values are baked in at build time: redeploy after changing them.
+
+SEO / AI discovery is built in: `/robots.txt` (allows search engines and AI crawlers), `/sitemap.xml`, `/llms.txt`, Open Graph image, JSON-LD structured data and an English rules page at `/about`. Game rooms and `/admin` are `noindex`. Without `NEXT_PUBLIC_SITE_URL`, absolute URLs use Vercel's production domain.
 
 ## Troubleshooting
 

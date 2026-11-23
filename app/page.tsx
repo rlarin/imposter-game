@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button, Card, Icon, IconName, Input, LikeButton } from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
@@ -11,9 +12,21 @@ import { validatePlayerName, validateRoomCode } from '@/lib/utils';
 import { DONATION_URL, SHOW_DONATION_LINK } from '@/lib/config';
 import { Image } from 'next/dist/client/image-component';
 
+/**
+ * Reads ?room= / ?code= from the URL. Isolated in its own Suspense boundary so the rest of the
+ * home page is still prerendered as static HTML (useSearchParams would opt the page out).
+ */
+function RoomCodeFromUrl({ onCode }: { onCode: (code: string) => void }) {
+  const searchParams = useSearchParams();
+  const code = searchParams.get('room') || searchParams.get('code') || '';
+  useEffect(() => {
+    onCode(code.toUpperCase());
+  }, [code, onCode]);
+  return null;
+}
+
 export default function Home() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const t = useTranslations();
   const [playerName, setPlayerName] = useState('');
   const [roomCode, setRoomCode] = useState('');
@@ -23,16 +36,13 @@ export default function Home() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
 
-  // Check for room code in URL params
-  const urlRoomCode = searchParams.get('room') || searchParams.get('code') || '';
+  // Room code from the URL (invite link / QR code): prefill and hide "create game"
+  const [urlRoomCode, setUrlRoomCode] = useState('');
   const hasUrlRoomCode = urlRoomCode.length > 0;
-
-  // Prefill room code from URL on mount
-  useEffect(() => {
-    if (urlRoomCode) {
-      setRoomCode(urlRoomCode.toUpperCase());
-    }
-  }, [urlRoomCode]);
+  const handleUrlRoomCode = useCallback((code: string) => {
+    setUrlRoomCode(code);
+    if (code) setRoomCode(code);
+  }, []);
 
   const handleCreateGame = async () => {
     const validation = validatePlayerName(playerName);
@@ -273,7 +283,15 @@ export default function Home() {
       </main>
 
       <footer className="relative mx-auto flex w-full max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 pb-safe pt-4 text-xs text-subtle sm:justify-between sm:px-6">
-        <span>{t('home.footer')}</span>
+        <span className="flex items-center gap-3">
+          {t('home.footer')}
+          <Link
+            href="/about"
+            className="text-muted underline-offset-4 hover:text-fg hover:underline"
+          >
+            {t('ui.howToTitle')}
+          </Link>
+        </span>
         <span className="flex items-center gap-4">
           {SHOW_DONATION_LINK && (
             <a
@@ -289,6 +307,10 @@ export default function Home() {
           <span>v{process.env.APP_VERSION}</span>
         </span>
       </footer>
+
+      <Suspense fallback={null}>
+        <RoomCodeFromUrl onCode={handleUrlRoomCode} />
+      </Suspense>
 
       {/* Instructions Modal */}
       <Instructions isOpen={showInstructions} onClose={() => setShowInstructions(false)} />
