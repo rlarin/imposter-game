@@ -29,12 +29,31 @@ function parseRoomCode(text: string): string | null {
  * camera (on multi-lens phones it can also switch lenses automatically for close focus),
  * instead of an arbitrary lens such as the ultra-wide or telephoto, which can't focus up close.
  */
-function buildConstraints(deviceId?: string): MediaTrackConstraints {
-  return {
-    ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: 'environment' } }),
-    width: { ideal: 1920 },
-    height: { ideal: 1080 },
-  };
+function buildConstraints(deviceId?: string, minimal = false): MediaTrackConstraints {
+  const source = deviceId
+    ? { deviceId: { exact: deviceId } }
+    : { facingMode: { ideal: 'environment' } };
+  // 720p is plenty for QR codes and is the most widely supported back-camera mode on iOS.
+  return minimal ? source : { ...source, width: { ideal: 1280 }, height: { ideal: 720 } };
+}
+
+/**
+ * Lists cameras WITHOUT opening a new capture. (Html5Qrcode.getCameras() calls getUserMedia,
+ * which on iOS opens the default front camera and silently blacks out the running back camera,
+ * because iOS only allows one active camera capture at a time.)
+ */
+async function listCameras(): Promise<{ id: string; label: string }[]> {
+  if (!navigator.mediaDevices?.enumerateDevices) return [];
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  return devices
+    .filter((d) => d.kind === 'videoinput' && d.deviceId)
+    .map((d) => ({ id: d.deviceId, label: d.label }));
+}
+
+/** True once the video element inside the reader is actually rendering frames. */
+function isVideoLive(): boolean {
+  const video = document.querySelector<HTMLVideoElement>(`#${READER_ID} video`);
+  return !!video && video.readyState >= 2 && video.videoWidth > 0;
 }
 
 export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
@@ -42,6 +61,7 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
   const router = useRouter();
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const runningRef = useRef(false);
+  const watchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const noticeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,6 +74,7 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
   const [cameraIndex, setCameraIndex] = useState<number | null>(null);
 
   const stopScanner = useCallback(async () => {
+    if (watchdogRef.current) clearTimeout(watchdogRef.current);
     const scanner = scannerRef.current;
     scannerRef.current = null;
     if (scanner && runningRef.current) {
@@ -82,7 +103,7 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
   );
 
   const startScanner = useCallback(
-    async (deviceId?: string) => {
+    async (deviceId?: string, minimal = false): Promise<void> => {
       if (!window.isSecureContext) {
         setError('Camera access requires HTTPS (or localhost for development)');
         return;
@@ -105,7 +126,7 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
         });
         scannerRef.current = scanner;
 
-        const constraints = buildConstraints(deviceId);
+        const constraints = buildConstraints(deviceId, minimal);
         await scanner.start(
           deviceId ?? { facingMode: 'environment' },
           {
@@ -121,18 +142,6 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
         );
         runningRef.current = true;
 
-        // Continuous autofocus where the browser exposes it.
-        const caps = scanner.getRunningTrackCapabilities() as MediaTrackCapabilities & {
-          focusMode?: string[];
-        };
-        if (caps.focusMode?.includes('continuous')) {
-          await scanner
-            .applyVideoConstraints({
-              advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet],
-            })
-            .catch(() => {});
-        }
-
         // Zoom & torch controls (supported on most Android devices).
         const cameraCaps = scanner.getRunningTrackCameraCapabilities();
         const zoomFeature = cameraCaps.zoomFeature();
@@ -147,9 +156,18 @@ export default function QRScanner({ isOpen, onClose }: QRScannerProps) {
         setTorchSupported(cameraCaps.torchFeature().isSupported());
 
         // Camera list (labels are available once permission is granted) for manual switching.
-        Html5Qrcode.getCameras()
+        listCameras()
           .then((list) => setCameras(list))
           .catch(() => {});
+
+        // Fallback: if no frames arrive (black preview), restart with minimal constraints.
+        if (!minimal) {
+          watchdogRef.current = setTimeout(() => {
+            if (scannerRef.current === scanner && runningRef.current && !isVideoLive()) {
+              startScanner(deviceId, true);
+            }
+          }, 3000);
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         if (/Permission|NotAllowed/i.test(message)) {
