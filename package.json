@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:party": "wrangler dev",
+    "dev:party": "wrangler dev --port 1999",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:party\"",
     "build": "next build --webpack",
     "start": "next start",
