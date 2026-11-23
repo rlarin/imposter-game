@@ -3,6 +3,10 @@
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+// Public Jitsi server; must allow iframe embedding (no X-Frame-Options / frame-ancestors block).
+// meet.ffmuc.net stopped allowing embeds in 2026. Override with NEXT_PUBLIC_JITSI_DOMAIN.
+const JITSI_DOMAIN = process.env.NEXT_PUBLIC_JITSI_DOMAIN || 'meet.element.io';
+
 interface JitsiVideoPanelProps {
   roomCode: string;
   playerName: string;
@@ -25,7 +29,6 @@ export default function JitsiVideoPanel({
   }, [onClose]);
 
   // Build the Jitsi URL with config parameters
-  // Using meet.ffmuc.net - reliable German public Jitsi server without auth requirements
   const configParams = new URLSearchParams({
     'config.prejoinConfig.enabled': 'false',
     'config.prejoinPageEnabled': 'false',
@@ -43,8 +46,7 @@ export default function JitsiVideoPanel({
     'userInfo.displayName': playerName,
   });
 
-  // Using meet.ffmuc.net - reliable German public Jitsi server
-  const jitsiUrl = `https://meet.ffmuc.net/ElImpostor-${roomCode}#${configParams.toString()}`;
+  const jitsiUrl = `https://${JITSI_DOMAIN}/ElImpostor-${roomCode}#${configParams.toString()}`;
 
   if (!isOpen) return null;
 
