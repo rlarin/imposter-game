@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Image } from 'next/dist/client/image-component';
 import { GamePhase } from '@/lib/types';
+import { DONATION_URL, SHOW_DONATION_LINK } from '@/lib/config';
 import { Icon, LikeButton } from '@/components/ui';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import Instructions from '@/components/ui/Instructions';
@@ -229,17 +230,19 @@ function OptionsMenu({
               {t('instructions.howToPlay')}
             </button>
             <LikeButton variant="row" />
-            <a
-              role="menuitem"
-              href="https://www.buymeacoffee.com/rlarin"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={itemClass}
-            >
-              <Icon name="coffee" />
-              <span className="flex-1">{t('ui.coffee')}</span>
-              <Icon name="external" className="size-4 text-muted" />
-            </a>
+            {SHOW_DONATION_LINK && (
+              <a
+                role="menuitem"
+                href={DONATION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={itemClass}
+              >
+                <Icon name="coffee" />
+                <span className="flex-1">{t('ui.coffee')}</span>
+                <Icon name="external" className="size-4 text-muted" />
+              </a>
+            )}
 
             <div className="my-1 h-px bg-line" />
             {canReset && (

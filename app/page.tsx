@@ -8,6 +8,7 @@ import LanguageSelector from '@/components/ui/LanguageSelector';
 import Instructions from '@/components/ui/Instructions';
 import QRScanner from '@/components/ui/QRScanner';
 import { validatePlayerName, validateRoomCode } from '@/lib/utils';
+import { DONATION_URL, SHOW_DONATION_LINK } from '@/lib/config';
 import { Image } from 'next/dist/client/image-component';
 
 export default function Home() {
@@ -274,15 +275,17 @@ export default function Home() {
       <footer className="relative mx-auto flex w-full max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 pb-safe pt-4 text-xs text-subtle sm:justify-between sm:px-6">
         <span>{t('home.footer')}</span>
         <span className="flex items-center gap-4">
-          <a
-            href="https://www.buymeacoffee.com/rlarin"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-muted transition-colors hover:text-fg"
-          >
-            <Icon name="coffee" className="size-4" />
-            {t('ui.coffee')}
-          </a>
+          {SHOW_DONATION_LINK && (
+            <a
+              href={DONATION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-muted transition-colors hover:text-fg"
+            >
+              <Icon name="coffee" className="size-4" />
+              {t('ui.coffee')}
+            </a>
+          )}
           <span>v{process.env.APP_VERSION}</span>
         </span>
       </footer>
